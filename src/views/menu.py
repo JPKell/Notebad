@@ -55,5 +55,8 @@ class Menubar:
         self.menu.add_cascade(label="Tools", menu=self.tools_menu)
         self.tools_menu.add_command(label="Calculator", accelerator="Alt C", command=self.controller.open_calculator)
         
-        
+        self.py_menu = Menu(self.tools_menu, tearoff=0)
+        self.menu_list.append(self.py_menu)
+        self.menu.add_cascade(label="Py", menu=self.py_menu)
+        self.py_menu.add_command(label="Eval line/selection", accelerator="Alt E", command=self.controller.eval_selection)
 
