@@ -1,6 +1,7 @@
 import pathlib, os
 import tkinter as tk
 
+
 from calc.controller import Calculator
 from conf  import cf
 from model import TextModel
@@ -194,7 +195,7 @@ class NoteController:
         ''' Opens a calculator window. The calculator is basic, but maybe will improve.
             Maybe one day it will be a full scientific calculator, or have business 
             functions. Who knows. Might even have it's own tab. '''
-        calculator = Calculator(self.app, self.view.ui.style)
+        calculator = Calculator(self.view.ui.style)
         calculator.main()
 
     ###          ###
@@ -241,3 +242,4 @@ class NoteController:
         # DEVELOPMENT ONLY
         self.app.bind("<Control-p>", lambda event: print(self.view.textbox.get_current_line_text()))
         self.app.bind("<Alt-p>", lambda event: self.view.textbox.mangle())
+

@@ -23,9 +23,16 @@ class Configuration:
             'size'  : 12,
             'weight': 'normal'
             }
+        self.line_number_width = 33
         # Textbox behaviour
         self.indent_size = 4
         self.enable_syntax_highlighting = False
+
+        # Calculator settings
+        self.calc_title = 'Mathbad'
+        self.calc_bg    = '#111'
+        self.calc_outer_pad = 3
+
 
         if dev_mode:
             self._dev_mode()
@@ -33,7 +40,7 @@ class Configuration:
     def _dev_mode(self):
         ''' Development related overrides '''
         self.app_title += ' dev'
-        self.default_theme = 'dark'
+        # self.default_theme = 'dark'
         self.hardcore_mode = True
         self.enable_syntax_highlighting = True
 

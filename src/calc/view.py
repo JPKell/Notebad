@@ -1,51 +1,48 @@
-import tkinter as     tk
-from   tkinter import ttk
+from   tkinter import Label, Toplevel
+from   tkinter.ttk import Style, Frame, Button
 
-class View(tk.Toplevel):
-    PAD = 1
-    MAX_BUTTONS_PER_ROW = 4
-    button_captions = [
-        'C', '+/-', '%', '/',
-          7,     8,   9, '*',
-          4,     5,   6, '-',
-          1,     2,   3, '+',
-          0,   '.',  '='
-    ]
-    
+from   conf    import cf
 
-    def __init__(self, controller, style: ttk.Style) -> None:
-        super().__init__() # Init the tk.Tk class
-        self.title("Mathbad") 
+class View(Toplevel):
+    ''' The view does all the visuals. It's a calculator so pretty easy. 
+        It leaves the logic of keeping the lines short enough to the model. 
+        The number display and variables built from number input are all strings
+        that means it can grow outside the display. Limited to 20 characters '''
 
-        CALC_SIZE = (400, 325)
-        self.geometry(f"{CALC_SIZE[0]}x{CALC_SIZE[1]}")
-        # Max size of window
-        self.maxsize(*CALC_SIZE)
-        self.minsize(*CALC_SIZE)
+    def __init__(self, controller, style: Style) -> None:
+        super().__init__() # Init the Toplevel widget to create a new window
+        self.title(cf.calc_title) 
 
         self.controller = controller
         self.style = style
         # Set up look and feel
-        self.config(bg="black")
+        self.config(bg=cf.calc_bg)
         self.configure_button_styles()
-
-        self.value_var = "0"      
-
+        # Default value to display
+        self.value_var = "0"
+        self.prev_val  = ""
+        self.operator  = ""    
+        self.equals_buffer = ""  
+        # Build the widgets
         self._make_main_frame()
-        self._make_label()
+        self._make_number_display()
         self._make_buttons()
-
-    def main(self):
+        self._lock_window_size()
+        
+    def main(self) -> None:
+        ''' The mainloop of the calc window '''
         self.mainloop()
 
-    def configure_button_styles(self):
+    def configure_button_styles(self) -> None:
+        ''' Calculator styling is kept over here. Calculator is intended to be a 
+            standalone module called from the main app '''
         common_style = {
             'font': ('Arial', 16, 'bold'), 
-            'relief': 'ridge', # groove , ridge     # winner raised
+            'relief': 'ridge', 
             'width': 5, 
             'padding': 5,
             'borderwidth': 1,
-            'bordercolor': 'black',
+            'anchor': 'n'
             }
         # Number buttons
         self.style.configure('N.TButton', foreground="white", background='#696969', **common_style) 
@@ -53,61 +50,99 @@ class View(tk.Toplevel):
         self.style.configure('O.TButton', foreground="black", background='orange', **common_style)
         # Alt buttons
         self.style.configure('A.TButton', foreground="black", background='grey', **common_style)
-    def _make_main_frame(self):
-        self.main_frm = ttk.Frame(self)
-        self.main_frm.pack(padx=self.PAD, pady=self.PAD) 
 
-    def _make_label(self):
-        ''' ent does not have to be an attribute of class since we have access to the value with self.value_var '''
-        self.lbl = tk.Label( self.main_frm, 
-                       text=self.value_var, 
-                       anchor='e',
-                       bg='black', 
-                       fg='white',
-                       font=('Arial',18), height=2
-                       )
+    def _make_main_frame(self) -> None:
+        ''' Create and pack the main frame all the other widgets live inside '''
+        self.main_frm = Frame(self)
+        self.main_frm.pack(padx=cf.calc_outer_pad, pady=cf.calc_outer_pad) 
+
+    def _make_number_display(self) -> None:
+        ''' Number display is a label we update the text of '''
+        common = {
+            'anchor':'e',
+            'bg':'black', 
+            'fg':'#EFEFEF',
+        }
+        self.prev_lbl = Label(
+            self.main_frm,
+            text = "",
+            **common,
+            font=('Arial', 14), height=1
+        )
+        self.prev_lbl.pack(fill='x')
+
+        self.lbl = Label( 
+            self.main_frm, 
+            text=self.value_var, 
+            **common,
+            font=('Arial',18), height=1
+        )
         self.lbl.pack(fill='x')
 
-    def _make_buttons(self):
-        outer_frm = ttk.Frame(self.main_frm)
-        outer_frm.pack(fill='both', expand=True)
-        outer_frm.pack()
+    def _make_buttons(self) -> None:
+        ''' Make the buttons. Rather than make them one by one we loop through a list '''
+
+        # I thought about putting more buttons in the future, but we will see how that goes. 
+        MAX_BUTTONS_PER_ROW = 4
+        button_captions = [
+            'C', '+/-', '%', '/',
+            7,     8,   9, '*',   # Note the numbers are int's not strings
+            4,     5,   6, '-',   # This is to make picking them out easier.
+            1,     2,   3, '+',
+            0,   '.',  '='
+        ]
+        self.btn_frm = Frame(self.main_frm)
+        self.btn_frm.pack(fill='both', expand=True)
+        self.btn_frm.pack()
 
         is_first_row = True
         buttons_in_row = 0
-        for caption in self.button_captions:
-            if is_first_row or buttons_in_row == self.MAX_BUTTONS_PER_ROW:
+        for caption in button_captions:
+            # Create a new frame for each row so they pack in row how we want
+            if is_first_row or buttons_in_row == MAX_BUTTONS_PER_ROW:
                 is_first_row = False
                 buttons_in_row = 0
-                frm = ttk.Frame(outer_frm)
+                frm = Frame(self.btn_frm)
                 frm.pack(fill='x')
 
+            # Determine what type of button it is so it gets called properly 
             if isinstance(caption, int):
                 style_prefix = 'N'
             elif self._is_operator(caption):
                 style_prefix = 'O'
             else:
                 style_prefix = 'A'
-
             style_name = f"{style_prefix}.TButton"
-
-            btn = ttk.Button(frm, text=caption, command=(lambda button=caption: self.controller.button_click(button)), style=style_name) 
-            
+            # Create the button object
+            btn = Button(frm, 
+                             text=caption, 
+                             command=(lambda button=caption: self.controller.button_click(button)),
+                             style=style_name,
+                             ) 
+            # We want 0 to cover 2 spaces so set expand to yes.
             if caption == 0:
                 fill = 'x'
                 expand = 1
             else:
                 fill = 'none'
                 expand = 0
-
+            # Pack the button in
             btn.pack(side='left', fill=fill, expand=expand)
             buttons_in_row += 1
 
-    def _is_operator(self, caption):
+    def _lock_window_size(self) -> None:
+        ''' The window will draw to fit everything if not given a geometry. 
+            Lock it in once everything is packed. '''
+        self.resizable(False, False)
+
+    def _is_operator(self, caption) -> None:
+        ''' And abstraction to determine if the keypress was an operator'''
         ops = ['/', '*', '-', '+', '=']
         return caption in ops
 
-    def _update(self):
+    def _update(self) -> None:
+        ''' Update the screen after number entry '''
         self.lbl.config(text=self.value_var)
+        self.prev_lbl.config(text=f"{self.prev_val} {self.operator} {self.equals_buffer}")
         self.update_idletasks()
         self.update()

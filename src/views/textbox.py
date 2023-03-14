@@ -160,7 +160,11 @@ class Textbox(Text):
         if not self.changed_since_saved and event.state == 16:
             self.changed_since_saved = True
             self.tabs.set_properties(self.tk_name, text=f'{self.file_name} *')
-        
+
+        # Put a delay on this so the cursor has a chance to move with the character
+        # placed on the screen before we update the position. 
+        self.after(10, self.tabs.view.footer.update_pos)
+
         # Pushes the current state of the document onto the stack for undo
         self.stackify()
         
@@ -204,10 +208,10 @@ class Textbox(Text):
         else:
             colors = Themes.light
         self.configure(
-            background=colors.text_background, 
+            background=colors.text_background,          
             foreground=colors.text_foreground,
-            highlightbackground=colors.text_background, 
-            borderwidth=0, 
+            highlightbackground=colors.text_background, # These 2 remove the quasi borders 
+            highlightcolor=colors.text_background,      # around the textbox
             font=self.font,
             padx=5, 
             pady=5)
@@ -222,7 +226,7 @@ class Textbox(Text):
 
     def _make_line_numbers(self) -> None:
         ''' Add line numbers Canvas to the text area '''
-        linenumbers = TextLineNumbers(self.frame, width=33)
+        linenumbers = TextLineNumbers(self.frame, width=cf.line_number_width)
         linenumbers.attach(self)
         linenumbers.pack(side="left", fill="y")
         self.linenumbers = linenumbers

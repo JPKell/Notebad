@@ -81,7 +81,7 @@ class Tabs(Notebook):
             self.new_tab()
     
     def move_to_tab(self, tab_name:str=None) -> None:
-        ''' Selects a tab by name. tabs.select() '''
+        ''' Selects a tab by name. tabs.select() defaults to the last created tab '''
         if not tab_name:
             tabs = self.tabs()
             tab_name = tabs[-1]

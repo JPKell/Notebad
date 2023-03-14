@@ -84,8 +84,9 @@ class UI:
                 background=colors.text_background, 
                 foreground=colors.text_foreground, 
                 insertbackground=colors.cursor, 
-                highlightbackground=colors.background, 
-                highlightcolor=colors.background,
+
+                highlightbackground=colors.text_background, 
+                highlightcolor=colors.text_background,
                 )
             # Style the line numbers on the side
             textbox.linenumbers.config(bg=colors.background, highlightbackground=colors.background)
@@ -102,6 +103,7 @@ class UI:
 
         # Style the status bar
         self.view.footer.status.config(bg=colors.background, fg=colors.foreground)
+        self.view.footer.pos_lbl.config(bg=colors.background, fg=colors.foreground)
 
 
     def _init_img_pool(self) -> None:
@@ -123,7 +125,6 @@ class UI:
             ''')
         )
 
-
     def _init_style(self) -> None:
         ''' This will get everything set up for the theme.'''
         # This custom element is used to make a close element for us to map over the image. 
@@ -135,30 +136,27 @@ class UI:
         for title, colors in [('dark', Themes.dark), ('light', Themes.light)]:
             
             self.style.theme_create( title, parent="alt", settings={
-                "TButton": {
-                    "configure": {
-                        "background": "#696969",
-                        "anchor": 'n'
-                    }
-                },
                 "TNotebook": {
                     "configure": {
-                        "tabmargins": [2, 5, 2, 0], 
+                        "tabmargins": [cf.line_number_width + 2, 5, 2, 0], 
                         "foreground": colors.background,
                         "background": colors.background,
+                        "borderwidth": 0,
+                        "highlightthickness": 0,
                         } 
                     },
                 "TNotebook.Tab": {
                     "configure": {
-                        "padding": [10, 2], 
-                        "background": colors.background,
+                        "padding": [10, 2, 10, 0], 
+                        "background": colors.tab_unselect,
                         "foreground": colors.foreground,
                         "compound": "right",
+                        "borderwidth": 0,
                         },
                     
                     "map": {
-                        "background": [("selected", colors.bg_highlight)],
-                        "expand": [("selected", [1, 1, 1, 0])] 
+                        "background": [("selected", colors.tab_select)],
+                        # "expand": [("selected", [0, 1, 1, 0])] 
                         },
                     } ,
                 "TScrollbar": {
@@ -169,17 +167,21 @@ class UI:
                         "highlightcolor": colors.background,
                         "highlightbackground": colors.background,
                         "relief": "flat",
-                        "bd":   0,    
+                        "borderwidth":   0,    
                         "darkcolor": colors.background,
                         }
                     }
                 } 
             ) 
+
         # Initialize to the correct theme
         if self.theme == 'dark':
             self.style.theme_use('dark')
         else:
             self.style.theme_use('light')
+
+
+
 
     def _register_tab_close_button_with_style(self) -> None:
         ''' The tab close is a custom element so we need to register it with the style.

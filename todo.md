@@ -8,4 +8,4 @@
 - Hide vertical scrollbar
 - Add multiline eval to the alt-e function https://stackoverflow.com/questions/12698028/why-is-pythons-eval-rejecting-this-multiline-string-and-how-can-i-fix-it
 - Get a custom icon
-- 
+- Calculator: add a second label above the first for the held value and operator
