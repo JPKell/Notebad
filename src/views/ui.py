@@ -64,18 +64,18 @@ class UI:
         # so rather than have ugly menus, dark mode will have light
         # menus for now. I would like to change this, but it's a low 
         # priority.   
-
-        # Menu bar styles     
-        menu_colors = {
-            'bg': colors.background, 
-            'fg': colors.foreground, 
-            'activebackground': colors.bg_highlight, 
-            'activeforeground':colors.foreground 
-            }
-        self.view.menu.menu.config(**menu_colors)  
-        # Loop through the menu items and set the colors 
-        for menu in self.view.menu.menu_list:
-            menu.config(**menu_colors)     
+        if os.name != 'nt':
+            # Menu bar styles     
+            menu_colors = {
+                'bg': colors.background, 
+                'fg': colors.foreground, 
+                'activebackground': colors.bg_highlight, 
+                'activeforeground':colors.foreground 
+                }
+            self.view.menu.menu.config(**menu_colors)  
+            # Loop through the menu items and set the colors 
+            for menu in self.view.menu.menu_list:
+                menu.config(**menu_colors)     
     
         
         # Tab styles. We need to cycle through all the tabs and set the styles.

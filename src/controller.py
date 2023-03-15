@@ -4,7 +4,7 @@ import tkinter as tk
 
 from calc.controller import Calculator
 from conf  import cf
-from model import TextModel
+from model import LanguageModel
 from view  import NoteView
 from views.textbox import Textbox
 
@@ -12,7 +12,7 @@ class NoteController:
     ''' The controller is the glue between the model and the view. It is the
         controller that binds the view to the model. The controller is also
         responsible for managing the application. '''
-    def __init__(self, model:TextModel):
+    def __init__(self, model:LanguageModel):
         self.app = tk.Tk()          # Root window
         self.model = model          # Model is passed in from main.py, this may change?
         self.view  = NoteView(self) # View is instantiated here, passing the controller into the view
@@ -226,6 +226,6 @@ class NoteController:
         self.app.bind("<Alt-e>", lambda event: self.eval_selection())
 
         # DEVELOPMENT ONLY
-        self.app.bind("<Control-p>", lambda event: print(self.view.textbox.get_current_line_text()))
-        self.app.bind("<Alt-p>", lambda event: self.view.textbox.mangle())
+        self.app.bind("<Control-p>", lambda event: self.model.decompose(self.view.textbox.get_all()))
+
 

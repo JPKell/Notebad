@@ -110,7 +110,12 @@ class Textbox(Text):
         self.see('insert')
 
     def clear_all(self):
+        ''' Clears all text in the textbox '''
         self.delete("1.0", "end")
+
+    def get_all(self) -> str:
+        ''' Returns all text in the textbox '''
+        return self.get("1.0", "end - 1c")
 
     ###                        ### 
     # Text selections and cursor #
