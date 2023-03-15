@@ -28,8 +28,8 @@ class NoteView(Frame):
     def _make(self) -> None:
         ''' The meat of the view, this is where we create the widgets '''
         self.ui     = UI(self)
-        self.menu   = Menubar(self, self.controller)
         self.tabs   = Tabs(self)
+        self.menu   = Menubar(self, self.controller)
         self.footer = Footer(self)
         # OG tkinter widgets need themes reloaded on first build
         self.ui.toggle_theme(reload=True)

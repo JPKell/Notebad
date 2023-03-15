@@ -1,4 +1,4 @@
-from tkinter import Frame, Label
+from tkinter import Frame, Label, StringVar
 
 from conf import cf
 
@@ -7,41 +7,35 @@ class Footer(Frame):
         displaying useful information, but I'm not sure what that would be yet.
         Process run times, remote connections, etc. '''
     def __init__(self, view):
-        super().__init__(view)
+        super().__init__(view, height=30)
         self.view = view
         self.pack(side='bottom', fill='x')
+        self.status_txt = StringVar(self, value=cf.status_bar_default_text)
         self._make_label()
         self._make_position_labels()
 
-    def set_status(self, text) -> None:
-        ''' Set the status bar text and reset it after the duration '''
+    def set_status(self, text, revert=True) -> None:
+        ''' Set the status bar text and optionally revert it after the duration '''
         text = str(text)
-        self.status.config(text=text)
-        self.after(cf.status_bar_duration, self.scroll_text, text)
-
-    def scroll_text(self, text:str) -> None:
-        ''' Scrolls the text our of the status bar once the duration has passed '''
-        if len(text) == 0 or not cf.status_bar_scrolling:
-            self._reset_label()
-        else:
-            text = text[1:]
-            self.status.config(text=text)
-            self.after(100, self.scroll_text, text)
+        old_txt = self.status_txt.get()
+        self.status_txt.set(text)
+        if revert:
+            self.after(cf.status_bar_duration, self.status_txt.set, old_txt)
 
     def update_pos(self) -> None:
         ''' Update the cursor index on the footer '''
         index = self.view.textbox.index('insert') 
         index = index.split('.')
-        self.pos_lbl.config(text=f"Line: {index[0]} Col: {index[1]} ")
+        self.pos_lbl.config(text=f"ln {index[0]} col {index[1]} ")
 
     # Private methods
     def _make_label(self) -> None:
         ''' Main constructor for the status bar '''
-        self.status = Label(self, text=cf.status_bar_default_text, relief='flat', anchor='w')
-        self.status.pack(expand=True, fill='x')
+        self.status = Label(self, textvariable=self.status_txt, relief='flat', anchor='w')
+        self.status.pack(expand=True, fill='x', side='bottom')
 
     def _make_position_labels(self):
-        self.pos_lbl = Label(self.status, text="Line: 1 Col: 0 ", relief='flat', anchor='e')
+        self.pos_lbl = Label(self.status, text="ln 1 col 0 ", relief='flat', anchor='e')
         self.pos_lbl.pack(side='right')
 
     def _reset_label(self, force=False) -> None:

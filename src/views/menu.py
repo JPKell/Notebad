@@ -1,8 +1,8 @@
-from tkinter import Menu
+from tkinter import Menu, Frame
 
 class Menubar:
     ''' Holds all the menu bar items, mainly just a nice place to keep it all'''
-    def __init__(self, view, controller) -> None:
+    def __init__(self, view:Frame, controller) -> None:
         self.view = view
         self.controller = controller
         self.menu_list = [] # List of all menu bar items to make theming easier
@@ -12,8 +12,8 @@ class Menubar:
         ''' Creates the menu bar items. Lambda functions are required in some 
             cases when we need to pass arguments, or the parent class isn't 
             fully instantiated yet.'''
-        self.menu = Menu(self.view.master, border=0,) # Menu bar master object
-        self.view.master.config(menu=self.menu)       # Set as the menu bar
+        self.menu = Menu(self.view, border=0,) # Menu bar master object
+        self.view.app.config(menu=self.menu)       # Set as the menu bar
 
         # File menu
         self.file_menu = Menu(self.menu, tearoff=0)
@@ -38,8 +38,8 @@ class Menubar:
         # self.tools_menu.add_command(label="Find", accelerator="Ctrl F", command=self.controller.find_text) # TODO: Implement find text
         # self.tools_menu.add_command(label="Replace", accelerator="Ctrl R", command=self.controller.replace_text) # TODO: Implement replace text
 
-        self.edit_menu.add_command(label="Undo",  accelerator="Ctrl Z",  command=self.controller.undo)
-        self.edit_menu.add_command(label="Redo",  accelerator="Ctrl Y",  command=self.controller.redo)
+        self.edit_menu.add_command(label="Undo",  accelerator="Ctrl Z",  command=self.view.textbox.undo)
+        self.edit_menu.add_command(label="Redo",  accelerator="Ctrl Y",  command=self.view.textbox.redo)
 
         # View menu
         self.view_menu = Menu(self.menu, tearoff=0)
@@ -55,7 +55,7 @@ class Menubar:
         self.menu.add_cascade(label="Tools", menu=self.tools_menu)
         self.tools_menu.add_command(label="Calculator", accelerator="Alt C", command=self.controller.open_calculator)
         
-        self.py_menu = Menu(self.tools_menu, tearoff=0)
+        self.py_menu = Menu(self.menu, tearoff=0)
         self.menu_list.append(self.py_menu)
         self.menu.add_cascade(label="Py", menu=self.py_menu)
         self.py_menu.add_command(label="Eval line/selection", accelerator="Alt E", command=self.controller.eval_selection)

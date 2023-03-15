@@ -7,4 +7,4 @@ print(bClass)
 layout = s.layout('TButton')
 
 
-print(s.element_options('TNotebook'))
+print(s.element_options('TNotebook.Tab'))

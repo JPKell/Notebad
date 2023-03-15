@@ -1,5 +1,4 @@
-- REMOVE THE PROXY FOR LINE NUMBERS
-- Turn textbook filename into property to update tab name automagically
+
 - File encodings on read/write. 
 - Better default font. Maybe search for options from a list ending withn courier
 - Make the status scroller only run once, if multiple messages sent in short order. The last message should override the previous
@@ -7,5 +6,3 @@
 - Add multi select. Cursor across mutliple lines and highlight multiple lines
 - Hide vertical scrollbar
 - Add multiline eval to the alt-e function https://stackoverflow.com/questions/12698028/why-is-pythons-eval-rejecting-this-multiline-string-and-how-can-i-fix-it
-- Get a custom icon
-- Calculator: add a second label above the first for the held value and operator

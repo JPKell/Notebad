@@ -19,11 +19,14 @@ class Textbox(Text):
         # This frame houses the text area, line numbers and scrollbars
         self.frame = Frame(tabs)
         # Initialize the text area
-        super().__init__(self.frame, undo=True, border=0, relief='flat', wrap='none') 
+        super().__init__(self.frame, undo=False, border=0, relief='flat', wrap='none') 
         # Instantiate the line numbers
+        self.line_nos_drawn = 0
         self._make_line_numbers()
         # Instantiate the scrollbar
         self._make_scrollbars()
+        # Handle special keybindings
+        self._bind_keys()
 
         # File settings
         self.full_path = ""
@@ -33,8 +36,8 @@ class Textbox(Text):
         self.changed_since_saved = False
 
         # Stack for undo/redo
-        self.stack = deque(maxlen = cf.max_undo)
-        self.stackcursor = 0 
+        self.undo_stack = deque(maxlen = cf.max_undo)
+        self.redo_stack = deque(maxlen = cf.max_undo)
 
         # Text area settings
         self._make_text_area(tabs) 
@@ -98,6 +101,13 @@ class Textbox(Text):
             return ""
         else:
             return self.get('sel.first', 'sel.last')
+        
+    def add_newline(self) -> None:
+        ''' There are times we need to add a new line. For instance the 
+            Enter key on the numberpad does not create a new line. '''
+        self.insert('insert', '\n')
+        # Have the window scroll to the new line
+        self.see('insert')
 
     def clear_all(self):
         self.delete("1.0", "end")
@@ -117,31 +127,31 @@ class Textbox(Text):
     # Undo and redo #
     ###           ###
 
-    # This whole section needs to be thought about more carefully. There are 
-    # a couple of considerations. The standard undo/redo is not very good and
-    # the granularity is too large. I would like to be able to undo/redo into 
-    # a distant past, but I don't want to store every single keystroke. 
-    # I think I want to see this implimented with a shifting granularity. So 
-    # the first handful of undo/redo's are at the character level, then the
-    # next bunch are at the word level and then statement level. 
-    # Implementation has not been thought out yet.
+    # I bypass the tkinter undo/redo because this gives more control. 
+    # It may be memory inefficient and it might be better to use marks 
+    # in the future take a look once the language server is running. 
 
     def stackify(self):
-        self.stack.append(self.get("1.0", "end - 1c"))
-        if self.stackcursor < 9: self.stackcursor += 1
+        self.undo_stack.append(self.get("1.0", "end - 1c"))
  
     def undo(self):
-        if self.stackcursor != 0:
-            self.clear()
-            if self.stackcursor > 0: self.stackcursor -= 1
-            self.insert("0.0", self.stack[self.stackcursor])
- 
+        try:
+            cur_txt = self.get("1.0", "end - 1c")
+            self.redo_stack.append(cur_txt)
+            txt = self.undo_stack.pop()
+            self.clear_all()
+            self.insert("0.0", txt)
+        except IndexError:
+            self.tabs.view.footer.set_status("Nothing to undo")
+
     def redo(self):
-        if len(self.stack) > self.stackcursor + 1:
-            self.clear()
-            if self.stackcursor < 9: self.stackcursor += 1
-            self.insert("0.0", self.stack[self.stackcursor])
- 
+        try:
+            txt = self.redo_stack.pop()
+            self.undo_stack.append(txt)
+            self.clear_all()
+            self.insert("0.0", txt)
+        except IndexError:
+            self.tabs.view.footer.set_status("Nothing to redo")
 
     ####################
     ## Event handlers ##
@@ -166,13 +176,18 @@ class Textbox(Text):
         self.after(10, self.tabs.view.footer.update_pos)
 
         # Pushes the current state of the document onto the stack for undo
-        self.stackify()
+        if event.char in [' ', '\t', '\n']:
+            self.stackify()
         
         # This is insane. The syntax highlighting goes over the whole document 
         # every keystroke
         if cf.enable_syntax_highlighting:
             self.syntax.tagHighlight()
             self.syntax.scan()
+
+    def _bind_keys(self) -> None:
+        ''' Some keys need specific bindings to behave how you expect in a text editor '''
+        self.bind("<KP_Enter>", lambda event: self.add_newline())
 
     ## Scrollbar events ##
     def hide_unused_scrollbars(self) -> None:
@@ -218,7 +233,7 @@ class Textbox(Text):
         self.pack(expand=True, fill='both')
         tabs.add(self.frame)
             
-        self.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
+        # self.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
         self.linenumbers.config(
             bg=colors.background, 
             highlightbackground=colors.background
@@ -233,62 +248,20 @@ class Textbox(Text):
         self.bind("<<Change>>", self._on_change)
         self.bind("<Configure>", self._on_change)
 
-    def _make_scrollbars(self) -> None:
-        ''' Add vertical and horizontal scrollbars to the text area '''
-        # Add scrollbars to text area
-        self.vert_scroll=Scrollbar(self.frame, orient='vertical')
-        self.vert_scroll.pack(side='right', fill='y')
-        self.vert_scroll_visible = False
-        self.horiz_scroll=Scrollbar(self.frame, orient='horizontal')
-        self.horiz_scroll_visible = False
-
-        # The scrollbars require a connection both ways. So changes to one will
-        # be reflected in the other.
-
-        # Connect the scrollbars to the text area
-        self.configure(
-            xscrollcommand=self.horiz_scroll.set, 
-            yscrollcommand=self.vert_scroll.set
-            )
-        # Connect the text area to the scrollbars
-        self.horiz_scroll.config(command=self.xview)
-        self.vert_scroll.config(command=self.yview)
-
-    def _setup_syntax_highlighting(self) -> None:
-        ''' This creates a proxy method for the text widget that will 
-            intercept any events and call the syntax highlighter. 
-            I would like to get rid of the proxy because it does not play well 
-            with try catch blocks. Something will get caught in the proxy and
-            fail in the original. 
-        '''
-        self.syntax = SyntaxMarker(self)
         # create a proxy for the underlying widget
         self._orig = self._w + "_orig"
         self.tk.call("rename", self._w, self._orig)
-        self.tk.createcommand(self._w, self._proxy_for_line_numbers)
-
-    def _proxy_for_line_numbers(self, *args):
-        ''' This proxy currently works to enable the line numbers to update '''
+        self.tk.createcommand(self._w, self._proxy)
+        
+    def _proxy(self, *args):
         # let the actual widget perform the requested action
-        
-        # An event at the Text widget will be sent to the widget. The event
-        # will be intercepted by the proxy and passed to the original widget. 
-        
-        cmd = (self._orig,) + args   # Here the command is rebuilt
-
-        # This is a really bad idea. I want to crash the program if something is bad. 
-        # But the proxy prevents other try blocks from working. Also if the program
-        # crashes it will not save the file. This proxy business is balls and has to go. 
-        if cf.dev_mode:
-            try:
-                result = self.tk.call(cmd)   # and executed with the original widget
-            except Exception as e:
-                print(e)
-                print(cmd)
-        else:
+        cmd = (self._orig,) + args
+        try:
             result = self.tk.call(cmd)
-
-
+        except Exception as e:
+            print(args)
+            print(e)
+            result = ''
         # generate an event if something was added or deleted,
         # or the cursor position changed
         if (args[0] in ("insert", "replace", "delete") or 
@@ -301,55 +274,51 @@ class Textbox(Text):
             self.event_generate("<<Change>>", when="tail")
 
         # return what the actual widget returned
-        return result 
-
-    ###              ###
-    # Pending removal? # 
-    ###              ###
+        return result   
 
 
-    def auto_indent(self, widget):
-        ''' This method came from a tutorial online and I kinda like the idea,
-            but I am not sure if it's worth the effort right now. '''
- 
-        index1 = widget.index("insert")
-        index2 = "%s-%sc" % (index1, 1)
-        prevIndex = widget.get(index2, index1)
- 
-        prevIndentLine = widget.index(index1 + "linestart")
-        print("prevIndentLine ",prevIndentLine)
-        prevIndent = self.getIndex(prevIndentLine)
-        print("prevIndent ", prevIndent)
- 
- 
-        if prevIndex == ":":
-            widget.insert("insert", "\n" + "    ")
-            widget.mark_set("insert", "insert + 1 line + 4char")
- 
-            while widget.compare(prevIndent, ">", prevIndentLine):
-                widget.insert("insert", "     ")
-                widget.mark_set("insert", "insert + 4 chars")
-                prevIndentLine += "+4c"
-            return "break"
-         
-        elif prevIndent != prevIndentLine:
-            widget.insert("insert", "\n")
-            widget.mark_set("insert", "insert + 1 line")
- 
-            while widget.compare(prevIndent, ">", prevIndentLine):
-                widget.insert("insert", "     ")
-                widget.mark_set("insert", "insert + 4 chars")
-                prevIndentLine += "+4c"
-            return "break"
-        
-    def getIndex(self, index) -> str:
-        ''' Used by auto indent '''
-        while True:
-            if self.get(index) == " ":
-                index = "%s+%sc" % (index, 1)
-            else:
-                return self.index(index)   
- 
+    ### Scrollbars ###
+    def _make_scrollbars(self) -> None:
+        ''' Add vertical and horizontal scrollbars to the text area '''
+        # Add scrollbars to text area
+        self.vert_scroll=Scrollbar(self.frame, orient='vertical')
+        self.vert_scroll.pack(side='right', fill='y')
+        self.vert_scroll.config(command=self._scroll_both)
+        self.vert_scroll_visible = False
+        self.horiz_scroll=Scrollbar(self.frame, orient='horizontal')
+        self.horiz_scroll.config(command=self.xview)
+        self.horiz_scroll_visible = False
+
+        # The scrollbars require a connection both ways. So changes to one will
+        # be reflected in the other.
+
+        # Connect the scrollbars to the text area
+        self.configure(
+            xscrollcommand=self.horiz_scroll.set, 
+            yscrollcommand=self._update_scroll
+            )
+        # Connect the text area to the scrollbars
+
+    def _scroll_both(self, action, position, type=None):
+        self.yview_moveto(position)
+        self.linenumbers.yview_moveto(position)
+
+    def _update_scroll(self, first, last, type=None):
+        self.yview_moveto(first)
+        self.linenumbers.yview_moveto(first)
+        self.vert_scroll.set(first, last)
+
+
+
+    def _setup_syntax_highlighting(self) -> None:
+        ''' This creates a proxy method for the text widget that will 
+            intercept any events and call the syntax highlighter. 
+            I would like to get rid of the proxy because it does not play well 
+            with try catch blocks. Something will get caught in the proxy and
+            fail in the original. 
+        '''
+        self.syntax = SyntaxMarker(self)
+
 
 
 class TextLineNumbers(Canvas):
@@ -359,10 +328,12 @@ class TextLineNumbers(Canvas):
         Canvas.__init__(self, *args,**kwargs)
         self.textwidget = None
         self.color = 'grey'
+        
 
     def attach(self, text_widget: Textbox) -> None:
         ''' Attach the line numbers to a textbox to retrive line info. '''
         self.textwidget = text_widget
+        self.redraw() # Kick it off once attached to a widget
 
     def redraw(self, *args) -> None:
         ''' Redraw the line numbers on the canvas '''
@@ -377,7 +348,7 @@ class TextLineNumbers(Canvas):
             if dline is None: 
                 break
             # Get the y coordinate of the line
-            y = dline[1] - 2
+            y = dline[1] + 1
             # Get the line number
             linenum = str(i).split(".")[0]
             # Set the font size
@@ -396,3 +367,4 @@ class TextLineNumbers(Canvas):
                 )
             # Get the next line
             i = self.textwidget.index("%s+1line" % i)
+        # self.after(50, self.redraw)

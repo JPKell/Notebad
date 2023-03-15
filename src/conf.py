@@ -1,11 +1,11 @@
 class Configuration:
     """A class to hold configuration values for the app"""
 
-    def __init__(self, dev_mode=True):
+    def __init__(self, dev_mode=False):
         self.dev_mode = dev_mode
         # Window settings
         self.app_title = 'Notebad'
-        self.geometry = '800x600+3400+1'
+        self.geometry = '800x600'
         self.min_size = (300, 200)
         self.default_theme = 'light'
         # Status bar settings
@@ -26,7 +26,8 @@ class Configuration:
         self.line_number_width = 33
         # Textbox behaviour
         self.indent_size = 4
-        self.enable_syntax_highlighting = False
+        self.enable_syntax_highlighting = True
+        self.max_undo = 50              # This should get tested for memory usage
 
         # Calculator settings
         self.calc_title = 'Mathbad'
@@ -41,6 +42,7 @@ class Configuration:
         ''' Development related overrides '''
         self.app_title += ' dev'
         # self.default_theme = 'dark'
+        self.geometry = '800x600+3400+1'
         self.hardcore_mode = True
         self.enable_syntax_highlighting = True
 

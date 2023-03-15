@@ -31,6 +31,10 @@ class Tabs(Notebook):
         textbox = Textbox(self)
         if file_name:
             textbox.file_name = file_name
+        else:
+            # If theres no name its a new file to start the undo stack empty
+            # without this the first undo wont be a blank document. 
+            textbox.stackify()      
         self.add(textbox.frame, text=textbox.file_name)
         self.move_to_tab()
         textbox.tk_name = self.select()

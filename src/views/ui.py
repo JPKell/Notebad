@@ -59,6 +59,12 @@ class UI:
             colors = Themes.dark
             self.style.theme_use('dark')
      
+        ### 
+        # Menu bars are not easily modified in the windows system, 
+        # so rather than have ugly menus, dark mode will have light
+        # menus for now. I would like to change this, but it's a low 
+        # priority.   
+
         # Menu bar styles     
         menu_colors = {
             'bg': colors.background, 
@@ -90,7 +96,8 @@ class UI:
                 )
             # Style the line numbers on the side
             textbox.linenumbers.config(bg=colors.background, highlightbackground=colors.background)
-            textbox.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
+            
+            # textbox.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
             
             # Style the syntax highlighting
             textbox.tag_configure("orange", foreground = colors.syn_orange)
@@ -163,12 +170,8 @@ class UI:
                     "configure": {
                         "background": colors.background,
                         "troughcolor": colors.bg_highlight,
-                        "bordercolor": colors.background,
-                        "highlightcolor": colors.background,
-                        "highlightbackground": colors.background,
                         "relief": "flat",
-                        "borderwidth":   0,    
-                        "darkcolor": colors.background,
+                        "troughrelief": "flat",
                         }
                     }
                 } 

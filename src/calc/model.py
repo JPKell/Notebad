@@ -88,7 +88,7 @@ class Model:
             self.value = '0'
             self.clear_value_next = True
 
-        elif caption == "=":
+        elif caption == "=" and self.operator != '':  # If there's no operator we should not try to do anything. 
             # If = is hit multiple times in a row we want to repeat the last operation 
             # the _equal_buffer stores that value so we can reuse it 
             if not self.last_pressed == "=":

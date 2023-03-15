@@ -77,6 +77,7 @@ class NoteController:
                     )
                 textbox.insert('end', file.read())  # Insert the file contents into the textbox
                 textbox.changed_since_saved = False # Reset the changed flag since we just opened the file
+                textbox.stackify()                  # Add the file contents to the undo stack
                 self.view.update_title()
                 
     def save_file(self) -> None:
@@ -153,20 +154,6 @@ class NoteController:
         textbox = self.view.tabs.textbox
         textbox.insert('insert', self.clipboard)
 
-    def undo(self) -> None:
-        ''' Undo the last action. '''
-        try:                                               # The try catch block is needed since the edit_undo with 
-            self.view.tabs.textbox.edit_undo()             # throw an error if there is nothing to undo.
-        except:
-            self.view.footer.set_status("Nothing to undo") # Update the user as to why nothing happened
-
-    def redo(self) -> None:
-        ''' Redo the last action that was undone. '''
-        try:                                               # Like above will throw an error if there is nothing to redo
-            self.view.tabs.textbox.edit_redo()
-        except:
-            self.view.footer.set_status("Nothing to redo") # Update the user
-
     ###          ###
     # Nifty things #
     ###          ###
@@ -220,8 +207,8 @@ class NoteController:
 
         # Textbox overides #
         self.app.bind_class("Text", "<Control-d>", lambda event: self.view.ui.toggle_theme())
-        self.app.bind_class("Text", "<Control-z>", lambda event: self.undo())
-        self.app.bind_class("Text", "<Control-y>", lambda event: self.redo())
+        self.app.bind_class("Text", "<Control-z>", lambda event: self.view.textbox.undo())
+        self.app.bind_class("Text", "<Control-y>", lambda event: self.view.textbox.redo())
 
         self.app.unbind_all("<Tab>")    # Unbind the default tab key for all widgets before overriding it
         self.app.bind_class("Text", "<Tab>", lambda event: self.view.tabs.add_indent(), add=False)
@@ -237,7 +224,6 @@ class NoteController:
         
         # Clipboard management
         self.app.bind("<Alt-e>", lambda event: self.eval_selection())
-
 
         # DEVELOPMENT ONLY
         self.app.bind("<Control-p>", lambda event: print(self.view.textbox.get_current_line_text()))
