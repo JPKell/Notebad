@@ -100,9 +100,11 @@ class UI:
             # textbox.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
             
             # Style the syntax highlighting
+            textbox.tag_configure("grey", foreground = colors.syn_grey)
             textbox.tag_configure("orange", foreground = colors.syn_orange)
             textbox.tag_configure("blue", foreground = colors.syn_blue)
-            textbox.tag_configure("purple", foreground = colors.syn_purple)
+            textbox.tag_configure("violet", foreground = colors.syn_violet)
+            textbox.tag_configure("magenta", foreground = colors.syn_magenta)
             textbox.tag_configure("green", foreground = colors.syn_green)
             textbox.tag_configure("red", foreground = colors.syn_red)
             textbox.tag_configure("yellow", foreground = colors.syn_yellow)
@@ -145,7 +147,7 @@ class UI:
             self.style.theme_create( title, parent="alt", settings={
                 "TNotebook": {
                     "configure": {
-                        "tabmargins": [cf.line_number_width + 2, 5, 2, 0], 
+                        "tabmargins": [cf.line_number_width + 2, 5, 10, 0], 
                         "foreground": colors.background,
                         "background": colors.background,
                         "borderwidth": 0,
@@ -163,7 +165,7 @@ class UI:
                     
                     "map": {
                         "background": [("selected", colors.tab_select)],
-                        # "expand": [("selected", [0, 1, 1, 0])] 
+                        "expand": [("selected", [0, 1, 1, 0])] 
                         },
                     } ,
                 "TScrollbar": {
@@ -176,6 +178,7 @@ class UI:
                     }
                 } 
             ) 
+            self._register_tab_close_button_with_style()
 
         # Initialize to the correct theme
         if self.theme == 'dark':

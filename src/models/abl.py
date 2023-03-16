@@ -1,1665 +1,1501 @@
 # This module contains lexing rules for Progress ABL
-# Things are processed top down. And putting largust up top prevents picking smaller keywords out of larger ones
+# Things are processed top down. And putting largest up top prevents picking smaller keywords out of larger ones
+from .modules.lex import TOKEN
+from .abl_rules.word_lists import tokens, reserved_no_abr, reserved_w_abr, non_reserved_w_abr, non_reserved_no_abr
 
-tokens = [
-    'XML_SUPPRESS_NAMESPACE_PROCESSING', 
-    'SERVER_CONNECTION_BOUND_REQUEST', 
-    'SYMMETRIC_ENCRYPTION_ALGORITHM', 
-    'SUPPRESS_NAMESPACE_PROCESSING', 
-    'WRITE_PROCESSING_INSTRUCTION', 
-    'XML_STRICT_ENTITY_RESOLUTION', 
-    'GET_INDEX_BY_NAMESPACE_NAME', 
-    'GET_VALUE_BY_NAMESPACE_NAME', 
-    'NONAMESPACE_SCHEMA_LOCATION', 
-    'VIEW_FIRST_COLUMN_ON_REOPEN', 
-    'GET_TYPE_BY_NAMESPACE_NAME', 
-    'LOGIN_EXPIRATION_TIMESTAMP', 
-    'XML_ENTITY_EXPANSION_LIMIT', 
-    'DEFINE_USER_EVENT_MANAGER', 
-    'GET_CALLBACK_PROC_CONTEXT', 
-    'PERSISTENT_CACHE_DISABLED', 
-    'SERVER_CONNECTION_CONTEXT', 
-    'CREATE_RESULT_LIST_ENTRY', 
-    'DATA_SOURCE_COMPLETE_MAP', 
-    'DELETE_RESULT_LIST_ENTRY', 
-    'INITIALIZE_DOCUMENT_TYPE', 
-    'SET_EVENT_MANAGER_OPTION', 
-    'STRICT_ENTITY_RESOLUTION', 
-    'SYMMETRIC_ENCRYPTION_KEY', 
-    'BLOCK_ITERATION_DISPLAY', 
-    'EVENT_PROCEDURE_CONTEXT', 
-    'GRID_UNIT_HEIGHT_PIXELS', 
-    'MIN_COLUMN_WIDTH_PIXELS', 
-    'REMOVE_EVENTS_PROCEDURE', 
-    'SERVER_CONNECTION_BOUND', 
-    'SYMMETRIC_ENCRYPTION_IV', 
-    'WORK_AREA_HEIGHT_PIXELS', 
-    'PROCESS_ARCHITECTURE', 
-    'ALLOW_COLUMN_SEARCHING', 
-    'CREATE_LIKE_SEQUENTIAL', 
-    'ENTITY_EXPANSION_LIMIT', 
-    'GET_CALLBACK_PROC_NAME', 
-    'GET_LOCALNAME_BY_INDEX', 
-    'GET_TEXT_HEIGHT_PIXELS', 
-    'GRID_FACTOR_HORIZONTAL', 
-    'GRID_UNIT_HEIGHT_CHARS', 
-    'GRID_UNIT_WIDTH_PIXELS', 
-    'INCREMENT_EXCLUSIVE_ID', 
-    'LOAD_IMAGE_INSENSITIVE', 
-    'MIN_COLUMN_WIDTH_CHARS', 
-    'NEEDS_APPSERVER_PROMPT', 
-    'NO_SEPARATE_CONNECTION', 
-    'PRINTER_CONTROL_HANDLE', 
-    'REMOVE_SUPER_PROCEDURE', 
-    'REPLACE_SELECTION_TEXT', 
-    'RETURN_VALUE_DATA_TYPE', 
-    'SCROLL_TO_SELECTED_ROW', 
-    'SET_OUTPUT_DESTINATION', 
-    'WORK_AREA_WIDTH_PIXELS', 
-    'AUTHENTICATION_FAILED', 
-    'CAN_DO_DOMAIN_SUPPORT', 
-    'CREATE_NODE_NAMESPACE', 
-    'CURRENT_RESPONSE_INFO', 
-    'DEFAULT_BUFFER_HANDLE', 
-    'DESELECT_SELECTED_ROW', 
-    'DISABLE_DUMP_TRIGGERS', 
-    'DISABLE_LOAD_TRIGGERS', 
-    'ENCRYPT_AUDIT_MAC_KEY', 
-    'GET_TEXT_HEIGHT_CHARS', 
-    'GET_TEXT_WIDTH_PIXELS', 
-    'GRID_UNIT_WIDTH_CHARS', 
-    'LOCATOR_COLUMN_NUMBER', 
-    'MULTITASKING_INTERVAL', 
-    'NO_SCROLLBAR_VERTICAL', 
-    'SCROLL_TO_CURRENT_ROW', 
-    'SCROLLED_ROW_POSITION', 
-    'SERVER_OPERATING_MODE', 
-    'VIRTUAL_HEIGHT_PIXELS', 
-    'ADD_EVENTS_PROCEDURE', 
-    'ASYNC_REQUEST_HANDLE', 
-    'BORDER_BOTTOM_PIXELS', 
-    'CLIENT_CONNECTION_ID', 
-    'CURRENT_REQUEST_INFO', 
-    'CURRENT_ROW_MODIFIED', 
-    'DATA_SOURCE_MODIFIED', 
-    'DELETE_SELECTED_ROWS', 
-    'DESELECT_FOCUSED_ROW', 
-    'FIND_NEXT_OCCURRENCE', 
-    'FIND_PREV_OCCURRENCE', 
-    'FIRST_ASYNCH_REQUEST', 
-    'FOCUSED_ROW_SELECTED', 
-    'GET_REPOSITIONED_ROW', 
-    'GET_TEXT_WIDTH_CHARS', 
-    'GRID_FACTOR_VERTICAL', 
-    'KEEP_CONNECTION_OPEN', 
-    'MARGIN_HEIGHT_PIXELS', 
-    'MEMPTR_TO_NODE_VALUE', 
-    'MOVE_BEFORE_TAB_ITEM', 
-    'NO_CONVERT_3D_COLORS', 
-    'NODE_VALUE_TO_MEMPTR', 
-    'NUM_SELECTED_WIDGETS', 
-    'REFRESH_AUDIT_POLICY', 
-    'SCROLLBAR_HORIZONTAL', 
-    'SERVER_CONNECTION_ID', 
-    'SET_REPOSITIONED_ROW', 
-    'TRANS_INIT_PROCEDURE', 
-    'VIRTUAL_HEIGHT_CHARS', 
-    'VIRTUAL_WIDTH_PIXELS', 
-    'ADD_SCHEMA_LOCATION', 
-    'ADD_SUPER_PROCEDURE', 
-    'ASYNC_REQUEST_COUNT', 
-    'AUDIT_EVENT_CONTEXT', 
-    'BORDER_BOTTOM_CHARS', 
-    'BORDER_RIGHT_PIXELS', 
-    'BUFFER_PARTITION_ID', 
-    'COPY_SAX_ATTRIBUTES', 
-    'CURRENT_ENVIRONMENT', 
-    'DELETE_SELECTED_ROW', 
-    'FIND_CASE_SENSITIVE', 
-    'GENERATE_RANDOM_KEY', 
-    'GET_SELECTED_WIDGET', 
-    'KEEP_SECURITY_CACHE', 
-    'LAST_ASYNCH_REQUEST', 
-    'LIST_PROPERTY_NAMES', 
-    'LOCATOR_LINE_NUMBER', 
-    'MARGIN_HEIGHT_CHARS', 
-    'MARGIN_WIDTH_PIXELS', 
-    'MOVE_AFTER_TAB_ITEM', 
-    'NUM_VISIBLE_COLUMNS', 
-    'PROCEDURE_CALL_TYPE', 
-    'REPOSITION_BACKWARD', 
-    'REPOSITION_TO_ROWID', 
-    'RETURN_TO_START_DIR', 
-    'SEPARATE_CONNECTION', 
-    'SKIP_DELETED_RECORD', 
-    'VALIDATE_EXPRESSION', 
-    'VIRTUAL_WIDTH_CHARS', 
-    'WRITE_EMPTY_ELEMENT', 
-    'APPSERVER_PASSWORD', 
-    'BORDER_LEFT_PIXELS', 
-    'BORDER_RIGHT_CHARS', 
-    'BY_VARIANT_POINTER', 
-    'CLEAR_APPL_CONTEXT', 
-    'CLIENT_WORKSTATION', 
-    'CURRENT_RESULT_ROW', 
-    'DELETE_CURRENT_ROW', 
-    'DOMAIN_DESCRIPTION', 
-    'EXCLUSIVE_WEB_USER', 
-    'FETCH_SELECTED_ROW', 
-    'FULL_HEIGHT_PIXELS', 
-    'FUNCTION_CALL_TYPE', 
-    'GET_ATTR_CALL_TYPE', 
-    'GET_ATTRIBUTE_NODE', 
-    'GET_CGI_LONG_VALUE', 
-    'GET_INDEX_BY_QNAME', 
-    'GET_QNAME_BY_INDEX', 
-    'GET_UNSIGNED_SHORT', 
-    'GET_VALUE_BY_INDEX', 
-    'GET_VALUE_BY_QNAME', 
-    'INDEXED_REPOSITION', 
-    'KEEP_FRAME_Z_ORDER', 
-    'LABELS_HAVE_COLONS', 
-    'LOAD_MOUSE_POINTER', 
-    'LOCAL_VERSION_INFO', 
-    'MARGIN_WIDTH_CHARS', 
-    'NO_INHERIT_BGCOLOR', 
-    'NO_INHERIT_FGCOLOR', 
-    'NUM_LOCKED_COLUMNS', 
-    'PBE_HASH_ALGORITHM', 
-    'REPOSITION_FORWARD', 
-    'SAX_WRITE_COMPLETE', 
-    'SCROLLBAR_VERTICAL', 
-    'SELECT_FOCUSED_ROW', 
-    'SET_ATTR_CALL_TYPE', 
-    'SET_ATTRIBUTE_NODE', 
-    'SYSTEM_ALERT_BOXES', 
-    'TEMP_TABLE_PREPARE', 
-    'VALIDATION_ENABLED', 
-    'WRITE_DATA_ELEMENT', 
-    'WRITE_EXTERNAL_DTD', 
-    'send_sql_statement', 
-    'ALLOW_REPLICATION', 
-    'ATTACHED_PAIRLIST', 
-    'AVAILABLE_FORMATS', 
-    'BEGIN_EVENT_GROUP', 
-    'BORDER_LEFT_CHARS', 
-    'BORDER_TOP_PIXELS', 
-    'CLEAR_SORT_ARROWS', 
-    'CONTEXT_HELP_FILE', 
-    'CONVERT_3D_COLORS', 
-    'CONVERT_TO_OFFSET', 
-    'CURRENT_ITERATION', 
-    'DATA_ENTRY_RETURN', 
-    'DATA_SOURCE_ROWID', 
-    'DECLARE_NAMESPACE', 
-    'DEFAULT_EXTENSION', 
-    'ERROR_STACK_TRACE', 
-    'FULL_HEIGHT_CHARS', 
-    'FULL_WIDTH_PIXELS', 
-    'GENERATE_PBE_SALT', 
-    'GET_BROWSE_COLUMN', 
-    'GET_BUFFER_HANDLE', 
-    'GET_POINTER_VALUE', 
-    'GET_TYPE_BY_INDEX', 
-    'GET_TYPE_BY_QNAME', 
-    'GET_UNSIGNED_LONG', 
-    'HTML_HEADER_BEGIN', 
-    'IMAGE_INSENSITIVE', 
-    'IMAGE_SIZE_PIXELS', 
-    'IMMEDIATE_DISPLAY', 
-    'INDEX_INFORMATION', 
-    'LOCATOR_PUBLIC_ID', 
-    'LOCATOR_SYSTEM_ID', 
-    'LOCK_REGISTRATION', 
-    'MAX_HEIGHT_PIXELS', 
-    'MESSAGE_AREA_FONT', 
-    'MIN_HEIGHT_PIXELS', 
-    'NUM_DROPPED_FILES', 
-    'NUM_SELECTED_ROWS', 
-    'PIXELS_PER_COLUMN', 
-    'PUT_UNSIGNED_LONG', 
-    'RCODE_INFORMATION', 
-    'REPOSITION_TO_ROW', 
-    'ROW_HEIGHT_PIXELS', 
-    'SAX_UNINITIALIZED', 
-    'SAX_WRITE_CONTENT', 
-    'SAX_WRITE_ELEMENT', 
-    'SEPARATOR_FGCOLOR', 
-    'SET_CURRENT_VALUE', 
-    'SET_POINTER_VALUE', 
-    'SIDE_LABEL_HANDLE', 
-    'SUPPRESS_WARNINGS', 
-    'SYMMETRIC_SUPPORT', 
-    'ADD_COLUMNS_FROM', 
-    'APPL_ALERT_BOXES', 
-    'APPSERVER_USERID', 
-    'AUTO_SYNCHRONIZE', 
-    'BORDER_TOP_CHARS', 
-    'CHARACTER_LENGTH', 
-    'CLIENT_PRINCIPAL', 
-    'CODEBASE_LOCATOR', 
-    'CODEPAGE_CONVERT', 
-    'COLUMN_READ_ONLY', 
-    'COLUMN_RESIZABLE', 
-    'COLUMN_SCROLLING', 
-    'CREATE_TEST_FILE', 
-    'CURRENT_LANGUAGE', 
-    'DELETE_PROCEDURE', 
-    'DISABLE_AUTO_ZAP', 
-    'DROP_FILE_NOTIFY', 
-    'DYNAMIC_FUNCTION', 
-    'EMPTY_TEMP_TABLE', 
-    'EXPORT_PRINCIPAL', 
-    'FILE_CREATE_DATE', 
-    'FILE_CREATE_TIME', 
-    'FILE_INFORMATION', 
-    'FIND_WRAP_AROUND', 
-    'FULL_WIDTH_CHARS', 
-    'GENERATE_PBE_KEY', 
-    'GET_CONFIG_VALUE', 
-    'GET_DROPPED_FILE', 
-    'GET_ERROR_COLUMN', 
-    'GET_URI_BY_INDEX', 
-    'HTML_END_OF_LINE', 
-    'HTML_END_OF_PAGE', 
-    'HTML_FRAME_BEGIN', 
-    'HTML_TITLE_BEGIN', 
-    'IMAGE_SIZE_CHARS', 
-    'IMPORT_PRINCIPAL', 
-    'INSERT_ATTRIBUTE', 
-    'INTERNAL_ENTRIES', 
-    'IS_PARAMETER_SET', 
-    'LIST_QUERY_ATTRS', 
-    'LITERAL_QUESTION', 
-    'MANUAL_HIGHLIGHT', 
-    'MAX_HEIGHT_CHARS', 
-    'MAX_WIDTH_PIXELS', 
-    'MIN_HEIGHT_CHARS', 
-    'MIN_WIDTH_PIXELS', 
-    'NAMESPACE_PREFIX', 
-    'NO_ARRAY_MESSAGE', 
-    'NO_AUTO_VALIDATE', 
-    'NO_CURRENT_VALUE', 
-    'NO_JOIN_BY_SQLDB', 
-    'PUBLISHED_EVENTS', 
-    'ROW_HEIGHT_CHARS', 
-    'SAX_PARSER_ERROR', 
-    'SERIALIZE_HIDDEN', 
-    'SET_APPL_CONTEXT', 
-    'SET_INPUT_SOURCE', 
-    'SOURCE_PROCEDURE', 
-    'START_ROW_RESIZE', 
-    'STATUS_AREA_FONT', 
-    'STORED_PROCEDURE', 
-    'SUPER_PROCEDURES', 
-    'TARGET_PROCEDURE', 
-    'TRANSACTION_MODE', 
-    'UPDATE_ATTRIBUTE', 
-    'VALIDATE_MESSAGE', 
-    'WINDOW_MAXIMIZED', 
-    'WINDOW_MINIMIZED', 
-    'WRITE_CHARACTERS', 
-    'WRITE_ENTITY_REF', 
-    'proc_text_buffer', 
-    'ADD_CALC_COLUMN', 
-    'ADD_FIELDS_FROM', 
-    'ADD_INDEX_FIELD', 
-    'ADD_LIKE_COLUMN', 
-    'APPL_CONTEXT_ID', 
-    'AUTO_COMPLETION', 
-    'CLEAR_SELECTION', 
-    'CONTEXT_HELP_ID', 
-    'COPY_TEMP_TABLE', 
-    'CURRENT_CHANGED', 
-    'DEFAULT_NOXLATE', 
-    'DISPLAY_MESSAGE', 
-    'ENCRYPTION_SALT', 
-    'END_EVENT_GROUP', 
-    'END_USER_PROMPT', 
-    'EVENT_PROCEDURE', 
-    'FIRST_PROCEDURE', 
-    'FIT_LAST_COLUMN', 
-    'FORM_LONG_INPUT', 
-    'GET_BINARY_DATA', 
-    'GET_FILE_OFFSET', 
-    'GET_GREEN_VALUE', 
-    'HOST_BYTE_ORDER', 
-    'HTML_HEADER_END', 
-    'INHERIT_BGCOLOR', 
-    'INHERIT_FGCOLOR', 
-    'IS_ROW_SELECTED', 
-    'LIKE_SEQUENTIAL', 
-    'LIST_ITEM_PAIRS', 
-    'LOAD_IMAGE_DOWN', 
-    'LOAD_SMALL_ICON', 
-    'LOG_AUDIT_EVENT', 
-    'MAX_WIDTH_CHARS', 
-    'MIN_WIDTH_CHARS', 
-    'ON_FRAME_BORDER', 
-    'PROGRESS_SOURCE', 
-    'REGISTER_DOMAIN', 
-    'REPOSITION_MODE', 
-    'RETURN_INSERTED', 
-    'SAX_PARSE_FIRST', 
-    'SAX_WRITE_BEGIN', 
-    'SAX_WRITE_ERROR', 
-    'SCHEMA_LOCATION', 
-    'SECURITY_POLICY', 
-    'SELECT_NEXT_ROW', 
-    'SELECT_PREV_ROW', 
-    'SELECTION_START', 
-    'SET_GREEN_VALUE', 
-    'SHOW_IN_TASKBAR', 
-    'SSL_SERVER_NAME', 
-    'USE_WIDGET_POOL', 
-    'WRITE_XMLSCHEMA', 
-    'XML_SCHEMA_PATH', 
-    'ds_close_cursor', 
-    'GLOBAL_DEFINE', 
-    'SCOPED_DEFINE', 
-    'ADD_LIKE_FIELD', 
-    'ADD_LIKE_INDEX', 
-    'APPSERVER_INFO', 
-    'BOX_SELECTABLE', 
-    'BUFFER_COMPARE', 
-    'BUFFER_RELEASE', 
-    'CASE_SENSITIVE', 
-    'COLUMN_BGCOLOR', 
-    'COLUMN_FGCOLOR', 
-    'COLUMN_MOVABLE', 
-    'COLUMN_PFCOLOR', 
-    'CURRENT_COLUMN', 
-    'CURRENT_WINDOW', 
-    'DATASET_HANDLE', 
-    'DBRESTRICTIONS', 
-    'DEFAULT_BUTTON', 
-    'DEFAULT_COMMIT', 
-    'DEFAULT_WINDOW', 
-    'DROP_DOWN_LIST', 
-    'DYNAMIC_INVOKE', 
-    'EDIT_CAN_PASTE', 
-    'ENABLED_FIELDS', 
-    'END_ROW_RESIZE', 
-    'EVENT_GROUP_ID', 
-    'EXCLUSIVE_LOCK', 
-    'FIRST_TAB_ITEM', 
-    'GET_BLUE_VALUE', 
-    'GET_COLLATIONS', 
-    'GET_WAIT_STATE', 
-    'HTML_FRAME_END', 
-    'HTML_TITLE_END', 
-    'INITIAL_FILTER', 
-    'INSERT_BACKTAB', 
-    'IS_PARTITIONED', 
-    'KEEP_TAB_ORDER', 
-    'LARGE_TO_SMALL', 
-    'LAST_PROCEDURE', 
-    'LIST_SET_ATTRS', 
-    'MARK_ROW_STATE', 
-    'MAX_DATA_GUESS', 
-    'MERGE_BY_FIELD', 
-    'MOVE_TO_BOTTOM', 
-    'NO_EMPTY_SPACE', 
-    'NO_ROW_MARKERS', 
-    'NUM_ITERATIONS', 
-    'NUM_PARAMETERS', 
-    'NUM_REFERENCES', 
-    'NUMERIC_FORMAT', 
-    'PASSWORD_FIELD', 
-    'PBE_KEY_ROUNDS', 
-    'PIXELS_PER_ROW', 
-    'PREFER_DATASET', 
-    'PREPARE_STRING', 
-    'PROCEDURE_TYPE', 
-    'PROXY_PASSWORD', 
-    'READ_AVAILABLE', 
-    'READ_EXACT_NUM', 
-    'REFERENCE_ONLY', 
-    'SAX_PARSE_NEXT', 
-    'SAX_WRITE_IDLE', 
-    'SCHEMA_MARSHAL', 
-    'SCROLL_TO_ITEM', 
-    'SEAL_TIMESTAMP', 
-    'SELECTION_LIST', 
-    'SELECTION_TEXT', 
-    'SERIALIZE_NAME', 
-    'SET_BLUE_VALUE', 
-    'SET_SORT_ARROW', 
-    'SET_WAIT_STATE', 
-    'SORT_ASCENDING', 
-    'START_DOCUMENT', 
-    'STRETCH_TO_FIT', 
-    'TEMP_DIRECTORY', 
-    'THIS_PROCEDURE', 
-    'WRITE_FRAGMENT', 
-    'LINE_NUMBER', 
-    'ACTIVE_WINDOW', 
-    'ADD_NEW_FIELD', 
-    'ADD_NEW_INDEX', 
-    'ALWAYS_ON_TOP', 
-    'ARRAY_MESSAGE', 
-    'ASK_OVERWRITE', 
-    'AUDIT_CONTROL', 
-    'AUDIT_ENABLED', 
-    'AUTHORIZATION', 
-    'BASE64_DECODE', 
-    'BASE64_ENCODE', 
-    'BUFFER_CREATE', 
-    'BUFFER_DELETE', 
-    'BUFFER_HANDLE', 
-    'CANCEL_BUTTON', 
-    'CAREFUL_PAINT', 
-    'COLON_ALIGNED', 
-    'COLUMN_DCOLOR', 
-    'CONTEXT_POPUP', 
-    'CONTROL_FRAME', 
-    'CURRENT_QUERY', 
-    'CURRENT_VALUE', 
-    'CURSOR_OFFSET', 
-    'DATA_RELATION', 
-    'DB_REFERENCES', 
-    'DEFAULT_VALUE', 
-    'DESELECT_ROWS', 
-    'DSLOG_MANAGER', 
-    'EDIT_CAN_UNDO', 
-    'END_FILE_DROP', 
-    'FILE_MOD_DATE', 
-    'FILE_MOD_TIME', 
-    'FIND_BY_ROWID', 
-    'FRAME_SPACING', 
-    'FULL_PATHNAME', 
-    'GENERATE_UUID', 
-    'GET_CGI_VALUE', 
-    'GET_CODEPAGES', 
-    'GET_ERROR_ROW', 
-    'GET_FILE_NAME', 
-    'GET_ITERATION', 
-    'GET_KEY_VALUE', 
-    'GET_RED_VALUE', 
-    'GET_RGB_VALUE', 
-    'GET_SIGNATURE', 
-    'HEIGHT_PIXELS', 
-    'INSERT_STRING', 
-    'IS_ATTR_SPACE', 
-    'ITEMS_PER_ROW', 
-    'JOIN_BY_SQLDB', 
-    'KEEP_MESSAGES', 
-    'LABEL_BGCOLOR', 
-    'LABEL_FGCOLOR', 
-    'LABEL_PFCOLOR', 
-    'LAST_TAB_ITEM', 
-    'LITTLE_ENDIAN', 
-    'LOAD_IMAGE_UP', 
-    'MACHINE_CLASS', 
-    'MAXIMUM_LEVEL', 
-    'MESSAGE_LINES', 
-    'MOUSE_POINTER', 
-    'MULTI_COMPILE', 
-    'NAMESPACE_URI', 
-    'NEXT_TAB_ITEM', 
-    'NO_ATTR_SPACE', 
-    'NO_BIND_WHERE', 
-    'NO_INDEX_HINT', 
-    'NO_SEPARATORS', 
-    'NUM_TO_RETAIN', 
-    'OS_CREATE_DIR', 
-    'PREV_TAB_ITEM', 
-    'PRINTER_SETUP', 
-    'PUT_KEY_VALUE', 
-    'QUERY_OFF_END', 
-    'QUERY_PREPARE', 
-    'RADIO_BUTTONS', 
-    'RECORD_LENGTH', 
-    'RESPONSE_INFO', 
-    'RESTART_ROWID', 
-    'RIGHT_ALIGNED', 
-    'ROUTINE_LEVEL', 
-    'ROW_RESIZABLE', 
-    'RUN_PROCEDURE', 
-    'SAX_WRITE_TAG', 
-    'SCROLL_OFFSET', 
-    'SEARCH_TARGER', 
-    'SELECTION_END', 
-    'SET_DB_CLIENT', 
-    'SET_PARAMETER', 
-    'SET_RED_VALUE', 
-    'SET_RGB_VALUE', 
-    'SET_SELECTION', 
-    'START_ELEMENT', 
-    'STREAM_HANDLE', 
-    'SYSTEM_DIALOG', 
-    'TEXT_SEG_GROW', 
-    'TEXT_SELECTED', 
-    'TITLE_BGCOLOR', 
-    'TITLE_FGCOLOR', 
-    'TOP_NAV_QUERY', 
-    'UNLESS_HIDDEN', 
-    'UNSIGNED_LONG', 
-    'USE_DICT_EXPS', 
-    'USE_UNDERLINE', 
-    'VALIDATE_SEAL', 
-    'VALUE_CHANGED', 
-    'WINDOW_NORMAL', 
-    'WINDOW_SYSTEM', 
-    'WRITE_COMMENT', 
-    'WRITE_MESSAGE', 
-    'XML_DATA_TYPE', 
-    'XML_NODE_TYPE', 
-    'YES_NO_CANCEL', 
-    'ASYNCHRONOUS', 
-    'AUDIT_POLICY', 
-    'AUTO_END_KEY', 
-    'BUFFER_CHARS', 
-    'BUFFER_FIELD', 
-    'BUFFER_LINES', 
-    'BUFFER_VALUE', 
-    'CANCEL_BREAK', 
-    'COLUMN_LABEL', 
-    'CONTEXT_HELP', 
-    'COPY_DATASET', 
-    'CURRENT_DATE', 
-    'DISPLAY_TYPE', 
-    'DRAG_ENABLED', 
-    'DYNAMIC_ENUM', 
-    'END_DOCUMENT', 
-    'ERROR_COLUMN', 
-    'ERROR_STATUS', 
-    'EXCLUSIVE_ID', 
-    'FIND_CURRENT', 
-    'FIRST_COLUMN', 
-    'FIRST_OBJECT', 
-    'FIRST_SERVER', 
-    'FROM_CURRENT', 
-    'GENERATE_MD5', 
-    'GET_CGI_LIST', 
-    'GET_PRINTERS', 
-    'GET_PROPERTY', 
-    'GET_TAB_ITEM', 
-    'GRAPHIC_EDGE', 
-    'GRID_VISIBLE', 
-    'HEIGHT_CHARS', 
-    'HTML_CHARSET', 
-    'INPUT_OUTPUT', 
-    'IS_LEAD_BYTE', 
-    'KEY_FUNCTION', 
-    'LABEL_DCOLOR', 
-    'LEFT_ALIGNED', 
-    'LINE_COUNTER', 
-    'LIST_WIDGETS', 
-    'LOAD_DOMAINS', 
-    'LOAD_PICTURE', 
-    'LOCATOR_TYPE', 
-    'MARGIN_EXTRA', 
-    'MESSAGE_AREA', 
-    'MULTIPLE_KEY', 
-    'NEEDS_PROMPT', 
-    'NEW_INSTANCE', 
-    'NEXT_SIBLING', 
-    'NO_ATTR_LIST', 
-    'NO_LOOKAHEAD', 
-    'NO_UNDERLINE', 
-    'NO_WORD_WRAP', 
-    'NUM_MESSAGES', 
-    'NUM_REPLACED', 
-    'OCTET_LENGTH', 
-    'ORDERED_JOIN', 
-    'PARSE_STATUS', 
-    'PREV_SIBLING', 
-    'PRINTER_NAME', 
-    'PRINTER_PORT', 
-    'PRIVATE_DATA', 
-    'PROGRAM_NAME', 
-    'PROXY_USERID', 
-    'QUERY_TUNING', 
-    'RAW_TRANSFER', 
-    'REQUEST_INFO', 
-    'RETAIN_SHAPE', 
-    'RETRY_CANCEL', 
-    'RETURN_VALUE', 
-    'REVERSE_FROM', 
-    'SAX_COMPLETE', 
-    'SCREEN_LINES', 
-    'SCREEN_VALUE', 
-    'SCROLL_DELTA', 
-    'SERIALIZABLE', 
-    'SET_CALLBACK', 
-    'SET_CONTENTS', 
-    'SET_PROPERTY', 
-    'SET_ROLLBACK', 
-    'START_RESIZE', 
-    'STATE_DETAIL', 
-    'STOP_PARSING', 
-    'STRING_VALUE', 
-    'TAB_POSITION', 
-    'TABLE_HANDLE', 
-    'TABLE_NUMBER', 
-    'TITLE_DCOLOR', 
-    'UNIQUE_MATCH', 
-    'URL_PASSWORD', 
-    'USE_FILENAME', 
-    'USE_REVVIDEO', 
-    'VALID_HANDLE', 
-    'VALID_OBJECT', 
-    'WIDGET_ENTER', 
-    'WIDGET_LEAVE', 
-    'WIDTH_PIXELS', 
-    'WINDOW_STATE', 
-    'WRITE_STATUS', 
-    'ACCELERATOR', 
-    'ACTIVE_FORM', 
-    'APPLICATION', 
-    'AUTO_ENDKEY', 
-    'AUTO_INDENT', 
-    'AUTO_RESIZE', 
-    'AUTO_RETURN', 
-    'BEFORE_HIDE', 
-    'BLOCK_LEVEL', 
-    'BUFFER_COPY', 
-    'BUFFER_NAME', 
-    'CLIENT_TYPE', 
-    'COLOR_TABLE', 
-    'COLUMN_FONT', 
-    'CONFIG_NAME', 
-    'CONSTRUCTOR', 
-    'CONTROL_BOX', 
-    'CREATE_LIKE', 
-    'CURSOR_CHAR', 
-    'CURSOR_LINE', 
-    'DATA_SOURCE', 
-    'DATASERVERS', 
-    'DATE_FORMAT', 
-    'DBCOLLATION', 
-    'DEBUG_ALERT', 
-    'DELETE_CHAR', 
-    'DELETE_LINE', 
-    'DESELECTION', 
-    'DOMAIN_NAME', 
-    'DOMAIN_TYPE', 
-    'DROP_TARGET', 
-    'EDGE_PIXELS', 
-    'END_ELEMENT', 
-    'FILE_OFFSET', 
-    'FIND_GLOBAL', 
-    'FIND_SELECT', 
-    'FIND_UNIQUE', 
-    'FIRST_CHILD', 
-    'FLAT_BUTTON', 
-    'FOCUSED_ROW', 
-    'FRAME_FIELD', 
-    'FRAME_INDEX', 
-    'FRAME_VALUE', 
-    'FROM_PIXELS', 
-    'GET_CURRENT', 
-    'GET_DYNAMIC', 
-    'GET_MESSAGE', 
-    'HAS_RECORDS', 
-    'INFORMATION', 
-    'INITIAL_DIR', 
-    'INNER_CHARS', 
-    'INNER_LINES', 
-    'INPUT_VALUE', 
-    'INSERT_FILE', 
-    'IS_SELECTED', 
-    'KEYFUNCTION', 
-    'KEYWORD_ALL', 
-    'LAST_OBJECT', 
-    'LAST_SERVER', 
-    'LIST_EVENTS', 
-    'LOG_MANAGER', 
-    'LOGIN_STATE', 
-    'MOVE_COLUMN', 
-    'MOVE_TO_EOF', 
-    'MOVE_TO_TOP', 
-    'NEXT_COLUMN', 
-    'NEXT_PROMPT', 
-    'NO_PREFETCH', 
-    'NO_TAB_STOP', 
-    'NO_VALIDATE', 
-    'NUM_ALIASES', 
-    'NUM_BUFFERS', 
-    'NUM_BUTTONS', 
-    'NUM_COLUMNS', 
-    'NUM_ENTRIES', 
-    'NUM_FORMATS', 
-    'NUM_RESULTS', 
-    'PAGE_BOTTOM', 
-    'PAGE_NUMBER', 
-    'PARTIAL_KEY', 
-    'PREV_COLUMN', 
-    'PRINTER_HDC', 
-    'PROC_HANDLE', 
-    'PROC_STATUS', 
-    'QUERY_CLOSE', 
-    'REFRESHABLE', 
-    'RESTART_ROW', 
-    'ROW_MARKERS', 
-    'SAX_RUNNING', 
-    'SCHEMA_PATH', 
-    'SCROLL_BARS', 
-    'SEARCH_SELF', 
-    'SET_BUFFERS', 
-    'SET_DYNAMIC', 
-    'SHA1_DIGEST', 
-    'SIDE_LABELS', 
-    'SIZE_PIXELS', 
-    'SMALL_TITLE', 
-    'SORT_NUMBER', 
-    'STATUS_AREA', 
-    'STRING_XREF', 
-    'SUB_AVERAGE', 
-    'SUB_MAXIMUM', 
-    'SUB_MINIMUM', 
-    'SYSTEM_HELP', 
-    'TEXT_CURSOR', 
-    'THIS_OBJECT', 
-    'THREAD_SAFE', 
-    'TIME_SOURCE', 
-    'TRANSACTION', 
-    'TRANSPARENT', 
-    'UNFORMATTED', 
-    'UNSUBSCRIBE', 
-    'VALID_EVENT', 
-    'WEB_CONTEXT', 
-    'WIDGET_POOL', 
-    'WIDTH_CHARS', 
-    'WINDOW_NAME', 
-    'WORK_AREA_X', 
-    'WORK_AREA_Y', 
-    'WRITE_CDATA', 
-    'YEAR_OFFSET', 
-    'SEQUENCE', 
-    'WEBSTREAM', 
-    'ACCUMULATE', 
-    'ADD_BUFFER', 
-    'ATTR_SPACE', 
-    'BACKGROUND', 
-    'BATCH_MODE', 
-    'BATCH_SIZE', 
-    'BIG_ENDIAN', 
-    'BIND_WHERE', 
-    'BY_POINTER', 
-    'CACHE_SIZE', 
-    'CAN_CREATE', 
-    'CAN_DELETE', 
-    'CLASS_TYPE', 
-    'CLIENT_TTY', 
-    'COM_HANDLE', 
-    'CPINTERNAL', 
-    'CPRCODEOUT', 
-    'DB_CONTEXT', 
-    'DBCODEPAGE', 
-    'DEBUG_LIST', 
-    'DESCENDING', 
-    'DESTRUCTOR', 
-    'DIALOG_BOX', 
-    'DICTIONARY', 
-    'DISCONNECT', 
-    'EDGE_CHARS', 
-    'EDIT_CLEAR', 
-    'EDIT_PASTE', 
-    'END_RESIZE', 
-    'EVENT_TYPE', 
-    'EXPANDABLE', 
-    'FIND_FIRST', 
-    'FIRST_FORM', 
-    'FIXED_ONLY', 
-    'FONT_TABLE', 
-    'FORCE_FILE', 
-    'FOREGROUND', 
-    'FORM_INPUT', 
-    'FRAME_DOWN', 
-    'FRAME_FILE', 
-    'FRAME_LINE', 
-    'FRAME_NAME', 
-    'FROM_CHARS', 
-    'GET_DOUBLE', 
-    'GET_NUMBER', 
-    'GET_STRING', 
-    'GO_PENDING', 
-    'HEX_DECODE', 
-    'HEX_ENCODE', 
-    'HORIZONTAL', 
-    'IMAGE_DOWN', 
-    'IMAGE_SIZE', 
-    'IMPLEMENTS', 
-    'INDEX_HINT', 
-    'INSERT_ROW', 
-    'INSERT_TAB', 
-    'LABEL_FONT', 
-    'LAST_BATCH', 
-    'LAST_CHILD', 
-    'LAST_EVENT', 
-    'LIST_ITEMS', 
-    'LOAD_IMAGE', 
-    'LOCAL_NAME', 
-    'LOGIN_HOST', 
-    'MAX_BUTTON', 
-    'MAX_HEIGHT', 
-    'MD5_DIGEST', 
-    'MENU_MOUSE', 
-    'MIN_BUTTON', 
-    'MUST_EXIST', 
-    'NEXT_ROWID', 
-    'NEXT_VALUE', 
-    'NO_CONSOLE', 
-    'NO_CONVERT', 
-    'NO_MESSAGE', 
-    'NOT_ACTIVE', 
-    'NUM_COPIES', 
-    'NUM_FIELDS', 
-    'OS_COMMAND', 
-    'PAGE_WIDTH', 
-    'PERSISTENT', 
-    'POPUP_MENU', 
-    'POPUP_ONLY', 
-    'PREPROCESS', 
-    'PRIVILEGES', 
-    'PROMPT_FOR', 
-    'PROVERSION', 
-    'PUT_DOUBLE', 
-    'PUT_STRING', 
-    'QUERY_OPEN', 
-    'REPOSITION', 
-    'RIGHT_TRIM', 
-    'SAVE_CACHE', 
-    'SAX_WRITER', 
-    'SCROLLABLE', 
-    'SELECT_ALL', 
-    'SELECT_ROW', 
-    'SELECTABLE', 
-    'SEPARATORS', 
-    'SESSION_ID', 
-    'SET_CLIENT', 
-    'SET_COMMIT', 
-    'SET_OPTION', 
-    'SHARE_LOCK', 
-    'SHOW_STATS', 
-    'SINGLE_RUN', 
-    'SIZE_CHARS', 
-    'SMALL_ICON', 
-    'STANDALONE', 
-    'START_MOVE', 
-    'STOP_AFTER', 
-    'SUBSTITUTE', 
-    'TABLE_SCAN', 
-    'TEMP_TABLE', 
-    'TITLE_FONT', 
-    'TOGGLE_BOX', 
-    'UNBUFFERED', 
-    'URL_DECODE', 
-    'URL_ENCODE', 
-    'URL_USERID', 
-    'WORD_INDEX', 
-    'WORK_TABLE', 
-    'WRITE_JSON', 
-    'UNDEFINE', 
-    'ADD_FIRST', 
-    'ALERT_BOX', 
-    'AMBIGUOUS', 
-    'ANSI_ONLY', 
-    'ASCENDING', 
-    'AUTOMATIC', 
-    'AVAILABLE', 
-    'BACKWARDS', 
-    'CALL_NAME', 
-    'CALL_TYPE', 
-    'CAN_QUERY', 
-    'CAN_WRITE', 
-    'CHARACTER', 
-    'CLEAR_LOG', 
-    'CLIPBOARD', 
-    'CLOSE_LOG', 
-    'COLUMN_OF', 
-    'COMBO_BOX', 
-    'CONNECTED', 
-    'CPRCODEIN', 
-    'CRC_VALUE', 
-    'DATA_BIND', 
-    'DATA_TYPE', 
-    'DBVERSION', 
-    'DDE_ERROR', 
-    'DDE_TOPIC', 
-    'DELIMITER', 
-    'DROP_DOWN', 
-    'EDIT_COPY', 
-    'EDIT_UNDO', 
-    'ERROR_ROW', 
-    'FILE_NAME', 
-    'FILE_SIZE', 
-    'FILE_TYPE', 
-    'FIND_LAST', 
-    'FORMATTED', 
-    'FRAME_COL', 
-    'FRAME_ROW', 
-    'FREQUENCY', 
-    'GET_CLASS', 
-    'GET_FIRST', 
-    'GET_FLOAT', 
-    'GET_INT64', 
-    'GET_SHORT', 
-    'GRID_SNAP', 
-    'IN_HANDLE', 
-    'INDICATOR', 
-    'INTERFACE', 
-    'KEY_LABEL', 
-    'LANDSCAPE', 
-    'LANGUAGES', 
-    'LAST_FORM', 
-    'LEFT_TRIM', 
-    'LOAD_ICON', 
-    'LOOKAHEAD', 
-    'MANDATORY', 
-    'MAX_CHARS', 
-    'MAX_VALUE', 
-    'MAX_WIDTH', 
-    'MENU_ITEM', 
-    'MIN_VALUE', 
-    'NO_ASSIGN', 
-    'NO_LABELS', 
-    'NORMALIZE', 
-    'NUM_ITEMS', 
-    'NUM_LINES', 
-    'OK_CANCEL', 
-    'OS_APPEND', 
-    'OS_DELETE', 
-    'OS_DRIVES', 
-    'OS_GETENV', 
-    'OS_RENAME', 
-    'OTHERWISE', 
-    'PAGE_SIZE', 
-    'PARAMETER', 
-    'PRECISION', 
-    'PRESELECT', 
-    'PROCEDURE', 
-    'PROTECTED', 
-    'PUBLIC_ID', 
-    'PUT_FLOAT', 
-    'PUT_INT64', 
-    'PUT_SHORT', 
-    'RADIO_SET', 
-    'READ_FILE', 
-    'READ_JSON', 
-    'READ_ONLY', 
-    'RECTANGLE', 
-    'RECURSIVE', 
-    'RESIZABLE', 
-    'RGB_VALUE', 
-    'SAVE_FILE', 
-    'SAX_PARSE', 
-    'SCREEN_IO', 
-    'SCROLLING', 
-    'SELECTION',
-    'SEMICOLON', 
-    'SENSITIVE', 
-    'SET_BREAK', 
-    'SETUSERID', 
-    'SIGNATURE', 
-    'SINGLETON', 
-    'STREAM_IO', 
-    'SUB_COUNT', 
-    'SUB_TOTAL', 
-    'SUBSCRIBE', 
-    'SUBSTRING', 
-    'SYSTEM_ID', 
-    'TERMINATE', 
-    'TIC_MARKS', 
-    'UNDERLINE', 
-    'UNIQUE_ID', 
-    'USE_INDEX', 
-    'V6DISPLAY', 
-    'WIDGET_ID', 
-    'WORD_WRAP', 
-    'WRITE_XML', 
-    'proc_text', 
-    'ABSOLUTE', 
-    'ABSTRACT', 
-    'ADD_LAST', 
-    'ADM_DATA', 
-    'ANYWHERE', 
-    'ASSEMBLY', 
-    'AUTO_ZAP', 
-    'BASE_ADE', 
-    'BASE_KEY', 
-    'CAN_FIND', 
-    'CAN_READ', 
-    'CENTERED', 
-    'CODEPAGE', 
-    'COM_SELF', 
-    'COMPARES', 
-    'COMPILER', 
-    'COMPLETE', 
-    'CONTAINS', 
-    'CONTENTS', 
-    'COPY_LOB', 
-    'COUNT_OF', 
-    'CPSTREAM', 
-    'DATABASE', 
-    'DBTASKID', 
-    'DDE_ITEM', 
-    'DDE_NAME', 
-    'DEBUGGER', 
-    'DECIMALS', 
-    'DELEGATE', 
-    'DISABLED', 
-    'DISTINCT', 
-    'EDIT_CUT', 
-    'END_MOVE', 
-    'EXPLICIT', 
-    'EXTENDED', 
-    'EXTERNAL', 
-    'FILENAME', 
-    'FIRST_OF', 
-    'FORWARDS', 
-    'FRAGMENT', 
-    'FRAME_DB', 
-    'FUNCTION', 
-    'GATEWAYS', 
-    'GET_BYTE', 
-    'GET_FILE', 
-    'GET_LAST', 
-    'GET_LONG', 
-    'GET_NEXT', 
-    'GET_PREV', 
-    'GET_SIZE', 
-    'IMAGE_UP', 
-    'INHERITS', 
-    'INITIATE', 
-    'IS_CLASS', 
-    'KEY_CODE', 
-    'KEYLABEL', 
-    'LAST_KEY', 
-    'MARK_NEW', 
-    'MAX_ROWS', 
-    'MAX_SIZE', 
-    'MAXIMIZE', 
-    'MENU_BAR', 
-    'MENU_KEY', 
-    'MIN_SIZE', 
-    'MODIFIED', 
-    'MULTIPLE', 
-    'MULTIPLY',
-    'NO_APPLY', 
-    'NO_DEBUG', 
-    'NO_ERROR', 
-    'NO_FOCUS', 
-    'NO_PAUSE', 
-    'NUM_TABS', 
-    'OS_ERROR', 
-    'OVERRIDE', 
-    'PAGE_TOP', 
-    'PATHNAME', 
-    'PORTRAIT', 
-    'POSITION', 
-    'PREPARED', 
-    'PROFILER', 
-    'PROGRESS', 
-    'PROPERTY', 
-    'PUT_BYTE', 
-    'PUT_LONG', 
-    'QUESTION', 
-    'READ_XML', 
-    'SELECTED', 
-    'SET_SIZE', 
-    'SMALLINT', 
-    'SUB_MENU', 
-    'TAB_STOP', 
-    'TERMINAL', 
-    'TO_ROWID', 
-    'TOOLTIPS', 
-    'TOP_ONLY', 
-    'TRAILING', 
-    'TRIGGERS', 
-    'TRUNCATE', 
-    'USE_TEXT', 
-    'VALIDATE', 
-    'VARIABLE', 
-    'VERTICAL', 
-    'WAIT_FOR', 
-    'WORKFILE', 
-    'XREF_XML', 
-    'ELSEIF', 
-    'ANALYZE', 
-    'AUTO_GO', 
-    'AVERAGE', 
-    'BETWEEN', 
-    'BGCOLOR', 
-    'BUTTONS', 
-    'CAN_SET', 
-    'CHAINED', 
-    'CHARSET', 
-    'CHECKED', 
-    'COLLATE', 
-    'COLUMNS', 
-    'COMMAND', 
-    'COMPILE', 
-    'CONNECT', 
-    'CONTEXT', 
-    'CONTROL', 
-    'CONVERT', 
-    'CPPRINT', 
-    'CURRENT', 
-    'DATASET', 
-    'DBPARAM', 
-    'DEBLANK', 
-    'DECIMAL', 
-    'DECLARE', 
-    'DECRYPT', 
-    'DEFAULT', 
-    'DEFINED', 
-    'DISABLE', 
-    'DISPLAY', 
-    'DYNAMIC', 
-    'EDITING', 
-    'ENCRYPT', 
-    'END_KEY', 
-    'ENTERED', 
-    'EXECUTE', 
-    'FGCOLOR', 
-    'FILL_IN', 
-    'FILTERS', 
-    'FINALLY', 
-    'FORWARD', 
-    'FRAME_X', 
-    'FRAME_Y', 
-    'GETBYTE', 
-    'HANDLER', 
-    'INITIAL', 
-    'INTEGER', 
-    'IS_JSON', 
-    'IS_OPEN', 
-    'KBLABEL', 
-    'KEYCODE', 
-    'KEYWORD', 
-    'LAST_OF', 
-    'LASTKEY', 
-    'LDBNAME', 
-    'LIBRARY', 
-    'LISTING', 
-    'LOGICAL', 
-    'MATCHES', 
-    'MAXIMUM', 
-    'MENUBAR', 
-    'MESSAGE', 
-    'MINIMUM', 
-    'MOVABLE', 
-    'NEW_ROW', 
-    'NO_DRAG', 
-    'NO_ECHO', 
-    'NO_FILL', 
-    'NO_HELP', 
-    'NO_HIDE', 
-    'NO_LOBS', 
-    'NO_LOCK', 
-    'NO_UNDO', 
-    'NO_WAIT', 
-    'NUM_DBS', 
-    'NUMERIC', 
-    'ORDINAL', 
-    'OS_COPY', 
-    'OVERLAY', 
-    'PDBNAME', 
-    'PFCOLOR', 
-    'PRIMARY', 
-    'PRINTER', 
-    'PRIVATE', 
-    'PROCESS', 
-    'PROMSGS', 
-    'PROPATH', 
-    'PUBLISH', 
-    'PUTBYTE', 
-    'R_INDEX', 
-    'READKEY', 
-    'REFRESH', 
-    'RELEASE', 
-    'REPLACE', 
-    'REQUEST', 
-    'RETURNS', 
-    'SAVE_AS', 
-    'SDBNAME', 
-    'SECTION', 
-    'SESSION', 
-    'STDCALL', 
-    'STOPPED', 
-    'SUBTYPE', 
-    'THREE_D', 
-    'THROUGH', 
-    'TOOLTIP', 
-    'TRIGGER', 
-    'TYPE_OF', 
-    'USER_ID', 
-    'V6FRAME', 
-    'VERBOSE', 
-    'VERSION', 
-    'VIEW_AS', 
-    'VISIBLE', 
-    'WARNING', 
-    'WEEKDAY', 
-    'ENDIF', 
-    'ADVISE', 
-    'APPEND', 
-    'ASSIGN', 
-    'BEGINS', 
-    'BINARY', 
-    'BROWSE', 
-    'BUFFER', 
-    'BUTTON', 
-    'CAN_DO', 
-    'CHOOSE', 
-    'COL_OF', 
-    'COLUMN', 
-    'CPCASE', 
-    'CPCOLL', 
-    'CPTERM', 
-    'CREATE', 
-    'CURSOR', 
-    'DBNAME', 
-    'DBTYPE', 
-    'DCOLOR', 
-    'DDE_ID', 
-    'DEFINE', 
-    'DELETE',
-    'DIVIDE', 
-    'DOUBLE', 
-    'EDITOR', 
-    'ENABLE', 
-    'ENCODE', 
-    'ENDKEY', 
-    'EQUALS',
-    'ESCAPE', 
-    'EVENTS', 
-    'EXCEPT', 
-    'EXISTS', 
-    'EXPAND', 
-    'EXPORT', 
-    'EXTENT', 
-    'FIELDS', 
-    'FILLED', 
-    'FINDER', 
-    'FORMAT', 
-    'GLOBAL', 
-    'HANDLE', 
-    'HAVING', 
-    'HEADER', 
-    'HIDDEN', 
-    'IMPORT', 
-    'INSERT', 
-    'INVOKE', 
-    'IS_XML', 
-    'LABELS', 
-    'LENGTH', 
-    'LOCKED', 
-    'LOGOUT', 
-    'LOOKUP',
-    'LPAREN', 
-    'MEMBER', 
-    'METHOD', 
-    'MODULO', 
-    'NATIVE', 
-    'NO_BOX', 
-    'NO_MAP', 
-    'OPTION', 
-    'OS_DIR', 
-    'OUTPUT', 
-    'PARENT', 
-    'PASCAL',
-    'PERIOD', 
-    'PIXELS', 
-    'PROMPT', 
-    'PUBLIC', 
-    'QUOTER', 
-    'RANDOM', 
-    'REMOTE', 
-    'REPEAT', 
-    'RESIZE', 
-    'RETAIN', 
-    'RETURN', 
-    'REVERT', 
-    'REVOKE', 
-    'ROW_OF', 
-    'RPAREN',
-    'SCHEMA', 
-    'SCREEN', 
-    'SCROLL', 
-    'SEARCH', 
-    'SELECT', 
-    'SERVER', 
-    'SHARED', 
-    'SILENT', 
-    'SIMPLE', 
-    'SINGLE', 
-    'SLIDER', 
-    'SOURCE', 
-    'STATIC', 
-    'STATUS', 
-    'STREAM', 
-    'STRICT', 
-    'STRING', 
-    'TARGET', 
-    'UNIQUE', 
-    'UNLOAD', 
-    'UPDATE', 
-    'USERID', 
-    'VALUES', 
-    'WIDGET', 
-    'WINDOW', 
-    'YES_NO', 
-    'ACCUM', 
-    'ALIAS', 
-    'ALTER', 
-    'APPLY', 
-    'BLANK', 
-    'BREAK', 
-    'CACHE', 
-    'CATCH', 
-    'CDECL', 
-    'CHECK', 
-    'CLASS', 
-    'CLEAR', 
-    'CLOSE', 
-    'COLON', 
-    'COLOR', 
-    'COMMA',
-    'COUNT', 
-    'CPLOG', 
-    'DEBUG', 
-    'EMPTY', 
-    'ENTRY', 
-    'ERROR', 
-    'ETIME', 
-    'EVENT', 
-    'FALSE', 
-    'FETCH', 
-    'FIELD', 
-    'FINAL', 
-    'FIRST', 
-    'FLOAT', 
-    'FOCUS', 
-    'FRAME', 
-    'GO_ON', 
-    'GRANT', 
-    'GROUP', 
-    'IMAGE', 
-    'INDEX', 
-    'INPUT', 
-    'INT64', 
-    'LABEL', 
-    'LARGE', 
-    'LEAVE', 
-    'MINUS',
-    'MONTH', 
-    'MOUSE', 
-    'MTIME', 
-    'OPSYS', 
-    'OWNER', 
-    'PAGED', 
-    'PAUSE', 
-    'PROXY', 
-    'QUERY', 
-    'RECID', 
-    'RESET', 
-    'RETRY', 
-    'ROLES', 
-    'ROUND', 
-    'ROWID', 
-    'SPACE', 
-    'START', 
-    'SUPER', 
-    'TABLE', 
-    'THROW', 
-    'TITLE', 
-    'TODAY', 
-    'TOPIC', 
-    'TOTAL', 
-    'TRANS', 
-    'UNBOX', 
-    'UNION', 
-    'USING', 
-    'VALUE', 
-    'WHERE', 
-    'WHILE', 
-    'WIDTH', 
-    'WRITE', 
-    'XCODE', 
-    'BELL', 
-    'BIND', 
-    'CALL', 
-    'CAPS', 
-    'CASE', 
-    'CAST', 
-    'CODE', 
-    'DATE', 
-    'DESC', 
-    'DISP', 
-    'DOWN', 
-    'DROP', 
-    'DUMP', 
-    'EACH', 
-    'ECHO', 
-    'ELSE', 
-    'ENUM', 
-    'FILE', 
-    'FILL', 
-    'FIND', 
-    'FONT', 
-    'FORM', 
-    'FROM', 
-    'GUID', 
-    'HELP', 
-    'HIDE', 
-    'HWND', 
-    'ICON', 
-    'INTO', 
-    'ITEM', 
-    'JOIN', 
-    'KEYS', 
-    'LAST', 
-    'LIKE', 
-    'LINE', 
-    'LOAD', 
-    'MENU', 
-    'NAME', 
-    'NEXT', 
-    'NONE', 
-    'NULL', 
-    'OPEN', 
-    'PAGE',
-    'PLUS', 
-    'PREV', 
-    'QUIT', 
-    'REAL', 
-    'RULE', 
-    'SAVE', 
-    'SEAL', 
-    'SEEK', 
-    'SELF', 
-    'SEND', 
-    'SIZE', 
-    'SKIP', 
-    'SOME', 
-    'SORT', 
-    'SQRT', 
-    'STOP', 
-    'TERM', 
-    'TEXT', 
-    'THEN', 
-    'THRU', 
-    'TIME', 
-    'TRIM', 
-    'TRUE', 
-    'TYPE', 
-    'UNDO', 
-    'UNIX', 
-    'USER', 
-    'VIEW', 
-    'VOID', 
-    'WAIT', 
-    'WHEN', 
-    'WITH', 
-    'X_OF', 
-    'XREF', 
-    'Y_OF', 
-    'YEAR', 
-    'ADD', 
-    'ALL', 
-    'AND', 
-    'ANY', 
-    'ASC', 
-    'AVG', 
-    'BOX', 
-    'CHR', 
-    'DAY', 
-    'DDE', 
-    'DIR', 
-    'DOS', 
-    'END', 
-    'EXP', 
-    'FOR', 
-    'GET', 
-    'INT', 
-    'KEY', 
-    'LOG', 
-    'MAP', 
-    'MAX', 
-    'MIN', 
-    'MPE', 
-    'NEW', 
-    'NOT', 
-    'NOW', 
-    'OFF', 
-    'OLD', 
-    'PUT', 
-    'RAW', 
-    'ROW', 
-    'RUN', 
-    'SET', 
-    'SQL', 
-    'SUM', 
-    'URL', 
-    'USE', 
-    'YES', 
-    'AS', 
-    'AT', 
-    'BY', 
-    'DO', 
-    'EQ', 
-    'GE', 
-    'GT', 
-    'IF', 
-    'IN', 
-    'IS', 
-    'LC', 
-    'LE', 
-    'LT', 
-    'NE', 
-    'NO', 
-    'OF', 
-    'OK', 
-    'ON', 
-    'OR', 
-    'TO', 
-    'UP']
+# Some of these contain tuples for syntax highlighting. so pull the value out of those. 
+for v in reserved_no_abr.values():
+    if isinstance(v, tuple):
+        tokens.append(v[0])
+    else:
+        tokens.append(v)
+for v in non_reserved_no_abr.values():
+    if isinstance(v, tuple):
+        tokens.append(v[0])
+    else:
+        tokens.append(v)
 
-reserved = {
-    
-}
+tokens += reserved_w_abr.values()
+tokens += non_reserved_w_abr.values()
 
-# A regular expression rule with some action code
-def t_NUMBER(t):
-    r'\d+(\.\d*)?'  # Matches integers and floating-point numbers
-    t.value = float(t.value)    
+reserved = {**reserved_no_abr, **non_reserved_no_abr}
+
+def build_regex(full_word:str, abr:str) -> str:
+    ''' Build a regular expression to match anything up to the abbreviation '''
+    reg = r'\b(?:' + abr.replace('-',r'\-')
+    for i in range(len(abr), len(full_word) + 1):
+        reg += r'|'+ full_word[:i].replace('-',r'\-')
+    reg += r')\b'
+    return reg
+
+###                        
+# Rules are executed top down 
+# So grab the comments and strings first to prevent mistakes
+###        
+
+# If newline is not checked first then any comment or string might wipe out
+# the line number counters correctness 
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+    t.lexer.colno = 0
+
+def t_FUNCTION_KEY(t):
+    r"""\b(?:'|")?([fF]\d{1,2})(?:'|")?\b"""
+    t.value = t.value.replace("'",'').replace('"','') 
+    t.tag = 'red'  
     return t
 
-def t_STRING(t):
+def t_SNG_COMMENT(t):
+    r'//.*'
+    t.tag='green'
+    return t
+
+def t_MULTI_COMMENT(t):
+    r'/\*[\s\S]*?\*/'
+    t.lexer.lineno += t.value.count('\n')
+    t.tag='green'
+    return t
+
+def t_CURLY_BRACE(t):
+    r'\{[\s\S]*?\}'
+    t.tag='yellow'
+    return t
+
+def t_ARRAY_BRACE(t):
+    r'\[[\s\S]*?\]'
+    t.tag = 'yellow'
+    return t
+
+def t_DATE_STR(t):
+    r'(?:0?[1-9]|1[0-2])[/\-\.](?:0?[1-9]|[12][0-9]|3[01])[/\-\.](?:\d{4}|\d{2})'
+    t.tag = 'violet'
+    return t
+
+# Decimal must come before int or 0.5 will be int 0 and float .5
+def t_DEC_STRING(t):
+    r'\b-?\d*\.\d+\b'
+    t.value = t.value
+    t.tag = 'magenta' 
+    return t
+
+def t_INT_STRING(t):
+    r'\b-?\d+\b'
+    t.tag = 'orange'
+    return t
+
+
+# def t_NUMBER(t):
+#     r'[\.]?\d+(\.\d*)?(\d*)?'  # Matches integers and floating-point numbers
+#     t.value = t.value
+#     t.tag = 'orange' 
+#     return t
+
+def t_DBL_STRING(t):
     r'\"[^"]*\"'
-
-    t.value = t.value[1:-1] # Remove the enclosing double quotes
+    t.tag='violet'
     return t
+
+def t_SNG_STRING(t):
+    r"\'[^']*\'"
+    t.tag='violet'
+    return t
+
+
+###
+# The following are all reserved keywords from the list. 
+# The should probably get sorted to make it easier to find
+###
+
+@TOKEN(build_regex('ACCUMULATE', 'ACCUM'))
+def t_ACCUMULATE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('AMBIGUOUS', 'AMBIG'))
+def t_AMBIGUOUS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('ANALYZE', 'ANALYZ'))
+def t_ANALYZE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('ASCENDING', 'ASC'))
+def t_ASCENDING(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('ATTR-SPACE', 'ATTR'))
+def t_ATTR_SPACE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('AUTO-RETURN', 'AUTO-RET'))
+def t_AUTO_RETURN(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('AVAILABLE', 'AVAIL'))
+def t_AVAILABLE(t):
+    t.tag = 'cyan' 
+    return t
+        
+@TOKEN(build_regex('BACKGROUND', 'BACK'))
+def t_BACKGROUND(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('BEFORE-HIDE', 'BEFORE-H'))
+def t_BEFORE_HIDE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('CASE-SENSITIVE', 'CASE-SEN'))
+def t_CASE_SENSITIVE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('CENTERED', 'CENTER'))
+def t_CENTERED(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('CHARACTER', 'CHA'))
+def t_CHARACTER(t):
+    t.tag='cyan'
+    return t
+    
+@TOKEN(build_regex('COLUMN-LABEL', 'COLUMN-LAB'))
+def t_COLUMN_LABEL(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('CURRENT-LANGUAGE', 'CURRENT-LANG'))
+def t_CURRENT_LANGUAGE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('CURSOR', 'CURS'))
+def t_CURSOR(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DATA-RELATION', 'DATA-REL'))
+def t_DATA_RELATION(t):
+    return t
+        
+@TOKEN(build_regex('DBRESTRICTIONS', 'DBREST'))
+def t_DBRESTRICTIONS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DBVERSION', 'DBVERS'))
+def t_DBVERSION(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DEFAULT-NOXLATE', 'DEFAULT-NOXL'))
+def t_DEFAULT_NOXLATE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DEFINE', 'DEF'))
+def t_DEFINE(t):
+    t.tag = 'blue'
+    return t
+        
+@TOKEN(build_regex('DELETE', 'DEL'))
+def t_DELETE(t):
+    t.tag = 'blue'
+    return t
+        
+@TOKEN(build_regex('DESCENDING', 'DESC'))
+def t_DESCENDING(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DICTIONARY', 'DICT'))
+def t_DICTIONARY(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DISCONNECT', 'DISCON'))
+def t_DISCONNECT(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('DISPLAY', 'DISP'))
+def t_DISPLAY(t):
+    t.tag='blue'
+    return t
+        
+@TOKEN(build_regex('ERROR-STATUS', 'ERROR-STAT'))
+def t_ERROR_STATUS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('EXCLUSIVE-LOCK', 'EXCLUSIVE'))
+def t_EXCLUSIVE_LOCK(t):
+    t.tag='red'
+    return t
+        
+@TOKEN(build_regex('FIELDS', 'FIELD'))
+def t_FIELDS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FILE-INFORMATION', 'FILE-INFO'))
+def t_FILE_INFORMATION(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FORMAT', 'FORM'))
+def t_FORMAT(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FRAME', 'FRAM'))
+def t_FRAME(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FRAME-INDEX', 'FRAME-INDE'))
+def t_FRAME_INDEX(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FRAME-VALUE', 'FRAME-VAL'))
+def t_FRAME_VALUE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FROM-CHARS', 'FROM-C'))
+def t_FROM_CHARS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('FROM-PIXELS', 'FROM-P'))
+def t_FROM_PIXELS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('GATEWAYS', 'GATEWAY'))
+def t_GATEWAYS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('GET-FILE-OFFSET', 'GET-FILE-OFFSE'))
+def t_GET_FILE_OFFSET(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('GET-KEY-VALUE', 'GET-KEY-VAL'))
+def t_GET_KEY_VALUE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('GO-PENDING', 'GO-PEND'))
+def t_GO_PENDING(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('GRAPHIC-EDGE', 'GRAPHIC-E'))
+def t_GRAPHIC_EDGE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('INPUT-OUTPUT', 'INPUT-O'))
+def t_INPUT_OUTPUT(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('IS-ATTR-SPACE', 'IS-ATTR'))
+def t_IS_ATTR_SPACE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('IS-LEAD-BYTE', 'IS-ATTR'))
+def t_IS_LEAD_BYTE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('KEY-FUNCTION', 'KEY-FUNC'))
+def t_KEY_FUNCTION(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('KEYFUNCTION', 'KEYFUNC'))
+def t_KEYFUNCTION(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('LAST-EVENT', 'LAST-EVEN'))
+def t_LAST_EVENT(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('LINE-COUNTER', 'LINE-COUNT'))
+def t_LINE_COUNTER(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('LISTING', 'LISTI'))
+def t_LISTING(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('LOGICAL', 'LOG'))
+def t_LOGICAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NO-ATTR-LIST', 'NO-ATTR'))
+def t_NO_ATTR_LIST(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NO-ATTR-SPACE', 'NO-ATTR'))
+def t_NO_ATTR_SPACE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NO-FILL', 'NO-F'))
+def t_NO_FILL(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NO-LABELS', 'NO-LABEL'))
+def t_NO_LABELS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NO-MESSAGE', 'NO-MES'))
+def t_NO_MESSAGE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NO-PREFETCH', 'NO-PREFE'))
+def t_NO_PREFETCH(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NO-VALIDATE', 'NO-VAL'))
+def t_NO_VALIDATE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('NUM-ALIASES', 'NUM-ALI'))
+def t_NUM_ALIASES(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PAGE-BOTTOM', 'PAGE-BOT'))
+def t_PAGE_BOTTOM(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PAGE-NUMBER', 'PAGE-NUM'))
+def t_PAGE_NUMBER(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PARAMETER', 'PARAM'))
+def t_PARAMETER(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PERSISTENT', 'PERSIST'))
+def t_PERSISTENT(t):
+    t.tag='blue'
+    return t
+        
+@TOKEN(build_regex('PREPROCESS', 'PREPROC'))
+def t_PREPROCESS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PROC-HANDLE', 'PROC-HA'))
+def t_PROC_HANDLE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PROC-STATUS', 'PROC-ST'))
+def t_PROC_STATUS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PROMPT-FOR', 'PROMPT-F'))
+def t_PROMPT_FOR(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PROVERSION', 'PROVERS'))
+def t_PROVERSION(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('PUT-KEY-VALUE', 'PUT-KEY-VAL'))
+def t_PUT_KEY_VALUE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('RCODE-INFORMATION', 'RCODE-INFO'))
+def t_RCODE_INFORMATION(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('RECTANGLE', 'RECT'))
+def t_RECTANGLE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('SAX-COMPLETE', 'SAX-COMPLE'))
+def t_SAX_COMPLETE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('SETUSERID', 'SETUSER'))
+def t_SETUSERID(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('SHARE-LOCK', 'SHARE'))
+def t_SHARE_LOCK(t):
+    t.tag='red'
+    return t
+        
+@TOKEN(build_regex('SHOW-STATS', 'SHOW-STAT'))
+def t_SHOW_STATS(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('TERMINAL', 'TERM'))
+def t_TERMINAL(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('UNDERLINE', 'UNDERL'))
+def t_UNDERLINE(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('UNFORMATTED', 'UNFORM'))
+def t_UNFORMATTED(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('WINDOW-MAXIMIZED', 'WINDOW-MAXIM'))
+def t_WINDOW_MAXIMIZED(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('WINDOW-MINIMIZED', 'WINDOW-MINIM'))
+def t_WINDOW_MINIMIZED(t):
+    t.tag='cyan'
+    return t
+        
+@TOKEN(build_regex('WORK-TABLE', 'WORK-TAB'))
+def t_WORK_TABLE(t):
+    t.tag='cyan'
+    return t
+
+
+
+
+
+###
+# These are non reserved keywords with abreviations
+###
+
+@TOKEN(build_regex('ABSOLUTE', 'ABS'))
+def t_ABSOLUTE(t):
+    t.tag='orange'
+    return t
+
+@TOKEN(build_regex('APPL-ALERT-BOXES', 'APPL-ALERT'))
+def t_APPL_ALERT_BOXES(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('AUTO-COMPLETION', 'AUTO-COMP'))
+def t_AUTO_COMPLETION(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('AUTO-INDENT', 'AUTO-IND'))
+def t_AUTO_INDENT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('AUTO-ZAP', 'AUTO-Z'))
+def t_AUTO_ZAP(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('AVERAGE', 'AVE'))
+def t_AVERAGE(t):
+    t.tag='orange'
+    return t
+
+@TOKEN(build_regex('BACKWARDS', 'BACKWARD'))
+def t_BACKWARDS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BATCH-MODE', 'BATCH'))
+def t_BATCH_MODE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BGCOLOR', 'BGC'))
+def t_BGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BLOCK-LEVEL', 'BLOCK-LEV'))
+def t_BLOCK_LEVEL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-BOTTOM-CHARS', 'BORDER-B'))
+def t_BORDER_BOTTOM_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-BOTTOM-PIXELS', 'BORDER-BOTTOM-P'))
+def t_BORDER_BOTTOM_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-LEFT-CHARS', 'BORDER-L'))
+def t_BORDER_LEFT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-LEFT-PIXELS', 'BORDER-LEFT-P'))
+def t_BORDER_LEFT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-RIGHT-CHARS', 'BORDER-R'))
+def t_BORDER_RIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-RIGHT-PIXELS', 'BORDER-RIGHT-P'))
+def t_BORDER_RIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-TOP-CHARS', 'BORDER-T'))
+def t_BORDER_TOP_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BORDER-TOP-PIXELS', 'BORDER-TOP-P'))
+def t_BORDER_TOP_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BOX-SELECTABLE', 'BOX-SELECT'))
+def t_BOX_SELECTABLE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('BUTTONS', 'BUTTON'))
+def t_BUTTONS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('CLEAR-SELECTION', 'CLEAR-SELECT'))
+def t_CLEAR_SELECTION(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('CLEAR-SORT-ARROWS', 'CLEAR-SORT-ARROW'))
+def t_CLEAR_SORT_ARROWS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('COLON-ALIGNED', 'COLON-ALIGN'))
+def t_COLON_ALIGNED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('COLUMN', 'COL'))
+def t_COLUMN(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('CONVERT-TO-OFFSET', 'CONVERT-TO-OFFS'))
+def t_CONVERT_TO_OFFSET(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('CURRENT-ENVIRONMENT', 'CURRENT-ENV'))
+def t_CURRENT_ENVIRONMENT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DATA-ENTRY-RETURN', 'DATA-ENTRY-RET'))
+def t_DATA_ENTRY_RETURN(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DATA-TYPE', 'DATA-T'))
+def t_DATA_TYPE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DATE-FORMAT', 'DATE-F'))
+def t_DATE_FORMAT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DDE-ID', 'DDE-I'))
+def t_DDE_ID(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DEBUG', 'DEBU'))
+def t_DEBUG(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DECIMAL', 'DEC'))
+def t_DECIMAL(t):
+    t.tag='blue'
+    return t
+
+@TOKEN(build_regex('DEFAULT-BUTTON', 'DEFAUT-B'))
+def t_DEFAULT_BUTTON(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DEFAULT-EXTENSION', 'DEFAULT-EX'))
+def t_DEFAULT_EXTENSION(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('DISPLAY-TYPE', 'DISPLAY-T'))
+def t_DISPLAY_TYPE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('EDGE-CHARS', 'EDGE'))
+def t_EDGE_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('EDGE-PIXELS', 'EDGE-P'))
+def t_EDGE_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('ERROR-COLUMN', 'ERROR-COL'))
+def t_ERROR_COLUMN(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('EVENT-TYPE', 'EVENT-T'))
+def t_EVENT_TYPE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FGCOLOR', 'FGC'))
+def t_FGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FILE-OFFSET', 'FILE-OFF'))
+def t_FILE_OFFSET(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FIRST-PROCEDURE', 'FIRST-PROC'))
+def t_FIRST_PROCEDURE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FIRST-TAB-ITEM', 'FIRST-TAB-I'))
+def t_FIRST_TAB_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FOREGROUND', 'FORE'))
+def t_FOREGROUND(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FORMATTED', 'FORMATTE'))
+def t_FORMATTED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FORWARDS', 'FORWARD'))
+def t_FORWARDS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FRAGMENT', 'FRAGMEN'))
+def t_FRAGMENT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FRAME-SPACING', 'FRAME-SPA'))
+def t_FRAME_SPACING(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FROM-CURRENT', 'FROM-CUR'))
+def t_FROM_CURRENT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FULL-HEIGHT-CHARS', 'FULL-HEIGHT'))
+def t_FULL_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FULL-HEIGHT-PIXELS', 'FULL-HEIGHT-P'))
+def t_FULL_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FULL-PATHNAME', 'FULL-PATHN'))
+def t_FULL_PATHNAME(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FULL-WIDTH-CHARS', 'FULL-WIDTH'))
+def t_FULL_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('FULL-WIDTH-PIXELS', 'FULL-WIDTH-P'))
+def t_FULL_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-BLUE-VALUE', 'GET-BLUE'))
+def t_GET_BLUE_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-GREEN-VALUE', 'GET-GREEN'))
+def t_GET_GREEN_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-RED-VALUE', 'GET-RED'))
+def t_GET_RED_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-SELECTED-WIDGET', 'GET-SELECTED'))
+def t_GET_SELECTED_WIDGET(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-TEXT-HEIGHT-CHARS', 'GET-TEXT-HEIGHT'))
+def t_GET_TEXT_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-TEXT-HEIGHT-PIXELS', 'GET-TEXT-HEIGHT-P'))
+def t_GET_TEXT_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-TEXT-WIDTH-CHARS', 'GET-TEXT-WIDTH'))
+def t_GET_TEXT_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GET-TEXT-WIDTH-PIXELS', 'GET-TEXT-WIDTH-P'))
+def t_GET_TEXT_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GRID-FACTOR-HORIZONTAL', 'GRID-FACTOR-H'))
+def t_GRID_FACTOR_HORIZONTAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GRID-FACTOR-VERTICAL', 'GRID-FACTOR-V'))
+def t_GRID_FACTOR_VERTICAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GRID-UNIT-HEIGHT-CHARS', 'GRID-UNIT-HEIGHT'))
+def t_GRID_UNIT_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GRID-UNIT-HEIGHT-PIXELS', 'GRID-UNIT-HEIGHT-P'))
+def t_GRID_UNIT_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GRID-UNIT-WIDTH-CHARS', 'GRID-UNIT-WIDTH'))
+def t_GRID_UNIT_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('GRID-UNIT-WIDTH-PIXELS', 'GRID-UNIT-WIDTH-P'))
+def t_GRID_UNIT_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('HEIGHT-CHARS', 'HEIGHT'))
+def t_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('HEIGHT-PIXELS', 'HEIGHT-P'))
+def t_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('HORIZONTAL', 'HORI'))
+def t_HORIZONTAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('IMAGE-SIZE-CHARS', 'IMAGE-SIZE-C'))
+def t_IMAGE_SIZE_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('IMAGE-SIZE-PIXELS', 'IMAGE-SIZE-P'))
+def t_IMAGE_SIZE_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INFORMATION', 'INFO'))
+def t_INFORMATION(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INHERIT-BGCOLOR', 'INHERIT-BGC'))
+def t_INHERIT_BGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INHERIT-FGCOLOR', 'INHERIT-FGC'))
+def t_INHERIT_FGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INITIAL', 'INIT'))
+def t_INITIAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INSERT-BACKTAB', 'INSERT-B'))
+def t_INSERT_BACKTAB(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INSERT-TAB', 'INSERT-T'))
+def t_INSERT_TAB(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('INTEGER', 'INT'))
+def t_INTEGER(t):
+    t.tag='blue'
+    return t
+
+@TOKEN(build_regex('IS-CLASS', 'IS-CLAS'))
+def t_IS_CLASS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('IS-PARTITIONED', 'IS-PARTITIONE'))
+def t_IS_PARTITIONED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('KEEP-FRAME-Z-ORDER', 'KEEP-FRAME-Z'))
+def t_KEEP_FRAME_Z_ORDER(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LABEL-BGCOLOR', 'LABEL-BGC'))
+def t_LABEL_BGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LABEL-DCOLOR', 'LABEL-DC'))
+def t_LABEL_DCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LABEL-FGCOLOR', 'LABEL-FGC'))
+def t_LABEL_FGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LABEL-PFCOLOR', 'LABEL-PFC'))
+def t_LABEL_PFCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LANGUAGES', 'LANGUAGE'))
+def t_LANGUAGES(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LAST-PROCEDURE', 'LAST-PROCE'))
+def t_LAST_PROCEDURE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LAST-TAB-ITEM', 'LAST-TAB-I'))
+def t_LAST_TAB_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LEFT-ALIGNED', 'LEFT-ALIGN'))
+def t_LEFT_ALIGNED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('LOAD-MOUSE-POINTER', 'LOAD-MOUSE-P'))
+def t_LOAD_MOUSE_POINTER(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MARGIN-HEIGHT-CHARS', 'MARGIN-HEIGHT'))
+def t_MARGIN_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MARGIN-HEIGHT-PIXELS', 'MARGIN-HEIGHT-P'))
+def t_MARGIN_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MARGIN-WIDTH-CHARS', 'MARGIN-WIDTH'))
+def t_MARGIN_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MARGIN-WIDTH-PIXELS', 'MARGIN-WIDTH-P'))
+def t_MARGIN_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MAX-HEIGHT-CHARS', 'MAX-HEIGHT-C'))
+def t_MAX_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MAX-HEIGHT-PIXELS', 'MAX-HEIGHT-P'))
+def t_MAX_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MAX-VALUE', 'MAX-VAL'))
+def t_MAX_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MAX-WIDTH-CHARS', 'MAX-WIDTH'))
+def t_MAX_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MAX-WIDTH-PIXELS', 'MAX-WIDTH-P'))
+def t_MAX_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MAXIMUM', 'MAX'))
+def t_MAXIMUM(t):
+    t.tag='orange'
+    return t
+
+@TOKEN(build_regex('MENU-KEY', 'MENU-K'))
+def t_MENU_KEY(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MENU-MOUSE', 'MENU-M'))
+def t_MENU_MOUSE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-COLUMN-WIDTH-CHARS', 'MIN-COLUMN-WIDTH-C'))
+def t_MIN_COLUMN_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-COLUMN-WIDTH-PIXELS', 'MIN-COLUMN-WIDTH-P'))
+def t_MIN_COLUMN_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-HEIGHT-CHARS', 'MIN-HEIGHT'))
+def t_MIN_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-HEIGHT-PIXELS', 'MIN-HEIGHT-P'))
+def t_MIN_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-VALUE', 'MIN-VAL'))
+def t_MIN_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-WIDTH-CHARS', 'MIN-WIDTH'))
+def t_MIN_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MIN-WIDTH-PIXELS', 'MIN-WIDTH-P'))
+def t_MIN_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MINIMUM', 'MIN'))
+def t_MINIMUM(t):
+    t.tag='orange'
+    return t
+
+@TOKEN(build_regex('MODULO', 'MOD'))
+def t_MODULO(t):
+    t.tag='orange'
+    return t
+
+@TOKEN(build_regex('MOUSE-POINTER', 'MOUSE-P'))
+def t_MOUSE_POINTER(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MOVE-AFTER-TAB-ITEM', 'MOVE-AFTER'))
+def t_MOVE_AFTER_TAB_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MOVE-BEFORE-TAB-ITEM', 'MOVE-BEFOR'))
+def t_MOVE_BEFORE_TAB_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MOVE-COLUMN', 'MOVE-COL'))
+def t_MOVE_COLUMN(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MOVE-TO-BOTTOM', 'MOVE-TO-B'))
+def t_MOVE_TO_BOTTOM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('MOVE-TO-TOP', 'MOVE-TO-T'))
+def t_MOVE_TO_TOP(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NEXT-TAB-ITEM', 'NEXT-TAB-I'))
+def t_NEXT_TAB_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NO-INHERIT-BGCOLOR', 'NO-INHERIT-BGC'))
+def t_NO_INHERIT_BGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NO-INHERIT-FGCOLOR', 'NO-INHERIT-FGC'))
+def t_NO_INHERIT_FGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NO-UNDERLINE', 'NO-UND'))
+def t_NO_UNDERLINE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NUM-BUTTONS', 'NUM-BUT'))
+def t_NUM_BUTTONS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NUM-COLUMNS', 'NUM-COL'))
+def t_NUM_COLUMNS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NUM-LOCKED-COLUMNS', 'NUM-LOCKED-COL'))
+def t_NUM_LOCKED_COLUMNS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NUM-SELECTED-WIDGETS', 'NUM-SELECTED'))
+def t_NUM_SELECTED_WIDGETS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('NUMERIC-FORMAT', 'NUMERIC-F'))
+def t_NUMERIC_FORMAT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('ON-FRAME-BORDER', 'ON-FRAME'))
+def t_ON_FRAME_BORDER(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('OS-DRIVES', 'OS-DRIVE'))
+def t_OS_DRIVES(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PAGE-WIDTH', 'PAGE-WID'))
+def t_PAGE_WIDTH(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PBE-HASH-ALGORITHM', 'PBE-HASH-ALG'))
+def t_PBE_HASH_ALGORITHM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PFCOLOR', 'PFC'))
+def t_PFCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PIXELS-PER-COLUMN', 'PIXELS-PER-COL'))
+def t_PIXELS_PER_COLUMN(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('POPUP-MENU', 'POPUP-M'))
+def t_POPUP_MENU(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('POPUP-ONLY', 'POPUP-O'))
+def t_POPUP_ONLY(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PRESELECT', 'PRESEL'))
+def t_PRESELECT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PREV-TAB-ITEM', 'PREV-TAB-I'))
+def t_PREV_TAB_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PRIVATE-DATA', 'PRIVATE-D'))
+def t_PRIVATE_DATA(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('PROCEDURE', 'PROCE'))
+def t_PROCEDURE(t):
+    t.tag='magenta'
+    return t
+
+@TOKEN(build_regex('PROGRESS-SOURCE', 'PROGRESS-S'))
+def t_PROGRESS_SOURCE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('RESIZABLE', 'RESIZA'))
+def t_RESIZABLE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('RETURN-INSERTED', 'RETURN-INS'))
+def t_RETURN_INSERTED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('RETURN-TO-START-DIR', 'RETURN-TO-START-DI'))
+def t_RETURN_TO_START_DIR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('RETURN-VALUE', 'RETURN-VAL'))
+def t_RETURN_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('RIGHT-ALIGNED', 'RETURN-ALIGN'))
+def t_RIGHT_ALIGNED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('ROW-HEIGHT-CHARS', 'HEIGHT'))
+def t_ROW_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('ROW-HEIGHT-PIXELS', 'HEIGHT-P'))
+def t_ROW_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SCREEN-VALUE', 'SCREEN-VAL'))
+def t_SCREEN_VALUE(t):
+    t.tag='blue'
+    return t
+
+@TOKEN(build_regex('SCROLL-TO-ITEM', 'SCROLL-TO-I'))
+def t_SCROLL_TO_ITEM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SCROLLBAR-HORIZONTAL', 'SCROLLBAR-H'))
+def t_SCROLLBAR_HORIZONTAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SCROLLBAR-VERTICAL', 'SCROLLBAR-V'))
+def t_SCROLLBAR_VERTICAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SCROLLED-ROW-POSITION', 'SCROLLED-ROW-POS'))
+def t_SCROLLED_ROW_POSITION(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SET-BLUE-VALUE', 'SET-BLUE'))
+def t_SET_BLUE_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SET-GREEN-VALUE', 'SET-GREEN'))
+def t_SET_GREEN_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SET-RED-VALUE', 'SET-RED'))
+def t_SET_RED_VALUE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SIDE-LABEL-HANDLE', 'SIDE-LABEL-H'))
+def t_SIDE_LABEL_HANDLE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SIDE-LABELS', 'SIDE-LAB'))
+def t_SIDE_LABELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SIZE-CHARS', 'SIZE-C'))
+def t_SIZE_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SIZE-PIXELS', 'SIZE-P'))
+def t_SIZE_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('STOPPED', 'STOPPE'))
+def t_STOPPED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('STORED-PROCEDURE', 'STORED-PROC'))
+def t_STORED_PROCEDURE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SUB-AVERAGE', 'SUB-AVE'))
+def t_SUB_AVERAGE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SUB-MAXIMUM', 'SUM-MAX'))
+def t_SUB_MAXIMUM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SUB-MENU', 'SUB-'))
+def t_SUB_MENU(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SUB-MINIMUM', 'SUB-MIN'))
+def t_SUB_MINIMUM(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SUBSTITUTE', 'SUBST'))
+def t_SUBSTITUTE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SUBSTRING', 'SUBSTR'))
+def t_SUBSTRING(t):
+    t.tag='orange'
+    return t
+
+@TOKEN(build_regex('SUPPRESS-WARNINGS', 'SUPPRESS-W'))
+def t_SUPPRESS_WARNINGS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('SYSTEM-ALERT-BOXES', 'SYSTEM-ALERT'))
+def t_SYSTEM_ALERT_BOXES(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('TEMP-DIRECTORY', 'TEMP-DIR'))
+def t_TEMP_DIRECTORY(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('TITLE-BGCOLOR', 'TITLE-BGC'))
+def t_TITLE_BGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('TITLE-DCOLOR', 'TITLE-DC'))
+def t_TITLE_DCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('TITLE-FGCOLOR', 'TITLE-FGC'))
+def t_TITLE_FGCOLOR(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('TITLE-FONT', 'TITLE-FO'))
+def t_TITLE_FONT(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('TRUNCATE', 'TRUNC'))
+def t_TRUNCATE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('UNBUFFERED', 'UNBUFF'))
+def t_UNBUFFERED(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('VARIABLE', 'VAR'))
+def t_VARIABLE(t):
+    t.tag='blue'
+    return t
+
+@TOKEN(build_regex('VERTICAL', 'VERT'))
+def t_VERTICAL(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('VIRTUAL-HEIGHT-CHARS', 'VIRTUAL-HEIGHT'))
+def t_VIRTUAL_HEIGHT_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('VIRTUAL-HEIGHT-PIXELS', 'VIRTUAL-HEIGHT-P'))
+def t_VIRTUAL_HEIGHT_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('VIRTUAL-WIDTH-CHARS', 'VIRTUAL-WIDTH'))
+def t_VIRTUAL_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('VIRTUAL-WIDTH-PIXELS', 'VIRTUAL-WIDTH-P'))
+def t_VIRTUAL_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('WIDGET-ENTER', 'WIDGET-E'))
+def t_WIDGET_ENTER(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('WIDGET-LEAVE', 'WIDGET-L'))
+def t_WIDGET_LEAVE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('WIDTH-CHARS', 'WIDTH'))
+def t_WIDTH_CHARS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('WIDTH-PIXELS', 'WIDTH-P'))
+def t_WIDTH_PIXELS(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('WINDOW-STATE', 'WINDOW-STA'))
+def t_WINDOW_STATE(t):
+    t.tag='cyan'
+    return t
+
+@TOKEN(build_regex('send-sql-statement', 'send-sql'))
+def t_send_sql_statement(t):
+    t.tag='cyan'
+    return t
+
 
 
 # Regular expression rules for simple tokens
-t_PLUS = r'\+'
-t_MINUS = r'\-'
+t_GTEQ = r'>=|\bGE\b'
+t_LTEQ = r'<=|\bLE\b'
+t_GT = r'>|\bGT\b'
+t_LT = r'<|\bLT\b'
+t_EQUALS = r'=|EQ'
+t_PLUS   = r'\+'
+t_MINUS  = r'\-'
 t_MULTIPLY = r'\*'
 t_DIVIDE = r'\/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-t_EQUALS = r'='
 t_PERIOD = r'\.'
-t_COMMA = r'\,'
-t_COLON = r'\:'
+t_COMMA  = r'\,'
+t_COLON  = r'\:'
 t_SEMICOLON = r'\;'
 t_ASSIGN = r'\:='
-t_DEFINE = r'\bDEF|DEFINE\b'
-t_NOT = r'\bNOT\b'
-t_AND = r'\bAND\b'
-t_OR = r'\bOR\b'
-t_TRUE = r'\bTRUE\b'
-t_FALSE = r'\bFALSE\b'
-t_NULL = r'\bNULL\b'
+t_UNKNOWN = r'\?'
+t_TILDE = r'~'
+
+t_ignore = ' \t'
 
 
-
-
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
 
 
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value,'ID')    # Check for reserved words
+    r'[a-zA-Z_][a-zA-Z_\-\.0-9]*[a-zA-Z_\-0-9]'
+    result = reserved.get(t.value.upper(),'ID')    # Check for reserved words
+    if isinstance(result, tuple):
+        t.type = result[0]
+        t.tag  = result[1]
+    # All non progress words
+    elif result == 'ID':
+        t.result = result
+        t.tag = 'grey'
+    else:
+        t.type = result
+        t.tag = 'cyan'
     return t
-
-
-
-
-t_ignore = ' \t'
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
-
-
-
-
-# TOKEN_TYPES = [
-#     # Keywords
-#     ('DO', r'\bDO\b'),
-#     ('END', r'\bEND\b'),
-#     ('IF', r'\bIF\b'),
-#     ('THEN', r'\bTHEN\b'),
-#     ('ELSE', r'\bELSE\b'),
-#     ('REPEAT', r'\bREPEAT\b'),
-#     ('UNTIL', r'\bUNTIL\b'),
-#     ('FOR', r'\bFOR\b'),
-#     ('TO', r'\bTO\b'),
-
-#     # Operators
-#     ('EQUALS', r'='),
-#     ('PLUS', r'\+'),
-#     ('MINUS', r'\-'),
-#     ('MULTIPLY', r'\*'),
-#     ('DIVIDE', r'\/'),
-
-#     # Comparison operators
-#     ('EQ', r'\bEQ\b'),
-#     ('NE', r'\bNE\b'),
-#     ('LT', r'\bLT\b'),
-#     ('LE', r'\bLE\b'),
-#     ('GT', r'\bGT\b'),
-#     ('GE', r'\bGE\b'),
-
-#     # Literals
-#     ('NUMBER', r'\d+(\.\d*)?'),  # Matches integers and floating-point numbers
-#     ('STRING', r'\"[^"]*\"'),    # Matches string literals enclosed in double quotes
-#     ('IDENTIFIER', r'[a-zA-Z_][a-zA-Z0-9_]*'),  # Matches identifiers (variable names, etc.)
-
-#     # Delimiters
-#     ('LPAREN', r'\('),
-#     ('RPAREN', r'\)'),
-#     ('PERIOD', r'\.'),
-
-#     # Whitespace
-#     ('WHITESPACE', r'\s+'),
-# ]

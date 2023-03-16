@@ -56,7 +56,7 @@ class LexError(Exception):
 # Token class.  This class is used to represent the tokens produced.
 class LexToken(object):
     def __repr__(self):
-        return f'LexToken({self.type},{self.value!r},{self.lineno},{self.lexpos})'
+        return f'LexToken({self.type},{self.value!r},{self.lineno},{self.lexpos},{self.colno},{self.tag})'
 
 # This object is a stand-in for a logging object created by the
 # logging module.
@@ -118,6 +118,7 @@ class Lexer:
         self.lexliterals = ''         # Literal characters that can be passed through
         self.lexmodule = None         # Module
         self.lineno = 1               # Current line number
+        self.colno  = 0               # Current col number for tk use *Notebad*
 
     def clone(self, object=None):
         c = copy.copy(self)
@@ -204,12 +205,14 @@ class Lexer:
         lexpos    = self.lexpos
         lexlen    = self.lexlen
         lexignore = self.lexignore
-        lexdata   = self.lexdata
+        lexdata   = self.lexdata  
+        colno     = self.colno
 
         while lexpos < lexlen:
             # This code provides some short-circuit code for whitespace, tabs, and other ignored characters
             if lexdata[lexpos] in lexignore:
                 lexpos += 1
+                colno  += 1  # *Notebad*
                 continue
 
             # Look for a regular expression match
@@ -223,6 +226,8 @@ class Lexer:
                 tok.value = m.group()
                 tok.lineno = self.lineno
                 tok.lexpos = lexpos
+                tok.colno  = colno      # *Notebad*
+                tok.tag    = None       # Syntax highlighting tag
 
                 i = m.lastindex
                 func, tok.type = lexindexfunc[i]
@@ -230,19 +235,29 @@ class Lexer:
                 if not func:
                     # If no token type was set, it's an ignored token
                     if tok.type:
-                        self.lexpos = m.end()
+                        before = self.lexpos 
+                        diff = m.end() - before
+                        self.lexpos += diff
+                        self.colno += diff
                         return tok
                     else:
-                        lexpos = m.end()
+                        before = lexpos 
+                        diff = m.end() - before
+                        lexpos += diff
+                        colno += diff
                         break
 
-                lexpos = m.end()
+                before = lexpos 
+                diff = m.end() - before
+                lexpos += diff
+                colno += diff
 
                 # If token is processed by a function, call it
 
                 tok.lexer = self      # Set additional attributes useful in token rules
                 self.lexmatch = m
                 self.lexpos = lexpos
+                self.colno  = colno
                 newtok = func(tok)
                 del tok.lexer
                 del self.lexmatch
@@ -250,6 +265,7 @@ class Lexer:
                 # Every function must return a token, if nothing, we just move to next token
                 if not newtok:
                     lexpos    = self.lexpos         # This is here in case user has updated lexpos.
+                    colno     = self.colno
                     lexignore = self.lexignore      # This is here in case there was a state change
                     break
                 return newtok
@@ -259,9 +275,11 @@ class Lexer:
                     tok = LexToken()
                     tok.value = lexdata[lexpos]
                     tok.lineno = self.lineno
+                    tok.colno  = colno # *Notebad*
                     tok.type = tok.value
                     tok.lexpos = lexpos
                     self.lexpos = lexpos + 1
+                    self.colno  = colno + 1
                     return tok
 
                 # No match. Call t_error() if defined.
@@ -269,21 +287,25 @@ class Lexer:
                     tok = LexToken()
                     tok.value = self.lexdata[lexpos:]
                     tok.lineno = self.lineno
+                    tok.colno  = colno # *Notebad*
                     tok.type = 'error'
                     tok.lexer = self
                     tok.lexpos = lexpos
                     self.lexpos = lexpos
+                    self.colno  = colno
                     newtok = self.lexerrorf(tok)
                     if lexpos == self.lexpos:
                         # Error method didn't change text position at all. This is an error.
                         raise LexError(f"Scanning error. Illegal character {lexdata[lexpos]!r}",
                                        lexdata[lexpos:])
                     lexpos = self.lexpos
+                    colno  = self.colno
                     if not newtok:
                         continue
                     return newtok
 
                 self.lexpos = lexpos
+                self.colno  = colno
                 raise LexError(f"Illegal character {lexdata[lexpos]!r} at index {lexpos}",
                                lexdata[lexpos:])
 
@@ -292,12 +314,16 @@ class Lexer:
             tok.type = 'eof'
             tok.value = ''
             tok.lineno = self.lineno
+            tok.colno  = colno
             tok.lexpos = lexpos
             tok.lexer = self
             self.lexpos = lexpos
+            self.colno  = colno
+
             newtok = self.lexeoff(tok)
             return newtok
 
+        self.colno  = colno + 1
         self.lexpos = lexpos + 1
         if self.lexdata is None:
             raise RuntimeError('No input string given with input()')

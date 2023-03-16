@@ -28,16 +28,18 @@ class Tabs(Notebook):
         ''' Opens a new tab with the filename as the tab name.
         If no filename is given, the tab will be named the default name.
         '''
-        textbox = Textbox(self)
+        textbox = Textbox(self)    
+        self.add(textbox.frame, text=textbox.file_name)
+        self.move_to_tab()
+        textbox.tk_name = self.select()
+        
         if file_name:
             textbox.file_name = file_name
         else:
             # If theres no name its a new file to start the undo stack empty
             # without this the first undo wont be a blank document. 
-            textbox.stackify()      
-        self.add(textbox.frame, text=textbox.file_name)
-        self.move_to_tab()
-        textbox.tk_name = self.select()
+            textbox.stackify()  
+        
         
     ## Handle tab closing ##
     def on_close_press(self, event):

@@ -8,6 +8,8 @@ from model import LanguageModel
 from view  import NoteView
 from views.textbox import Textbox
 
+import threading
+
 class NoteController:
     ''' The controller is the glue between the model and the view. It is the
         controller that binds the view to the model. The controller is also
@@ -19,6 +21,10 @@ class NoteController:
         self.clipboard = ''         # Clipboard is an application feature and thus lives here
         self._bind_keys()
         self._app_protocols()
+
+        if cf.preload_file:
+            self.__write_file_to_textbox(self.view.textbox, cf.preload_file)
+
 
     def _app_protocols(self) -> None:
         ''' Application protocols deal with system commands such as closing the window. '''
@@ -62,24 +68,22 @@ class NoteController:
             isn't, that should get added and this note removed. '''
         full_path = self.view.open_file_dialogue()
         if full_path:
-            with open(full_path, "r") as file:
-                textbox = self.view.textbox         # Get the current textbox
-                if not textbox.is_blank:            # Don't open a new tab if the current one is blank
-                    self.view.tabs.new_tab(file_name=full_path)
-                    self.view.tabs.move_to_tab()
-                    textbox = self.view.textbox     # Grab the newly minted textbox object 
-                path_parts = self._parts_from_file_path(full_path)
-                textbox.set_meta(
-                    tk_name=self.view.tabs.select(),
-                    full_path=full_path,
-                    file_path=path_parts['path'], 
-                    file_name=path_parts['file'], 
-                    )
-                textbox.insert('end', file.read())  # Insert the file contents into the textbox
-                textbox.changed_since_saved = False # Reset the changed flag since we just opened the file
-                textbox.stackify()                  # Add the file contents to the undo stack
-                self.view.update_title()
-                
+            textbox = self.view.textbox         # Get the current textbox
+            path_parts = self._parts_from_file_path(full_path)
+            if not textbox.is_blank:            # Don't open a new tab if the current one is blank
+                self.view.tabs.new_tab(file_name=path_parts['file'])
+                self.view.tabs.move_to_tab()
+                textbox = self.view.textbox     # Grab the newly minted textbox object 
+
+            textbox.set_meta(
+                tk_name=self.view.tabs.select(),
+                full_path=full_path,
+                file_path=path_parts['path'], 
+                file_name=path_parts['file'], 
+                )
+            self.__write_file_to_textbox(textbox, full_path)
+            self.view.update_title()
+
     def save_file(self) -> None:
         ''' Saves current textbox to disk. If not written to disk before,
             save_as_file is called to let the user name it. Also thinking 
@@ -88,7 +92,7 @@ class NoteController:
         if textbox.file_name == cf.new_file_name:
             self.save_as_file(textbox)
         else:
-            self._write_file_to_disk(textbox.full_path, textbox)
+            self._write_textbox_to_file(textbox.full_path, textbox)
         
     def save_as_file(self, textbox:Textbox=None) -> None:
         ''' Saves textbox to disk. If no textbox is given, the current tab is used.'''
@@ -99,9 +103,27 @@ class NoteController:
             textbox = self.view.textbox
         full_path = self.view.save_file_dialogue(file_name=textbox.file_name)
         if full_path:
-            self._write_file_to_disk(full_path, textbox)
+            self._write_textbox_to_file(full_path, textbox)
 
-    def _write_file_to_disk(self, full_path:str, textbox:Textbox) -> None:
+    def _parts_from_file_path(self, full_path:str) -> dict:
+        ''' Take the full path name and return a dictionary with the path and file name.
+            `{ 'path': ..., 'file': ... }`
+        '''
+        if os.name == 'nt':         # Windows
+            parts = full_path.split('\\')
+            return {'path': '\\'.join(parts[:-1]), 'file': parts[-1]}
+        else:                       # Linux/Mac
+            parts = full_path.split('/')
+            return {'path': '/'.join(parts[:-1]), 'file': parts[-1]}
+
+    def __write_file_to_textbox(self, textbox:Textbox, full_path:str) -> None:
+        ''' Writes the contents of a file to the textbox '''
+        with open(full_path, "r") as file:
+            textbox.insert('end', file.read())  # Insert the file contents into the textbox
+            textbox.changed_since_saved = False # Reset the changed flag since we just opened the file
+            textbox.stackify()                  # Add the file contents to the undo stack
+
+    def _write_textbox_to_file(self, full_path:str, textbox:Textbox) -> None:
         ''' Private method to write file to disk. Needs encoding option. '''
         with open(full_path, "w") as file:
             txt = textbox.get(1.0, 'end')
@@ -115,20 +137,9 @@ class NoteController:
                     file_path=path_parts['path'], 
                     file_name=path_parts['file'], )
         textbox.changed_since_saved = False
-        self.view.tabs.set_properties(textbox.tab_name, text=textbox.file_name)
+        self.view.tabs.set_properties(textbox.tk_name, text=textbox.file_name)
         # Update the window title
         self.app.title(f"{cf.app_title} - {textbox.file_name}")
-
-    def _parts_from_file_path(self, full_path:str) -> dict:
-        ''' Take the full path name and return a dictionary with the path and file name.
-            `{ 'path': ..., 'file': ... }`
-        '''
-        if os.name == 'nt':         # Windows
-            parts = full_path.split('\\')
-            return {'path': '\\'.join(parts[:-1]), 'file': parts[-1]}
-        else:                       # Linux/Mac
-            parts = full_path.split('/')
-            return {'path': '/'.join(parts[:-1]), 'file': parts[-1]}
 
         
     ## Clipboard management ##
@@ -153,6 +164,26 @@ class NoteController:
         ''' Hand me that paper bag '''
         textbox = self.view.tabs.textbox
         textbox.insert('insert', self.clipboard)
+
+    ###            ###
+    # Language tools #
+    ###            ###
+
+    def capitalize_syntax(self) -> None:
+        ''' Capitalizes syntax in current textbox '''
+        textbox = self.view.textbox
+        results = self.model.capitalize_syntax(textbox.get_all())
+
+        textbox.clear_all()
+        prev_ln = 1
+        for txt, index, lineno, tag in results:
+            if lineno != prev_ln:
+                textbox.insert('insert', '\n')
+                prev_ln = lineno
+            textbox.insert(index,txt+' ', tag)
+        self.app.update()
+        
+
 
     ###          ###
     # Nifty things #
@@ -226,6 +257,6 @@ class NoteController:
         self.app.bind("<Alt-e>", lambda event: self.eval_selection())
 
         # DEVELOPMENT ONLY
-        self.app.bind("<Control-p>", lambda event: self.model.decompose(self.view.textbox.get_all()))
+        self.app.bind("<Control-p>", lambda event: threading.Thread(target=self.capitalize_syntax).start())
 
 

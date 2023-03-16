@@ -4,7 +4,6 @@ from tkinter.ttk import Notebook, Scrollbar, Frame
 
 from conf import cf
 from .colors import Themes
-from .syntax import SyntaxMarker
 
 class Textbox(Text):
     ''' This is where the magic happens. This is the text area where the user 
@@ -49,8 +48,9 @@ class Textbox(Text):
 
         # Syntax highlighting. Until this is a little more stable I don't want 
         # it to be the default
-        if cf.enable_syntax_highlighting:
-            self._setup_syntax_highlighting()
+        if cf.enable_syntax_highlighting: 
+            ...
+            # self._setup_syntax_highlighting()
 
     ###              ###
     # Class properties #
@@ -77,6 +77,12 @@ class Textbox(Text):
     ###                        ###
     # Underlying file operations #
     ###                        ###
+
+    def set_full_path(self, full_path:str) -> None:
+        ''' Sets the path of the file and splits the path apart for different uses '''
+        full_path = full_path.split('/')
+        file_name = full_path.pop()
+        file_path = ''
 
     def set_meta(self, file_path:str=None, file_name:str=None, full_path:str=None, tk_name:str=None) -> None:
         ''' Set various pieces of meta data. The tk name is the name of the tab in 
@@ -187,8 +193,9 @@ class Textbox(Text):
         # This is insane. The syntax highlighting goes over the whole document 
         # every keystroke
         if cf.enable_syntax_highlighting:
-            self.syntax.tagHighlight()
-            self.syntax.scan()
+            ...
+            # self.syntax.tagHighlight()
+            # self.syntax.scan()
 
     def _bind_keys(self) -> None:
         ''' Some keys need specific bindings to behave how you expect in a text editor '''
@@ -315,14 +322,14 @@ class Textbox(Text):
 
 
 
-    def _setup_syntax_highlighting(self) -> None:
-        ''' This creates a proxy method for the text widget that will 
-            intercept any events and call the syntax highlighter. 
-            I would like to get rid of the proxy because it does not play well 
-            with try catch blocks. Something will get caught in the proxy and
-            fail in the original. 
-        '''
-        self.syntax = SyntaxMarker(self)
+    # def _setup_syntax_highlighting(self) -> None:
+    #     ''' This creates a proxy method for the text widget that will 
+    #         intercept any events and call the syntax highlighter. 
+    #         I would like to get rid of the proxy because it does not play well 
+    #         with try catch blocks. Something will get caught in the proxy and
+    #         fail in the original. 
+    #     '''
+    #     self.syntax = SyntaxMarker(self)
 
 
 

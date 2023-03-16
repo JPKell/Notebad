@@ -34,6 +34,8 @@ class Configuration:
         self.calc_bg    = '#111'
         self.calc_outer_pad = 3
 
+        # Developer settings. Don't change these here. If you want developer functions, use dev mode. 
+        self.preload_file = False
 
         if dev_mode:
             self._dev_mode()
@@ -41,10 +43,11 @@ class Configuration:
     def _dev_mode(self):
         ''' Development related overrides '''
         self.app_title += ' dev'
-        self.default_theme = 'dark'
+        # self.default_theme = 'dark'
         self.geometry = '800x600+3400+1'
         self.hardcore_mode = True
         self.enable_syntax_highlighting = True
+        self.preload_file = '/home/jpk/gits/Notebad/test.p'
 
 
 cf = Configuration()
