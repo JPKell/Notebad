@@ -1,21 +1,30 @@
 import re
 
-float_pattern = r'\b-?\d*\.\d+\b'
-float_regex = re.compile(float_pattern)
+pattern = r"""(?:(?:'|")?F[1-9](?:'|")?)|(?:(?:'|")?F1[0-2](?:'|")?)"""
+text = """
+ON "F3" 
+OF 'f12'
+ON F3
 
-# Test with example strings
-test_strings = [
-    "123.45",
-    "-123.45",
-    ".123",
-    "-.123",
-    "123",
-    "abc",
-]
 
-for string in test_strings:
-    match = float_regex.match(string)
-    if match:
-        print(f"{string}: Valid float")
-    else:
-        print(f"{string}: Invalid float")
+/* @(#) SchRegtot.p 1.90 05/10/17 @(#) */ 
+/*---------------------------------------------------------------------------- 
+  File: 
+    SchRegtot.p 
+
+  Description: 
+    <description>
+
+  Syntax: 
+    RUN SchRegtot.p 
+      (input-output t-deposit, p-orderid, input-output t-pay-enter, 
+       input-output t-dt-enter, t-paid, r-ins, 
+       input f9active, tSchCostShare, tSchCostShareValue, 
+       output discount, output is_charge, output discreason, 
+       output t-disc-type,   /* send with regtot.p */ 
+       """
+
+matches = list(re.finditer(pattern, text))
+
+for match in matches:
+    print(match.group())

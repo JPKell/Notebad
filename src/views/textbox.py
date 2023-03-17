@@ -11,6 +11,9 @@ class Textbox(Text):
         and scrollbars. Syntax highlighting is a beast of it's own and is 
         separated into it's own module. '''
     def __init__(self, tabs:Notebook) -> None:
+        # Line number updates is a whole thing. It uses a proxy and if we are 
+        # doing mass updates we want to be able to turn that off. 
+        self.disable_line_no_update = False
         # tabs is the parent widget
         self.tabs = tabs
         self.font = tabs.view.ui.font
@@ -99,6 +102,48 @@ class Textbox(Text):
     def get_current_line_text(self) -> str:
         ''' Return the text of the current line including the newline character '''
         return self.get('insert linestart', 'insert lineend')
+    
+    def get_previous_line(self) -> str:
+        ''' Return the text of the previous line including the newline character '''
+        return self.get('insert -1l linestart', 'insert -1l lineend')
+    
+    def get_trailing_word_and_index(self) -> tuple:
+        ''' Return the word the cursor is currently on or just ahead of. 
+            This is great for syntax highlighting since we can return the
+            word before a space and handle it. 
+
+            This can get language specific because ABL can have a hypen in the word or 
+            a number of other things.
+        '''
+        cur_index = self.index('insert')
+        # If we are at the start of a line dont try to get the word. 
+        if cur_index[-2:] == '.1':
+            return '', (cur_index, cur_index)
+        
+        offset = 1
+        word = self.get(f'insert -{offset}c wordstart', 'insert')
+
+        # If the word is a space we are past the end of the word and need to move
+        # back one more character.
+        if word == ' ':
+            offset = 2
+            word = self.get(f'insert -{offset}c wordstart', 'insert')
+
+        if word == ' ': # Double space, lets assume we dont want that word
+            return '', (cur_index, cur_index)
+
+        # There is an annoying trait of tkinter where if you are at the start 
+        # of the line and the line above is empty, the index will be at the 
+        # start of the line above. So we need to check for this. 
+        # Perhaps there is a better way. 
+        idx = self.index(f'insert -{offset}c wordstart')
+        idx = idx.split('.')
+        cur_index = cur_index.split('.')
+        start_index = f"{cur_index[0]}.{idx[1]}"
+        
+        # The offset here is to try to make up for 
+        index = (start_index, self.index(f'insert -{offset - 1}c'))  # Might need to adjust the end index. 
+        return word, index
 
     def get_selection(self) -> str:
         ''' Return the text selected in the textbox '''
@@ -118,6 +163,10 @@ class Textbox(Text):
     def clear_all(self):
         ''' Clears all text in the textbox '''
         self.delete("1.0", "end")
+
+    def delete_cur_line(self) -> None:
+        ''' Delete the current line '''
+        self.delete('insert linestart', 'insert lineend') 
 
     def get_all(self) -> str:
         ''' Returns all text in the textbox '''
@@ -189,13 +238,7 @@ class Textbox(Text):
         # Pushes the current state of the document onto the stack for undo
         if event.char in [' ', '\t', '\n']:
             self.stackify()
-        
-        # This is insane. The syntax highlighting goes over the whole document 
-        # every keystroke
-        if cf.enable_syntax_highlighting:
-            ...
-            # self.syntax.tagHighlight()
-            # self.syntax.scan()
+
 
     def _bind_keys(self) -> None:
         ''' Some keys need specific bindings to behave how you expect in a text editor '''
@@ -268,12 +311,21 @@ class Textbox(Text):
     def _proxy(self, *args):
         # let the actual widget perform the requested action
         cmd = (self._orig,) + args
+        
+        # Would be nice to get rid of this extra try catch. Would that speed things up? 
         try:
             result = self.tk.call(cmd)
         except Exception as e:
             print(args)
             print(e)
             result = ''
+
+        # If we are doing thousands of tasks like reformatting a whole document
+        # that will add thousands of inserts and that will cause this to fire. 
+        # That means the main event loop will get hammered and the app will block. 
+        if self.disable_line_no_update == True:
+            return result
+        
         # generate an event if something was added or deleted,
         # or the cursor position changed
         if (args[0] in ("insert", "replace", "delete") or 

@@ -39,10 +39,12 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
     t.lexer.colno = 0
+    t.tag = 'nl'
+    return t
 
+# Seems excessive, but it's what's needed. 
 def t_FUNCTION_KEY(t):
-    r"""\b(?:'|")?([fF]\d{1,2})(?:'|")?\b"""
-    t.value = t.value.replace("'",'').replace('"','') 
+    r"""(?:'([fF]1[0-2]|[fF][1-9])'|"([fF]1[0-2]|[fF][1-9])"|\b([fF]1[0-2]|[fF][1-9])\b)"""
     t.tag = 'red'  
     return t
 
@@ -51,9 +53,17 @@ def t_SNG_COMMENT(t):
     t.tag='green'
     return t
 
+# r'/\*[\s\S]*?\*/'     # Zero nested
+# r'/\*(?:(?:(?!\*/)[\s\S])*?(?:/\*(?:(?!\*/)[\s\S])*?(?:/\*(?:(?!\*/)[\s\S])*?\*/(?:(?!\*/)[\s\S])*?)*\*/(?:(?!\*/)[\s\S])*?)*\*/' # Triple nested
 def t_MULTI_COMMENT(t):
-    r'/\*[\s\S]*?\*/'
+    r'/\*(?:(?:(?!\*/)[\s\S])*?(?:/\*(?:(?!\*/)[\s\S])*?\*/(?:(?!\*/)[\s\S])*?)*)\*/' # Double nested
     t.lexer.lineno += t.value.count('\n')
+    t.tag='green'
+    return t
+
+# Comments that have started are going to be a challenge
+def t_COMMENT_STARTED(t):
+    r'/\*.*'
     t.tag='green'
     return t
 
@@ -83,13 +93,6 @@ def t_INT_STRING(t):
     r'\b-?\d+\b'
     t.tag = 'orange'
     return t
-
-
-# def t_NUMBER(t):
-#     r'[\.]?\d+(\.\d*)?(\d*)?'  # Matches integers and floating-point numbers
-#     t.value = t.value
-#     t.tag = 'orange' 
-#     return t
 
 def t_DBL_STRING(t):
     r'\"[^"]*\"'
@@ -1454,14 +1457,16 @@ def t_send_sql_statement(t):
     t.tag='cyan'
     return t
 
-
+def t_COMPARISON_OP(t):
+    r'\b(?:GE|LE|GT|LT)\b'
+    return t
 
 # Regular expression rules for simple tokens
-t_GTEQ = r'>=|\bGE\b'
-t_LTEQ = r'<=|\bLE\b'
-t_GT = r'>|\bGT\b'
-t_LT = r'<|\bLT\b'
-t_EQUALS = r'=|EQ'
+t_GTEQ = r'>='
+t_LTEQ = r'<='
+t_GT = r'>'
+t_LT = r'<'
+t_EQUALS = r'='
 t_PLUS   = r'\+'
 t_MINUS  = r'\-'
 t_MULTIPLY = r'\*'
@@ -1478,11 +1483,8 @@ t_TILDE = r'~'
 
 t_ignore = ' \t'
 
-
-
-
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_\-\.0-9]*[a-zA-Z_\-0-9]'
+    r'[a-zA-Z_][a-zA-Z_\-\.0-9]*[a-zA-Z_\-0-9]|\b[a-zA-Z]\b'
     result = reserved.get(t.value.upper(),'ID')    # Check for reserved words
     if isinstance(result, tuple):
         t.type = result[0]
@@ -1496,6 +1498,13 @@ def t_ID(t):
         t.tag = 'cyan'
     return t
 
+def t_WORK_IN_PROGRESS(t):
+    r'{[a-zA-Z_]*[a-zA-Z_\-\.0-9]*'
+    print("a/sdhj")
+    t.tag = 'grey'
+    return t
+
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
+    print(f"Illegal character {t.value[0:50]} @ ln:{t.lineno} col:{t.colno}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    
     t.lexer.skip(1)

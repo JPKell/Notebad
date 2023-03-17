@@ -22,7 +22,7 @@
 
 import re
 
-text = "Examples: 'F12', \"f5\", F99, f2"
+text = """Examples: 'F12', "f5", F99, f2"""
 
 pattern = r"""['"]?[fF]\d{1,2}['"]?"""
 results = re.findall(pattern, text)

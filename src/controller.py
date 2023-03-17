@@ -8,7 +8,7 @@ from model import LanguageModel
 from view  import NoteView
 from views.textbox import Textbox
 
-import threading
+import time
 
 class NoteController:
     ''' The controller is the glue between the model and the view. It is the
@@ -171,18 +171,101 @@ class NoteController:
 
     def capitalize_syntax(self) -> None:
         ''' Capitalizes syntax in current textbox '''
+        t = time.time()
         textbox = self.view.textbox
+        cur_index = textbox.index('insert')
         results = self.model.capitalize_syntax(textbox.get_all())
 
+        # We want to disable the line number update otherwise we will 
+        # end up blocking the app with thousands of inserts which trigger
+        # events which will block in the Tk main loop. 
+        textbox.disable_line_no_update = True
+
         textbox.clear_all()
-        prev_ln = 1
-        for txt, index, lineno, tag in results:
-            if lineno != prev_ln:
-                textbox.insert('insert', '\n')
-                prev_ln = lineno
-            textbox.insert(index,txt+' ', tag)
-        self.app.update()
+        nl = True
+        for tok in results:
+            spc = '' if tok.value in ['.', ','] or nl else ' '
+            nl = False
+
+            if tok.tag == 'nl':
+                textbox.insert('insert', tok.value)
+                nl=True
+                continue
+ 
+            textbox.insert('insert',spc+tok.value, tok.tag)
+
+        textbox.disable_line_no_update = False
+        # Return the cursor to the same position by deleting the place it
+        # ended up and then setting it back to the original position 
+        textbox.mark_unset('insert')
+        textbox.mark_set('insert', cur_index)
+        print('Process took:', time.time() - t, 'seconds')
+
+
+    def format_code(self, event) -> None:
+        ''' To properly implement syntax highlighting we need to understand the
+            context of the word we are working on. This means that if we are on 
+            line 5 of a multi line comment we need to know that.'''
+
+        # If the key pressed is a special key, we don't want to do anything
+        if event.char == '':
+            return
+
+        if event.keysym == 'BackSpace':
+            return
+
+        textbox = self.view.textbox
+        # The existing tags should give us the context of the word we are working on
+        existing_tags = textbox.tag_names('insert -1c')
+
+        # if 'comment' in existing_tags bail. we don't want to format comments
+        if 'green' in existing_tags:
+            return
         
+        # There are times where we will end up formatting part way through a word or
+        # statement, then there's also the case of a comment. In both cases we want
+        # context outside of the tags we have.  
+        
+        if event.keycode == 36: # If the key pressed is a Enter
+            # Get the current line
+            textbox.mark_set('insert', 'insert -1l')
+            txt = textbox.get_current_line_text()
+            # I like the idea of expanding as you type, but it causes some issues
+            # Mainly inserting the cursor in the right place after expanding words
+            tokens = self.model.capitalize_syntax(txt, no_nl=True, expand=True) 
+            # We want to disable the line number update otherwise we will block
+            textbox.disable_line_no_update = True
+            textbox.delete_cur_line()
+            nl = True
+            for i,tok in enumerate(tokens):
+                spc = '' if tok.value in ['.', ','] or nl else ' '
+                nl = False
+
+                if tok.tag == 'nl':
+                    textbox.insert('insert', tok.value)
+                    nl=True
+                    continue
+    
+                textbox.insert('insert',spc+tok.value, tok.tag)
+            # Return the cursor to the new line
+ 
+            textbox.mark_set('insert', 'insert +1l')
+            textbox.disable_line_no_update = False
+    
+        # Otherwise we just want to get and format one word
+        else:
+            # Get the current word
+            txt, index = textbox.get_trailing_word_and_index()
+            token = self.model.get_syntax_token(txt) 
+
+            # If the token is empty we need to print the char, bail
+            if len(token) == 0:
+                return
+
+            textbox.disable_line_no_update = True
+            textbox.delete(index[0], index[1])
+            textbox.insert(index[0], token[0].value, token[0].tag)
+            textbox.disable_line_no_update = False
 
 
     ###          ###
@@ -246,6 +329,11 @@ class NoteController:
 
         # Textbox management
         self.app.bind("<Control-a>", lambda event: self.view.tabs.textbox.select_all())
+        
+        # Syntax highlighting
+        self.app.bind("<Key>", lambda event: self.format_code(event))
+        self.app.bind_all("<space>", lambda event: self.format_code(event))
+        self.app.bind_all("<Return>", lambda event: self.format_code(event))
 
         # Tab management
         self.app.bind("<<NotebookTabChanged>> ", lambda event: self.view.update_title())
@@ -257,6 +345,4 @@ class NoteController:
         self.app.bind("<Alt-e>", lambda event: self.eval_selection())
 
         # DEVELOPMENT ONLY
-        self.app.bind("<Control-p>", lambda event: threading.Thread(target=self.capitalize_syntax).start())
-
-
+        self.app.bind("<Control-p>", lambda event: self.capitalize_syntax())
