@@ -184,14 +184,20 @@ class NoteController:
         textbox.clear_all()
         nl = True
         for tok in results:
-            spc = '' if tok.value in ['.', ','] or nl else ' '
+
+            spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl or no_spc_after else ' '
             nl = False
 
             if tok.tag == 'nl':
                 textbox.insert('insert', tok.value)
                 nl=True
                 continue
- 
+
+            # For some characters we dont want a trailing space
+            if tok.value in [':']:
+                # This is a hack, maybe worth it's own variable. 
+                nl = True
+
             textbox.insert('insert',spc+tok.value, tok.tag)
 
         textbox.disable_line_no_update = False

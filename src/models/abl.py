@@ -22,9 +22,10 @@ reserved = {**reserved_no_abr, **non_reserved_no_abr}
 
 def build_regex(full_word:str, abr:str) -> str:
     ''' Build a regular expression to match anything up to the abbreviation '''
-    reg = r'\b(?:' + abr.replace('-',r'\-')
-    for i in range(len(abr), len(full_word) + 1):
-        reg += r'|'+ full_word[:i].replace('-',r'\-')
+    reg = r'\b(?:' + full_word.replace('-','\-')
+    # build it backwards so that the longest match is found first
+    for i in range(len(abr), len(full_word) + 1, -1):
+        reg += r'|'+ full_word[:i].replace('-','\-')
     reg += r')\b'
     return reg
 
@@ -39,6 +40,10 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
     t.lexer.colno = 0
+    # This extra space is a fix for the fact that sometimes the : separates an object and method
+    # and sometimes it starts a block. The need for no space around the first and a space around 
+    # the second can be solved adding a space to before the newline. 
+    t.value = ' ' + t.value
     t.tag = 'nl'
     return t
 
@@ -132,6 +137,7 @@ def t_ASCENDING(t):
         
 @TOKEN(build_regex('ATTR-SPACE', 'ATTR'))
 def t_ATTR_SPACE(t):
+    print("MARCO")
     t.tag='cyan'
     return t
         
@@ -1464,6 +1470,7 @@ def t_COMPARISON_OP(t):
 # Regular expression rules for simple tokens
 t_GTEQ = r'>='
 t_LTEQ = r'<='
+t_NE   = r'<>'
 t_GT = r'>'
 t_LT = r'<'
 t_EQUALS = r'='
@@ -1481,7 +1488,7 @@ t_ASSIGN = r'\:='
 t_UNKNOWN = r'\?'
 t_TILDE = r'~'
 
-t_ignore = ' \t'
+t_ignore = ' }\t'
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_\-\.0-9]*[a-zA-Z_\-0-9]|\b[a-zA-Z]\b'
@@ -1499,7 +1506,7 @@ def t_ID(t):
     return t
 
 def t_WORK_IN_PROGRESS(t):
-    r'{[a-zA-Z_]*[a-zA-Z_\-\.0-9]*'
+    r'{[a-zA-Z_ ]*[a-zA-Z_\-\.0-9]*'
     print("a/sdhj")
     t.tag = 'grey'
     return t

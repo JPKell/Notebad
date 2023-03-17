@@ -29,7 +29,9 @@ tokens = [
     'GTEQ',
     'LT',
     'LTEQ',
+    'NE'
     # Null
+    'WORK_IN_PROGRESS',
     'UNKNOWN',
     'TILDE'
 ]

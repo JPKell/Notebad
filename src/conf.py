@@ -1,7 +1,7 @@
 class Configuration:
     """A class to hold configuration values for the app"""
 
-    def __init__(self, dev_mode=False):
+    def __init__(self, dev_mode=True):
         self.dev_mode = dev_mode
         # Window settings
         self.app_title = 'Notebad'
