@@ -185,7 +185,7 @@ class NoteController:
         nl = True
         for tok in results:
 
-            spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl or no_spc_after else ' '
+            spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
             nl = False
 
             if tok.tag == 'nl':

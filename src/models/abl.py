@@ -24,7 +24,7 @@ def build_regex(full_word:str, abr:str) -> str:
     ''' Build a regular expression to match anything up to the abbreviation '''
     reg = r'\b(?:' + full_word.replace('-','\-')
     # build it backwards so that the longest match is found first
-    for i in range(len(abr), len(full_word) + 1, -1):
+    for i in range(len(abr), len(full_word))[::-1]:
         reg += r'|'+ full_word[:i].replace('-','\-')
     reg += r')\b'
     return reg
@@ -137,7 +137,7 @@ def t_ASCENDING(t):
         
 @TOKEN(build_regex('ATTR-SPACE', 'ATTR'))
 def t_ATTR_SPACE(t):
-    print("MARCO")
+
     t.tag='cyan'
     return t
         
@@ -1507,7 +1507,7 @@ def t_ID(t):
 
 def t_WORK_IN_PROGRESS(t):
     r'{[a-zA-Z_ ]*[a-zA-Z_\-\.0-9]*'
-    print("a/sdhj")
+
     t.tag = 'grey'
     return t
 
