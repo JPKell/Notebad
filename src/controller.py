@@ -209,6 +209,7 @@ class NoteController:
         # ended up and then setting it back to the original position 
         textbox.mark_unset('insert')
         textbox.mark_set('insert', cur_index)
+        textbox.see('insert')
 
         if cf.time_functions:
             print('Process took:', time.time() - t, 'seconds')
