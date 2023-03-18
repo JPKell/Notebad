@@ -1,7 +1,6 @@
 import pathlib, os
 import tkinter as tk
 
-
 from calc.controller import Calculator
 from conf  import cf
 from model import LanguageModel
@@ -169,7 +168,7 @@ class NoteController:
     # Language tools #
     ###            ###
 
-    def capitalize_syntax(self) -> None:
+    def capitalize_syntax(self, event) -> None:
         ''' Capitalizes syntax in current textbox '''
         t = time.time()
         textbox = self.view.textbox
@@ -185,27 +184,34 @@ class NoteController:
         nl = True
         for tok in results:
 
-            spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
-            nl = False
+            ###
+            # STOP! the commented out code is if whitespace is not tracked.
+            ###
+            # spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
+            # nl = False
+            # if tok.tag == 'nl':
+            #     textbox.insert('insert', tok.value)
+            #     nl=True
+            #     continue
+            # # For some characters we dont want a trailing space
+            # if tok.value in [':']:
+            #     # This is a hack, maybe worth it's own variable. 
+            #     nl = True
+            # textbox.insert('insert',spc+tok.value, tok.tag)
+            textbox.insert('insert',tok.value, tok.tag)
+            ###
+            # If restoring , delete the above line and uncomment the rest
+            ###
 
-            if tok.tag == 'nl':
-                textbox.insert('insert', tok.value)
-                nl=True
-                continue
-
-            # For some characters we dont want a trailing space
-            if tok.value in [':']:
-                # This is a hack, maybe worth it's own variable. 
-                nl = True
-
-            textbox.insert('insert',spc+tok.value, tok.tag)
 
         textbox.disable_line_no_update = False
         # Return the cursor to the same position by deleting the place it
         # ended up and then setting it back to the original position 
         textbox.mark_unset('insert')
         textbox.mark_set('insert', cur_index)
-        print('Process took:', time.time() - t, 'seconds')
+
+        if cf.time_functions:
+            print('Process took:', time.time() - t, 'seconds')
 
 
     def format_code(self, event) -> None:
@@ -244,17 +250,23 @@ class NoteController:
             textbox.delete_cur_line()
             nl = True
             for i,tok in enumerate(tokens):
-                spc = '' if tok.value in ['.', ','] or nl else ' '
-                nl = False
 
-                if tok.tag == 'nl':
-                    textbox.insert('insert', tok.value)
-                    nl=True
-                    continue
-    
-                textbox.insert('insert',spc+tok.value, tok.tag)
+                ###
+                # STOP! the commented out code is if whitespace is not tracked.
+                ###
+                # spc = '' if tok.value in ['.', ','] or nl else ' '
+                # nl = False
+                # if tok.tag == 'nl':
+                #     textbox.insert('insert', tok.value)
+                #     nl=True
+                #     continue
+                # textbox.insert('insert',spc+tok.value, tok.tag)
+                textbox.insert('insert',tok.value, tok.tag)
+                ###
+                # If restoring , delete the above line and uncomment the rest
+                ###
+            
             # Return the cursor to the new line
- 
             textbox.mark_set('insert', 'insert +1l')
             textbox.disable_line_no_update = False
     
@@ -267,7 +279,6 @@ class NoteController:
             # If the token is empty we need to print the char, bail
             if len(token) == 0:
                 return
-
             textbox.disable_line_no_update = True
             textbox.delete(index[0], index[1])
             textbox.insert(index[0], token[0].value, token[0].tag)
@@ -351,4 +362,11 @@ class NoteController:
         self.app.bind("<Alt-e>", lambda event: self.eval_selection())
 
         # DEVELOPMENT ONLY
-        self.app.bind("<Control-p>", lambda event: self.capitalize_syntax())
+        self.app.bind("<Alt-p>", lambda event: self.capitalize_syntax(event))
+
+
+        ###
+        # Various tk keybindings that exist by default
+        # 
+        # <Control-p> previous line
+        ###

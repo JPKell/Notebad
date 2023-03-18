@@ -44,6 +44,7 @@ class Configuration:
 
         # Developer settings. Don't change these here. If you want developer functions, use dev mode. 
         self.preload_file = False
+        self.time_functions = False
 
         if dev_mode:
             self._dev_mode()
@@ -56,6 +57,7 @@ class Configuration:
         self.hardcore_mode = True
         self.enable_syntax_highlighting = True
         self.preload_file = '/home/jpk/gits/Notebad/test.p'
+        self.time_functions = True
 
 
 cf = Configuration()

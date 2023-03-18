@@ -1488,7 +1488,12 @@ t_ASSIGN = r'\:='
 t_UNKNOWN = r'\?'
 t_TILDE = r'~'
 
-t_ignore = ' }\t'
+
+# This will track whitespace and adds a lot of time to processing. Ideally it
+# would not be needed, but indentation rules has not been implemented yet. 
+t_WHITESPACE = r'\s+'
+
+t_ignore = '}\t'
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_\-\.0-9]*[a-zA-Z_\-0-9]|\b[a-zA-Z]\b'
@@ -1505,6 +1510,7 @@ def t_ID(t):
         t.tag = 'cyan'
     return t
 
+# This isn't really doing much i think... 
 def t_WORK_IN_PROGRESS(t):
     r'{[a-zA-Z_ ]*[a-zA-Z_\-\.0-9]*'
 

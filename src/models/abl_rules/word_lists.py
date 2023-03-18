@@ -33,6 +33,7 @@ tokens = [
     # Null
     'WORK_IN_PROGRESS',
     'UNKNOWN',
+    'WHITESPACE',
     'TILDE'
 ]
 

@@ -1,4 +1,3 @@
-from tkinter import PhotoImage
 from tkinter.ttk import Notebook
 
 from .textbox import Textbox

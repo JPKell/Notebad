@@ -129,7 +129,7 @@ class Textbox(Text):
             offset = 2
             word = self.get(f'insert -{offset}c wordstart', 'insert')
 
-        if word == ' ': # Double space, lets assume we dont want that word
+        if word == '  ': # Double space, lets assume we dont want that word
             return '', (cur_index, cur_index)
 
         # There is an annoying trait of tkinter where if you are at the start 

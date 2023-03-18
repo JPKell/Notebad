@@ -32,6 +32,7 @@ class LanguageModel:
         ignore = ['SNG_COMMENT', 'MULTI_COMMENT', 'SNG_STRING', 'DBL_STING', 'NUMBER', 'ID', 'CURLY_BRACE']
         output = []
         for token in self.model:
+            # Not sure if the no_nl is still needed
             if no_nl and token.tag == 'nl':
                 continue
             if not token.tag: 

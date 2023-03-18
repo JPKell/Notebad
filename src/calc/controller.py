@@ -34,7 +34,11 @@ class Calculator:       # a.k.a Controller
         '''Take the keyboard input and convert numbers to integers so they are 
            handled properly downstream '''
         if key in '0123456789':
-            self.button_click(int(key))
+            # The numlock key will mean keypad keys still get here, but might not be a number
+            try:
+                self.button_click(int(key))
+            except ValueError:
+                pass
         else:
             self.button_click(key)
 
