@@ -1519,5 +1519,5 @@ def t_WORK_IN_PROGRESS(t):
 
 def t_error(t):
     print(f"Illegal character {t.value[0:50]} @ ln:{t.lineno} col:{t.colno}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-    
-    t.lexer.skip(1)
+    return t
+    # t.lexer.skip(1)
