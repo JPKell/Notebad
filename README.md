@@ -37,5 +37,3 @@ Most of the classes in the view are inheriting from tk widgets. The heirarchy lo
 
 Mainly just handles what happens to inputs and routes events to functions. 
 
-
-

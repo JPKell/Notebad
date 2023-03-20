@@ -1,7 +1,7 @@
 class Configuration:
     """A class to hold configuration values for the app"""
 
-    def __init__(self, dev_mode=True):
+    def __init__(self, dev_mode=False):
         self.dev_mode = dev_mode
         # Window settings
         self.app_title = 'Notebad'
@@ -56,7 +56,7 @@ class Configuration:
         self.geometry = '800x600+3400+1'
         self.hardcore_mode = True
         self.enable_syntax_highlighting = True
-        self.preload_file = '/home/jpk/gits/Notebad/test.p'
+        # self.preload_file = '/home/jpk/gits/Notebad/test.p'
         self.time_functions = True
 
 
