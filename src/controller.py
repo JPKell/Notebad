@@ -230,7 +230,6 @@ class NoteController:
         ''' To properly implement syntax highlighting we need to understand the
             context of the word we are working on. This means that if we are on 
             line 5 of a multi line comment we need to know that.'''
-        print(event.__dict__)
 
         # If the key pressed is a special key, we don't want to do anything
         if event.char == '' and event.keysym != 'Up' and event.keysym != 'Down':
@@ -252,8 +251,8 @@ class NoteController:
         # context outside of the tags we have.  
         if os.name == 'nt':
             rtn = 13
-            up = 111
-            down = 116
+            up = 38
+            down = 40
             kp_enter = 104
             key = [rtn,kp_enter,down]
         else:

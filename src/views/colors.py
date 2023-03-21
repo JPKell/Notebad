@@ -14,6 +14,7 @@ Themes = SimpleNamespace(
         tab_unselect = '#E5E0E8',
         scrollbar    = '#DFDBD4',
         # Syntax
+        syn_error    = '#ff0000',
         syn_grey     = '#586e75',
         syn_red      = '#dc322f',
         syn_orange   = '#cb4b16',
@@ -38,6 +39,7 @@ Themes = SimpleNamespace(
         tab_unselect = '#32323A',
         scrollbar    = '#2E292A',
         # Syntax
+        syn_error    = '#ff0000',
         syn_grey     = '#a3b1b1',
         syn_red      = '#ec423f',
         syn_orange   = '#db5b26',

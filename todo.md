@@ -6,9 +6,6 @@ Hopefully the bugs decrease and the missing important does too
 
 
 # Bugs
-- ERROR OUTPUT WHEN just processing regular text will give a scanning error and illegal character error and delete the text!!!! 
-- status bar is blinky
-
 
 # Missing important
 - FIND, FIND AND REPLACE

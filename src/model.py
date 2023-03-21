@@ -35,7 +35,7 @@ class LanguageModel:
     def format_syntax(self, txt:str, no_nl=False, expand=True, upper=True) -> list:
         ''' Take code as input and return code with syntax words in caps '''
         self.build_ast(txt)
-        ignore = ['SNG_COMMENT', 'MULTI_COMMENT', 'SNG_STRING', 'DBL_STRING', 'NUMBER', 'ID', 'CURLY_BRACE']
+        ignore = ['SNG_COMMENT', 'MULTI_COMMENT', 'SNG_STRING', 'DBL_STRING', 'NUMBER', 'ID', 'ERROR', 'CURLY_BRACE']
         output = []
         for token in self.model:
             # Not sure if the no_nl is still needed

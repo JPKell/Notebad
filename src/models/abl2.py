@@ -26,7 +26,6 @@ for v in non_reserved_no_abr.values():
 tokens += reserved_w_abr.values()
 tokens += non_reserved_w_abr.values()
 
-reserved = {**reserved_no_abr, **non_reserved_no_abr}
 
 # Regular expression rules for simple tokens
 t_GTEQ = r'>='
@@ -1528,19 +1527,16 @@ def t_ID(t):
     t.tag  = result['tag']
     return t
 
-# def t_syntax_CATCHALL(t):
-#     r'[.,;:(){}\[\]_][a-zA-Z]'
-#     t.tag = 'red'
-#     return t
+def t_CATCHALL(t):
+    r'[0-9][a-zA-Z_0-9\.,\-=]*'
+    t.type = 'ERROR'
+    t.tag = 'error'
+    return t
 
-
-# def t_syntax_error(t):
-#     print('SYNTAX error')
-#     return t
 
 def t_error(t):
     print(f"Illegal character {t.value[0:50]} @ ln:{t.lineno} col:{t.colno}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     t.type = 'ERROR'
-    t.tag = 'red'
+    t.tag = 'error'
     return t
     # t.lexer.skip(1)

@@ -32,7 +32,7 @@ class Footer(Frame):
     def _make_label(self) -> None:
         ''' Main constructor for the status bar '''
         self.status = Label(self, textvariable=self.status_txt, relief='flat', anchor='w')
-        self.status.pack(expand=True, fill='x', side='bottom')
+        self.status.pack(fill='x')
 
     def _make_position_labels(self):
         self.pos_lbl = Label(self.status, text="ln 1 col 0 ", relief='flat', anchor='e')

@@ -110,6 +110,7 @@ class UI:
             textbox.tag_configure("violet", foreground = colors.syn_violet)
             textbox.tag_configure("magenta", foreground = colors.syn_magenta)
             textbox.tag_configure("grey", foreground = colors.syn_grey)
+            textbox.tag_configure("error", foreground = colors.syn_error)
 
         # Style the status bar
         self.view.footer.status.config(bg=colors.background, fg=colors.foreground)

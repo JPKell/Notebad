@@ -74,11 +74,6 @@ for v in non_reserved_no_abr.values():
 tokens += reserved_w_abr.values()
 tokens += non_reserved_w_abr.values()
 ''')
-           
-# Write out the reserved keywords
-file.write('''
-reserved = {**reserved_no_abr, **non_reserved_no_abr}
-''')
 
 # Simple tokens
 file.write('''
@@ -236,6 +231,15 @@ def t_ID(t):
     t.type = result['token']
     t.tag  = result['tag']
     return t
+
+# This is a hack to prevent the lexer from throwing an error on a bad word and deleting it.
+def t_CATCHALL(t):
+    r'[0-9][a-zA-Z_0-9\.,\-=]*'
+    t.type = 'ERROR'
+    t.tag = 'error'
+    return t
+
+    
 
 def t_error(t):
     print(f"Illegal character {t.value[0:50]} @ ln:{t.lineno} col:{t.colno}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
