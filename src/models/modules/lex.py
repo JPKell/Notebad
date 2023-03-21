@@ -278,6 +278,7 @@ class Lexer:
                     tok.colno  = colno # *Notebad*
                     tok.type = tok.value
                     tok.lexpos = lexpos
+                    tok.tag = ''
                     self.lexpos = lexpos + 1
                     self.colno  = colno + 1
                     return tok

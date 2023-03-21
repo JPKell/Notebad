@@ -1,22 +1,28 @@
 import re
 
-from models import abl
+from models import abl2
 from models.modules import lex
-from models.abl_rules import abl_master
+# from models.abl_rules import build
 
 class LanguageModel:
     def __init__(self):
         # The primary widget in the model is the text area to the model should know about it
         self.model = []
+
         self.expand = False
 
     def build_ast(self, txt:str) -> None:
-        lexer = lex.lex(module=abl, reflags=re.VERBOSE | re.IGNORECASE)
+        lexer = lex.lex(module=abl2, reflags=re.VERBOSE | re.IGNORECASE)
         lexer.input(txt)
         self.model = []
 
         while True:
-            tok = lexer.token()
+            try:
+                tok = lexer.token()
+            except Exception as e:
+                tok = None
+                print(e)
+    
             if not tok: break
             self.model.append(tok)
         
@@ -26,10 +32,10 @@ class LanguageModel:
         return [ tok for tok in self.model if tok.type != 'newline' ]
 
 
-    def capitalize_syntax(self, txt:str, no_nl=False, expand=True) -> list:
+    def format_syntax(self, txt:str, no_nl=False, expand=True, upper=True) -> list:
         ''' Take code as input and return code with syntax words in caps '''
         self.build_ast(txt)
-        ignore = ['SNG_COMMENT', 'MULTI_COMMENT', 'SNG_STRING', 'DBL_STING', 'NUMBER', 'ID', 'CURLY_BRACE']
+        ignore = ['SNG_COMMENT', 'MULTI_COMMENT', 'SNG_STRING', 'DBL_STRING', 'NUMBER', 'ID', 'CURLY_BRACE']
         output = []
         for token in self.model:
             # Not sure if the no_nl is still needed
@@ -37,9 +43,9 @@ class LanguageModel:
                 continue
             if not token.tag: 
                 token.tag = ''
-            if token.type not in ignore:  
+            if token.type not in ignore and upper:
                 token.value = str(token.value).upper()
-            
+
             if expand:
                 self.expand_syntax(token)
 

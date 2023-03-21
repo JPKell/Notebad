@@ -117,12 +117,16 @@ class Textbox(Text):
         '''
         cur_index = self.index('insert')
         # If we are at the start of a line dont try to get the word. 
-        if cur_index[-2:] == '.1':
+        if cur_index[-2:] == '.0':
             return '', (cur_index, cur_index)
         
+        ln,col = cur_index.split('.')
         offset = 1
-        word = self.get(f'insert -{offset}c wordstart', 'insert')
-
+        if int(col) < 3:
+            word = self.get(f'{ln}.0', 'insert')
+        else:
+            word = self.get(f'insert -{offset}c wordstart', 'insert')
+        print(word)
         # If the word is a space we are past the end of the word and need to move
         # back one more character.
         if word == ' ':
@@ -176,12 +180,17 @@ class Textbox(Text):
     # Text selections and cursor #
     ###                        ###
 
+    def delete_selection(self):
+        self.delete('sel.first', 'sel.last')
+
+    def has_selection(self) -> bool:
+        ''' Returns True if there is text selected '''
+        return self.tag_ranges('sel') != ()
+
     def select_all(self) -> None:
         ''' Select all text in the textbox '''
         self.tag_add('sel', 1.0, 'end')
 
-    def delete_selection(self):
-        self.delete('sel.first', 'sel.last')
 
     ###           ###
     # Undo and redo #
@@ -282,17 +291,20 @@ class Textbox(Text):
             foreground=colors.text_foreground,
             highlightbackground=colors.text_background, # These 2 remove the quasi borders 
             highlightcolor=colors.text_background,      # around the textbox
+            insertbackground=colors.cursor, 
             font=self.font,
             padx=5, 
             pady=5)
         self.pack(expand=True, fill='both')
         tabs.add(self.frame)
             
-        # self.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
         self.linenumbers.config(
             bg=colors.background, 
             highlightbackground=colors.background
             )
+        self.mark_unset("insert")
+        self.mark_set("insert", "1.0")
+        self.focus_set()
 
     def _make_line_numbers(self) -> None:
         ''' Add line numbers Canvas to the text area '''

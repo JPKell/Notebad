@@ -21,9 +21,16 @@ class NoteController:
         self._bind_keys()
         self._app_protocols()
 
+        # This might be better done as a function on its own. 
+        # At that point, maybe we stash the open tabs at close and reopen them 
         if cf.preload_file:
-            self.__write_file_to_textbox(self.view.textbox, cf.preload_file)
-
+            textbox = self.view.textbox         
+            self.__write_file_to_textbox(textbox, cf.preload_file)
+            path_parts = self._parts_from_file_path(cf.preload_file)
+            textbox.set_meta(tk_name=self.view.tabs.cur_tab_tk_name(),
+                        full_path=cf.preload_file,
+                        file_path=path_parts['path'], 
+                        file_name=path_parts['file'], )
 
     def _app_protocols(self) -> None:
         ''' Application protocols deal with system commands such as closing the window. '''
@@ -100,7 +107,7 @@ class NoteController:
         # something to worry about now? No. 
         if textbox is None:             
             textbox = self.view.textbox
-        full_path = self.view.save_file_dialogue(file_name=textbox.file_name)
+        full_path = self.view.save_file_dialogue(file_name=textbox.file_name, path=textbox.file_path)
         if full_path:
             self._write_textbox_to_file(full_path, textbox)
 
@@ -162,6 +169,10 @@ class NoteController:
     def paste_text(self) -> None:
         ''' Hand me that paper bag '''
         textbox = self.view.tabs.textbox
+        # If there is text selected, delete it
+        if textbox.has_selection():
+            textbox.delete_selection()
+
         textbox.insert('insert', self.clipboard)
 
     ###            ###
@@ -173,7 +184,7 @@ class NoteController:
         t = time.time()
         textbox = self.view.textbox
         cur_index = textbox.index('insert')
-        results = self.model.capitalize_syntax(textbox.get_all())
+        results = self.model.format_syntax(textbox.get_all())
 
         # We want to disable the line number update otherwise we will 
         # end up blocking the app with thousands of inserts which trigger
@@ -219,9 +230,10 @@ class NoteController:
         ''' To properly implement syntax highlighting we need to understand the
             context of the word we are working on. This means that if we are on 
             line 5 of a multi line comment we need to know that.'''
+        print(event.__dict__)
 
         # If the key pressed is a special key, we don't want to do anything
-        if event.char == '':
+        if event.char == '' and event.keysym != 'Up' and event.keysym != 'Down':
             return
 
         if event.keysym == 'BackSpace':
@@ -238,14 +250,27 @@ class NoteController:
         # There are times where we will end up formatting part way through a word or
         # statement, then there's also the case of a comment. In both cases we want
         # context outside of the tags we have.  
-        
-        if event.keycode == 36: # If the key pressed is a Enter
+        if os.name == 'nt':
+            rtn = 13
+            up = 111
+            down = 116
+            kp_enter = 104
+            key = [rtn,kp_enter,down]
+        else:
+            rtn = 36
+            up = 111
+            down = 116
+            kp_enter = 104
+            key = [rtn,kp_enter,down]
+
+
+        if event.keycode in key: # If the key pressed is a Enter
             # Get the current line
-            textbox.mark_set('insert', 'insert -1l')
+            textbox.mark_set('insert', f'insert -1l')
             txt = textbox.get_current_line_text()
             # I like the idea of expanding as you type, but it causes some issues
             # Mainly inserting the cursor in the right place after expanding words
-            tokens = self.model.capitalize_syntax(txt, no_nl=True, expand=True) 
+            tokens = self.model.format_syntax(txt, no_nl=True, expand=True) 
             # We want to disable the line number update otherwise we will block
             textbox.disable_line_no_update = True
             textbox.delete_cur_line()
@@ -273,17 +298,52 @@ class NoteController:
     
         # Otherwise we just want to get and format one word
         else:
-            # Get the current word
-            txt, index = textbox.get_trailing_word_and_index()
-            token = self.model.get_syntax_token(txt) 
+            # # Get the current word
+            # txt, index = textbox.get_trailing_word_and_index()
+            # print('before syntax',txt, index)
+            # token = self.model.get_syntax_token(txt) 
+            # print(token)
+            # # If the token is empty we need to print the char, bail
+            # if len(token) == 0:
+            #     return
+            # textbox.disable_line_no_update = True
+            # textbox.delete(index[0], index[1])
+            # textbox.insert(index[0], token[0].value, token[0].tag)
+            # textbox.disable_line_no_update = False
 
-            # If the token is empty we need to print the char, bail
-            if len(token) == 0:
-                return
+            txt = textbox.get_current_line_text()
+            index = textbox.index('insert')
+            # I like the idea of expanding as you type, but it causes some issues
+            # Mainly inserting the cursor in the right place after expanding words
+            tokens = self.model.format_syntax(txt, no_nl=True, expand=False, upper=False) 
+            # We want to disable the line number update otherwise we will block
             textbox.disable_line_no_update = True
-            textbox.delete(index[0], index[1])
-            textbox.insert(index[0], token[0].value, token[0].tag)
+            textbox.delete_cur_line()
+            nl = True
+            for i,tok in enumerate(tokens):
+
+                ###
+                # STOP! the commented out code is if whitespace is not tracked.
+                ###
+                # spc = '' if tok.value in ['.', ','] or nl else ' '
+                # nl = False
+                # if tok.tag == 'nl':
+                #     textbox.insert('insert', tok.value)
+                #     nl=True
+                #     continue
+                # textbox.insert('insert',spc+tok.value, tok.tag)
+                textbox.insert('insert',tok.value, tok.tag)
+                ###
+                # If restoring , delete the above line and uncomment the rest
+                ###
+            
+            # Return the cursor to the new line
+            textbox.mark_set('insert', index)
             textbox.disable_line_no_update = False
+
+
+
+
 
 
     ###          ###
@@ -347,11 +407,14 @@ class NoteController:
 
         # Textbox management
         self.app.bind("<Control-a>", lambda event: self.view.tabs.textbox.select_all())
+        self.app.bind("<Control-v>", lambda event: self.paste_text())
         
         # Syntax highlighting
         self.app.bind("<Key>", lambda event: self.format_code(event))
         self.app.bind_all("<space>", lambda event: self.format_code(event))
         self.app.bind_all("<Return>", lambda event: self.format_code(event))
+
+        self.app.bind("<KP_Enter>", lambda event: self.format_code(event))
 
         # Tab management
         self.app.bind("<<NotebookTabChanged>> ", lambda event: self.view.update_title())

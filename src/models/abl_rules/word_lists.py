@@ -34,7 +34,15 @@ tokens = [
     'WORK_IN_PROGRESS',
     'UNKNOWN',
     'WHITESPACE',
-    'TILDE'
+    'TILDE',
+    'NOT_ILLEGAL'
+    # Preprocessor
+    'SCOPED_DEFINE',
+    'LBRACKET',
+    'RBRACKET',
+    'LBRACE',
+    'RBRACE',
+
 ]
 
 reserved_no_abr = {

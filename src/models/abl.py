@@ -109,6 +109,20 @@ def t_SNG_STRING(t):
     t.tag='violet'
     return t
 
+# This is a workaround to subdue the errors that come when live 
+# syntax highlighting with the lexer. There really should be 2
+# states for this.
+# def t_NOT_ILLEGAL(t):
+#     r'[&\s\(\)\{\}\[\]\+\-\*\/\%\^\|\<\>\=\!\?\:\;\,\.!@#\}\{]+'
+
+#     return t
+
+
+### Various preprocessing rules these dont exist in the word list yet. 
+def t_SCOPED_DEFINE(t):
+    r'&SCOPED\-DEFINE'
+    t.tag='blue'
+    return t
 
 ###
 # The following are all reserved keywords from the list. 
@@ -1487,12 +1501,23 @@ t_SEMICOLON = r'\;'
 t_ASSIGN = r'\:='
 t_UNKNOWN = r'\?'
 t_TILDE = r'~'
+t_LBRACKET = r'\['
+t_RBRACKET = r'\]'
+t_LBRACE = r'\{'
+t_RBRACE = r'\}'
+
 
 
 # This will track whitespace and adds a lot of time to processing. Ideally it
 # would not be needed, but indentation rules has not been implemented yet. 
 t_WHITESPACE = r'\s+'
 
+literals = [ '+','-','*','/', '"', "'", '(', ')', '[', ']', '{', '}', ',', ':', ';', '=', '?', '~', '.', '>', '<', '!' ]
+
+# Some of these might be better not ignored. However for syntax highlighting
+# they throw a lot of errors. As this is continuing, it might be better to 
+# define 2 states, one for syntax highlighting and one for parsing.
+# t_ignore = r'.'
 t_ignore = '}\t'
 
 def t_ID(t):
@@ -1507,7 +1532,7 @@ def t_ID(t):
         t.tag = 'grey'
     else:
         t.type = result
-        t.tag = 'cyan'
+        t.tag = 'cyan' 
     return t
 
 # This isn't really doing much i think... 
