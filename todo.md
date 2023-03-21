@@ -8,8 +8,6 @@ Hopefully the bugs decrease and the missing important does too
 # Bugs
 - ERROR OUTPUT WHEN just processing regular text will give a scanning error and illegal character error and delete the text!!!! 
 - status bar is blinky
-- keypad enter AND DOWN OFF OF LINE should ALL behave LIKE RETURN does
-- word starting with - at the beginning of line deletes text. 
 
 
 # Missing important
