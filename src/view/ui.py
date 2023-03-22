@@ -2,9 +2,11 @@ import os
 from tkinter import PhotoImage, Frame, font
 from tkinter.ttk import Style
 
+from conf  import Configuration
 from .colors import Themes
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class UI:
@@ -13,11 +15,10 @@ class UI:
         '''
     def __init__(self, view: Frame) -> None:
         self.view = view
-        self.conf = view.conf
-        self.theme = self.conf.default_theme
+        self.theme = cfg.default_theme
         self.style = Style()
         self.font = font.nametofont('TkFixedFont')
-        self._font_size = self.conf.font_size
+        self._font_size = cfg.font_size
         self._init_img_pool()
         self._init_style()
         self._root_window_setup()
@@ -165,7 +166,7 @@ class UI:
                 },
                 "TNotebook": {
                     "configure": {
-                        "tabmargins": [self.conf.line_number_width + 2, 5, 10, 0], 
+                        "tabmargins": [cfg.line_number_width + 2, 5, 10, 0], 
                         "foreground": colors.background,
                         "background": colors.background,
                         "borderwidth": 0,
@@ -243,9 +244,9 @@ class UI:
         ''' Basic geometry and title settings for the root window.'''
         app = self.view.app
         # Window settings 
-        app.title(self.conf.app_title)  
-        app.geometry(self.conf.geometry) 
-        app.minsize(*self.conf.min_size)
+        app.title(cfg.app_title)  
+        app.geometry(cfg.geometry) 
+        app.minsize(*cfg.min_size)
 
         path_func = self.view.controller.relative_to_abs_path
         if os.name == 'nt': 

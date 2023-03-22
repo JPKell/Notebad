@@ -1,13 +1,14 @@
 from view.textbox import Textbox
 from modules.logging import Log
+from conf import Configuration
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class FileManagement:
     ''' Handles all file management. '''
     def __init__(self, controller):
         self.controller = controller
-        self.conf       = self.controller.conf
         logger.debug('Initialized FileManagement')
 
 
@@ -46,7 +47,7 @@ class FileManagement:
             save_as_file is called to let the user name it. Also thinking 
             about just sequentially naming all the files to make like hard. jk'''
         textbox = self.controller.view.textbox
-        if textbox.meta.file_name == self.conf.new_file_name:
+        if textbox.meta.file_name == cfg.new_file_name:
             self.save_as_file(textbox)
         else:
             self.write_textbox_to_file(textbox.meta.full_path, textbox)
@@ -68,7 +69,7 @@ class FileManagement:
         ''' Take the full path name and return a dictionary with the path and file name.
             `{ 'path': ..., 'file': ... }`
         '''
-        if self.conf.os == 'nt':         # Windows
+        if cfg.os == 'nt':         # Windows
             parts = full_path.split('\\')
             return {'path': '\\'.join(parts[:-1]), 'file': parts[-1]}
         else:                       # Linux/Mac
@@ -105,5 +106,5 @@ class FileManagement:
         textbox.changed_since_saved = False
         self.controller.view.tabs.set_properties(textbox.meta.tk_name, text=textbox.meta.file_name)
         # Update the window title
-        self.controller.app.title(f"{self.conf.app_title} - {textbox.meta.file_name}")
+        self.controller.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
         logger.debug(f'Wrote file to textbox: {full_path}')

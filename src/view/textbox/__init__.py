@@ -1,6 +1,7 @@
 from tkinter     import Text, font
 from tkinter.ttk import Notebook, Frame
 
+from conf import Configuration
 from view.colors import Themes
 from view.textbox.clipboard import Clipboard
 from view.textbox.cursor    import Cursor
@@ -12,6 +13,7 @@ from view.textbox.scrollbars import Scrollbars
 from view.textbox.undo_stack import History
 from modules.logging         import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class Textbox(Text):
@@ -22,7 +24,6 @@ class Textbox(Text):
 
     def __init__(self, tabs:Notebook) -> None:
         logger.debug("Textbox begin init")
-        self.conf = tabs.conf
 
         # If the area is in focus we want to be active. When inactive, things
         # on the event loop should be turned off.
@@ -126,7 +127,7 @@ class Textbox(Text):
             colors = Themes.light
 
         self.font = font.nametofont('TkFixedFont')
-        self.font.configure(size=self.conf.font_size)
+        self.font.configure(size=cfg.font_size)
         self.font_size = 0  # This allows different font sizes between windows
 
         self.configure(

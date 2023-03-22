@@ -1,8 +1,10 @@
 from collections import deque
 from tkinter import Text
 
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 # I bypass the tkinter undo/redo because this gives more control. 
@@ -11,11 +13,10 @@ logger = Log(__name__)
 class History:
     def __init__(self, textbox: Text, footer) -> None:
         self.textbox = textbox
-        self.conf    = textbox.conf
         self.footer  = footer
         # Stack for undo/redo
-        self.undo_stack = deque(maxlen = self.conf.max_undo)
-        self.redo_stack = deque(maxlen = self.conf.max_undo)
+        self.undo_stack = deque(maxlen = cfg.max_undo)
+        self.redo_stack = deque(maxlen = cfg.max_undo)
         logger.debug("History init")
 
     def stackify(self) -> None:

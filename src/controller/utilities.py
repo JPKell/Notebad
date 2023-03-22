@@ -1,4 +1,3 @@
-
 from calc.controller import Calculator
 from modules.logging import Log
 
@@ -14,7 +13,6 @@ class Utilities:
     def __init__(self, controller, view):
         self.controller = controller
         self.view = view
-        self.conf = controller.conf
         logger.debug('Utilities init')
 
 
@@ -45,5 +43,5 @@ class Utilities:
         ''' Opens a calculator window. The calculator is basic, but maybe will improve.
             Maybe one day it will be a full scientific calculator, or have business 
             functions. Who knows. Might even have it's own tab. '''
-        calculator = Calculator(self.view.ui.style, self.conf)
+        calculator = Calculator(self.view.ui.style)
         calculator.main()

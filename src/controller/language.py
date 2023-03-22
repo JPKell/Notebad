@@ -1,6 +1,8 @@
+from conf import Configuration
 from modules.logging import Log
 from language import LanguageModel
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class LanguageTools:
@@ -10,7 +12,6 @@ class LanguageTools:
         self.controller = controller
         self.view = view
         self.model = LanguageModel()
-        self.conf = controller.conf
         logger.debug('LanguageTools init')
 
     def load_language(self, lang:str) -> None:
@@ -127,7 +128,7 @@ class LanguageTools:
         # There are times where we will end up formatting part way through a word or
         # statement, then there's also the case of a comment. In both cases we want
         # context outside of the tags we have.  
-        if self.conf.os == 'nt':
+        if cfg.os == 'nt':
             rtn = 13
             up = 38
             down = 40

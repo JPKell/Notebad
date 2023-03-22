@@ -1,12 +1,13 @@
 from   tkinter import messagebox, filedialog, Frame
 
+from conf import Configuration
+from controller.menu    import Menubar
 from modules.logging import Log
 from view.colors  import Themes
-from controller.menu    import Menubar
 from view.tabs    import Tabs
 from view.ui      import UI
 
-
+cfg = Configuration()
 logger = Log(__name__)
 
 class NoteView(Frame):
@@ -25,7 +26,6 @@ class NoteView(Frame):
         super().__init__(controller.app) # This class is a frame that live right inside the main window
         self.controller = controller    
         self.app        = controller.app     # The main window
-        self.conf     = controller.conf    # The config object
         self._make()
         logger.debug("View finish init")
 
@@ -73,7 +73,7 @@ class NoteView(Frame):
 
         textbox = self.textbox
         textbox.is_focus = True
-        self.app.title(f"{self.conf.app_title} - {textbox.meta.file_name}")
+        self.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
         textbox.footer.lang_lbl.config(text=textbox.meta.language)
         self.controller.load_language(textbox.meta.language)
 

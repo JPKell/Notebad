@@ -1,12 +1,14 @@
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class Meta:
     def __init__(self,textbox, tabs):
         self.textbox = textbox
         self.tabs = tabs
-        self._file_name = textbox.conf.new_file_name  # class property
+        self._file_name = cfg.new_file_name  # class property
         self._language  = None  # class property
         self.tk_name    = None
         self.file_path  = None

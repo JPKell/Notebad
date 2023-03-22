@@ -12,7 +12,6 @@ class Tabs(Notebook):
         logger.debug("Tabs begin init")
         super().__init__(view)
         self.view = view
-        self.conf = view.conf
         self.pack(expand=True, fill='both')
         self.bind('<ButtonPress-1>',   lambda event: self.on_close_press(event), True)
         self.bind('<ButtonRelease-1>', lambda event: self.on_close_release(event))
@@ -85,7 +84,7 @@ class Tabs(Notebook):
         if not tab_name:
             tab_name = self.select()
         
-        if self.textbox.meta.changed_since_saved and not self.conf.hardcore_mode:
+        if self.textbox.meta.changed_since_saved and not cfg.hardcore_mode:
             self.view.prompt_yes_no("Whoa, there...", "There are changes not yet saved. Save before you giddy on off??", self.view.controller.save_file)
 
         # Remove tab from the notebook

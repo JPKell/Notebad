@@ -7,11 +7,12 @@ from controller.language        import LanguageTools
 from controller.menu            import Menubar
 from controller.utilities       import Utilities    
 
-from conf  import Configuration
 from view  import NoteView
 
+from conf  import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class NoteController:
@@ -22,9 +23,6 @@ class NoteController:
     view = None
 
     def __init__(self, current_dir:pathlib.Path):
-        # Build the controller first
-        self.conf = Configuration(current_dir)
-        logger.update_conf(self.conf)
         logger.info('Notebad AB-LM IDE Initializing...')
         logger.debug('Controller begin init')
         # Instantiate controller objects
@@ -46,12 +44,12 @@ class NoteController:
 
         # This might be better done as a function on its own. 
         # At that point, maybe we stash the open tabs at close and reopen them 
-        if self.conf.preload_file:
+        if cfg.preload_file:
             textbox = self.view.textbox         
-            self.file_system.write_file_to_textbox(textbox, self.conf.preload_file)
-            path_parts = self.file_system.parts_from_file_path(self.conf.preload_file)
+            self.file_system.write_file_to_textbox(textbox, cfg.preload_file)
+            path_parts = self.file_system.parts_from_file_path(cfg.preload_file)
             textbox.meta.set_meta(tk_name=self.view.tabs.cur_tab_tk_name(),
-                        full_path=self.conf.preload_file,
+                        full_path=cfg.preload_file,
                         file_path=path_parts['path'], 
                         file_name=path_parts['file'], )
         logger.debug('Controller finish init')
@@ -62,7 +60,7 @@ class NoteController:
 
     def relative_to_abs_path(self, rel_path:str) -> str:
         ''' Returns the absolute path of a relative path. '''
-        return os.path.join(self.conf.current_dir, rel_path) 
+        return os.path.join(cfg.current_dir, rel_path) 
 
     def run(self) -> None:
         ''' Start 'er up! Run is called from outside the controller allowing for 
@@ -76,7 +74,7 @@ class NoteController:
                 "Save often, the plains of Oblivion are a dangerous place." 
         ''' 
         tab_list = self.view.tabs.tabs()
-        if not self.conf.hardcore_mode:
+        if not cfg.hardcore_mode:
             for tab in tab_list:
                 self.view.tabs.select(tab)
                 if self.view.textbox.changed_since_saved:

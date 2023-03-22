@@ -1,7 +1,9 @@
 from tkinter import Frame, Label, StringVar
 
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class Footer(Frame):
@@ -11,9 +13,8 @@ class Footer(Frame):
     def __init__(self, frm, view):
         super().__init__(frm, height=30)
         self.view = view
-        self.conf = view.conf
         self.pack(side='bottom', fill='x')
-        self.status_txt = StringVar(self, value=self.conf.status_bar_default_text)
+        self.status_txt = StringVar(self, value=cfg.status_bar_default_text)
         self._make_label()
         self._make_selection_labels()
         self._make_position_labels()
@@ -26,7 +27,7 @@ class Footer(Frame):
         old_txt = self.status_txt.get()
         self.status_txt.set(text)
         if revert:
-            self.after(self.conf.status_bar_duration, self.status_txt.set, old_txt)
+            self.after(cfg.status_bar_duration, self.status_txt.set, old_txt)
         logger.debug(f"Status bar set to: {text}")
 
     def update_pos(self) -> None:
@@ -76,5 +77,5 @@ class Footer(Frame):
 
     def _reset_label(self, force=False) -> None:
         ''' Return status bar to default text. Force will override the freeze setting.'''
-        if not self.conf.status_bar_freeze or force:
-            self.status.config(text=self.conf.status_bar_default_text)
+        if not cfg.status_bar_freeze or force:
+            self.status.config(text=cfg.status_bar_default_text)

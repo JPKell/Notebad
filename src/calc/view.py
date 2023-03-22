@@ -1,8 +1,10 @@
 from   tkinter import Label, Toplevel
 from   tkinter.ttk import Style, Frame, Button
 
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class View(Toplevel):
@@ -14,11 +16,10 @@ class View(Toplevel):
     def __init__(self, controller, style: Style) -> None:
         super().__init__() # Init the Toplevel widget to create a new window
         self.controller = controller
-        self.conf    = controller.conf
-        self.title(self.conf.calc_title) 
+        self.title(cfg.calc_title) 
         self.style = style
         # Set up look and feel
-        self.config(bg=self.conf.calc_bg)
+        self.config(bg=cfg.calc_bg)
         self.configure_button_styles()
         # Default value to display
         self.value_var = "0"
@@ -63,7 +64,7 @@ class View(Toplevel):
     def _make_main_frame(self) -> None:
         ''' Create and pack the main frame all the other widgets live inside '''
         self.main_frm = Frame(self)
-        self.main_frm.pack(padx=self.conf.calc_outer_pad, pady=self.conf.calc_outer_pad) 
+        self.main_frm.pack(padx=cfg.calc_outer_pad, pady=cfg.calc_outer_pad) 
 
     def _make_number_display(self) -> None:
         ''' Number display is a label we update the text of '''

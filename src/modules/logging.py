@@ -1,7 +1,11 @@
 import  datetime as dt
 from    glob import glob
-import  os 
+import  os, pathlib
 from    time import perf_counter
+
+from conf import Configuration
+
+cfg = Configuration()
 
 class Log:
     ''' Handles logging throughout the app. There are 6 levels of logging currently
@@ -17,27 +21,10 @@ class Log:
     '''
 
     log_files_exist = False
-    conf = {}
 
     def __init__(self, src_name: str) -> None:
         self.src_name = src_name
-
-        if not Log.log_files_exist and Log.conf != {}:
-            Log.log_files_exist = (self.__check_for_log_folder() and self.__check_for_log_files())
-            if not Log.log_files_exist:
-                self._init_logs()
-                Log.log_files_exist = True
         
-    def update_conf(self, conf: dict) -> None:
-        ''' Updates the configuration for the logger. 
-            This is called from the main app. 
-        '''
-        Log.conf = conf
-        if not Log.log_files_exist:
-            Log.log_files_exist = (self.__check_for_log_folder() and self.__check_for_log_files())
-            if not Log.log_files_exist:
-                self._init_logs()
-                Log.log_files_exist = True
 
     def fatal(self, txt: str) -> None:
         ''' Log level: 0 - FATAL
@@ -102,7 +89,7 @@ class Log:
                 However the knowledge you can gleam from this is worth the expense. But it doesn't need
                 to run all the time.  
             ''' 
-            if not self.conf.log_performance:
+            if not cfg.log_performance:
                 return func(*args, **kwargs)
 
             # Setup
@@ -129,16 +116,16 @@ class Log:
     def _init_logs(self) -> None:
         ''' Ensure that the required folders and files are in place to start logging '''
         if self.__check_for_log_folder() == False:
-            os.makedirs(self.conf.log_dir)
-        log_list = [self.conf.log_file, self.conf.log_performance_file]
+            os.makedirs(cfg.log_dir)
+        log_list = [cfg.log_file, cfg.log_performance_file]
         for log in log_list:
             with open(log, 'a'):
                 pass         
 
     def delete_dot_logs(self) -> None:
         ''' Remove all .log files created '''
-        os.remove(f'{self.conf.log_file}')
-        os.remove(f'{self.conf.performance_file}')
+        os.remove(f'{cfg.log_file}')
+        os.remove(f'{cfg.performance_file}')
 
     # Helper functions
 
@@ -157,20 +144,6 @@ class Log:
             'log': str(log_txt),
         }
 
-    def __check_for_log_folder(self) -> bool:
-        ''' Before we can have a log file there must be a log folder '''
-        folder_list = glob(f'{self.conf.current_dir}/**/', recursive=True)
-        for folder in folder_list:
-            if folder[:-1] == self.conf.log_dir:
-                return True
-        return False
-
-    def __check_for_log_files(self) -> bool:
-        ''' If the log file does not exist, it will may throw and error when accessed. '''
-        file_list = glob(f'{self.conf.log_dir}/**/*.*', recursive=True)
-        x = [ 1 for file in file_list if file == self.conf.log_file ]
-        return sum(x) > 0
-
 
     # Output logs
     def __log_console_write(self, log: dict):
@@ -178,7 +151,7 @@ class Log:
             Params:
                 - log: a dictionary created from the methods above
         '''
-        if log.get('level') <= self.conf.log_console_level:
+        if log.get('level') <= cfg.log_console_level:
             log_lines = log.get('log','').split('\n')
             for line in log_lines:
                 if line != '': 
@@ -191,21 +164,21 @@ class Log:
             Params:
                 - log: a dictionary created from the methods above
         '''
-        if log.get('level') <= self.conf.log_file_level:
-            with open(self.conf.log_file, 'a') as file:
+        if log.get('level') <= cfg.log_file_level:
+            with open(cfg.log_file, 'a') as file:
                 log_lines = log.get('log','').split('\n')
                 for line in log_lines: 
                     file.write(f"{log.get('timestamp')}\t{log.get('name')}\t{log.get('module')}\t{line}\n")
 
     def __perf_console_write(self, log:dict):
         ''' Outputs the performance log information to terminal.'''
-        if self.conf.log_performance_to_console:
+        if cfg.log_performance_to_console:
             time = dt.datetime.strftime(log.get('timestamp'), '%H:%M:%S.%f')[:-3]
             print(f"{time} PERF\t{log.get('module'): <35} {log.get('name')}\t{log.get('duration'):10.5f} sec")
 
     def __perf_file_write(self, log:dict):
         ''' Writes the performance log to flat file '''
-        if self.conf.log_performance_to_file:
+        if cfg.log_performance_to_file:
             line = f"{log.get('timestamp')}\t{log.get('module')}\t{log.get('name')}\t{log.get('duration'):10.10f}\n"
-            with open(self.conf.log_performance_file, 'a') as file:
+            with open(cfg.log_performance_file, 'a') as file:
                 file.write(line)

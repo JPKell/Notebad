@@ -1,9 +1,11 @@
 from tkinter.ttk import Style
 
+from modules.logging import Log
+
+# Calculator imports
 from .model import Model
 from .view  import View
 
-from modules.logging import Log
 
 logger = Log(__name__)
 
@@ -11,8 +13,7 @@ class Calculator:       # a.k.a Controller
     ''' The calculator is a simple MVC architecture. It was added to Notebad as 
         a more simplified example without heaps of methods and classes. It carries
         the styles from the main app since it is running on the same Tk interpreter '''
-    def __init__(self, style:Style, conf):
-        self.conf = conf 
+    def __init__(self, style:Style):
         self.model = Model()           # Model does not know about controller
         self.view  = View(self, style) # View does. Pass the controller into view
         self._bind_keys()

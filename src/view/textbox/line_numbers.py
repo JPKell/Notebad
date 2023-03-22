@@ -1,15 +1,16 @@
 from tkinter import Canvas
 
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class LineNumbers(Canvas):
     ''' Line numbers for the edge of a textbox. These are drawn on a canvas 
         and are updated when the window is changed. ''' 
     def __init__(self, textbox):
-        self.conf    = textbox.conf
-        super().__init__(textbox.frame, width=self.conf.line_number_width)
+        super().__init__(textbox.frame, width=cfg.line_number_width)
         # Canvas.__init__(textbox.frame)
         self.textbox = textbox
         self.color = 'grey'
