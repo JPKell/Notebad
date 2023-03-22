@@ -24,12 +24,8 @@ class NoteController:
 
     def __init__(self, current_dir:pathlib.Path):
         logger.info('Notebad AB-LM IDE Initializing...')
-        logger.verbose('Verbose')
         logger.debug('Controller begin init')
-        logger.info('Info')
-        logger.warn('Warn')
-        logger.error('Error')
-        logger.fatal('FATAL')
+
         # Instantiate controller objects
         # Root window
         self.app       = tk.Tk()        
@@ -82,11 +78,11 @@ class NoteController:
         if not cfg.hardcore_mode:
             for tab in tab_list:
                 self.view.tabs.select(tab)
-                if self.view.textbox.changed_since_saved:
+                if self.view.textbox.meta.changed_since_saved:
                     self.view.prompt_yes_no(
                         "You have unsaved changes", 
                         f"Save {self.view.textbox.meta.file_name}?", 
-                        self.save_file)
+                        self.file_system.save_file)
         self.view.master.destroy()
         logger.debug('Application closed')
 
