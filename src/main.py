@@ -18,3 +18,5 @@ if __name__ == '__main__':
     controller = NoteController(current_dir)
     controller.run()
     
+
+test = "Not a thing"
