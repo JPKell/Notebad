@@ -35,12 +35,14 @@ class Textbox(Text):
 
         # tabs is the parent widget
         self.tabs = tabs
+        self.view = self.tabs
 
         # This frame houses the text area, line numbers, scrollbars, and footer
         self.frame = Frame(tabs, padding=0, border=0, relief='flat')
 
         # Initialize the text area
         super().__init__(self.frame, undo=False, border=0, relief='flat', wrap='none', padx=0, pady=0) 
+
         
         # Build all the objects associated with the text area
         self.footer = Footer(self.frame, self.tabs.view)
@@ -57,7 +59,6 @@ class Textbox(Text):
 
         # Handle special keybindings
         self._bind_keys()
-
 
         # Text area settings
         self._make_text_area(tabs) 

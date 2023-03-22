@@ -156,6 +156,7 @@ def t__UNDEFINE(t):
 def t_ABSOLUTE(t):
     r'\b(?:ABSOLUTE|ABSOLUT|ABSOLU|ABSOL|ABSO|ABS)\b'
     t.tag = 'orange'
+    t.indent += 1 
     return t
     
 def t_ACCUMULATE(t):

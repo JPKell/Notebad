@@ -6,6 +6,7 @@ from modules.logging import Log
 from view.colors  import Themes
 from view.tabs    import Tabs
 from view.ui      import UI
+from view.find_window import FindWindow
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -45,6 +46,9 @@ class NoteView(Frame):
     @property
     def textbox(self):           # So common it needs to be a property in view
         return self.tabs.textbox
+
+    def find(self):
+        FindWindow(self)
 
     ###               ###
     # User interactions #

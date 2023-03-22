@@ -7,6 +7,8 @@ Hopefully the bugs decrease and the missing important does too
 
 # Bugs
 
+
+
 # Missing important
 - FIND, FIND AND REPLACE
 - settings to enable and disable language
@@ -16,17 +18,13 @@ Hopefully the bugs decrease and the missing important does too
 - ABL section needs to be tidied up.
   - able tokens from kw_master 
 
+
 # Refactor
 ## Priority
-- Status bar needs to move into the textbox item. 
+
 - Textbox needs to be able to freeze state when switching tab. 
   - The issue is the functions with callbacks keep running in the background. even when tab is closed. That's terrible for longer sessions. That could get out of hand with many tabs open. 
 
-
-- Reduce controller
-  - file operations, clipboard/edit/undo, languages split out?
-- Reduce textbox
-  - scrollbars split out. 
 
 # Language
 - . or colon followed by whitespace. should be a rule.
