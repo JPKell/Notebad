@@ -1,5 +1,4 @@
-from collections import deque
-from tkinter import Text, font
+from tkinter     import Text, font
 from tkinter.ttk import Notebook, Frame
 
 from view.colors import Themes
@@ -20,12 +19,13 @@ class Textbox(Text):
         is typing. This class is responsible for the text area, line numbers, 
         and scrollbars. Syntax highlighting is a beast of it's own and is 
         separated into it's own module. '''
-    
-    tk_name = ""
 
     def __init__(self, tabs:Notebook) -> None:
         logger.debug("Textbox begin init")
         self.conf = tabs.conf
+
+        # If the area is in focus we want to be active. When inactive, things
+        # on the event loop should be turned off.
         self._is_focus = False
 
         # Line number updates is a whole thing. It uses a proxy and if we are 
@@ -35,12 +35,9 @@ class Textbox(Text):
         # tabs is the parent widget
         self.tabs = tabs
 
-        self.font = font.nametofont('TkFixedFont')
-        self.font.configure(size=self.conf.font_size)
-        self.font_size = 0  # This allows different font sizes between windows
-
-        # This frame houses the text area, line numbers and scrollbars
+        # This frame houses the text area, line numbers, scrollbars, and footer
         self.frame = Frame(tabs, padding=0, border=0, relief='flat')
+
         # Initialize the text area
         super().__init__(self.frame, undo=False, border=0, relief='flat', wrap='none', padx=0, pady=0) 
         
@@ -55,7 +52,7 @@ class Textbox(Text):
         self.cusor     = Cursor(self)
 
         # Instantiate the line numbers
-        self._make_line_numbers()
+        self._init_line_numbers()
 
         # Handle special keybindings
         self._bind_keys()
@@ -95,9 +92,6 @@ class Textbox(Text):
         '''
         return self.get(1.0, 'end') == '\n'
 
-    ####################
-    ## Event handlers ##
-    ####################
 
     def check_on_key(self, event) -> None:
         ''' This is the function that runs upon every keypress. If there is a
@@ -113,6 +107,7 @@ class Textbox(Text):
             self.history.stackify()
             self.meta.changed_since_saved = True
             self.tabs.set_properties(self.meta.tk_name, text=f'{self.meta.file_name} *')
+            return
 
         # Pushes the current state of the document onto the stack for undo
         if event.char in [' ', '\t', '\n']:
@@ -123,20 +118,17 @@ class Textbox(Text):
         ''' Some keys need specific bindings to behave how you expect in a text editor '''
         self.bind("<KP_Enter>", lambda event: self.add_newline())
 
-
-    def _on_change(self, event):
-        self.linenumbers.redraw()
-
-    ###                 ###
-    # Constructor helpers #
-    ###                 ###
-
     def _make_text_area(self, tabs:Notebook) -> None:
         ''' Create a new textbox and add it to the notebook '''
         if tabs.view.ui.theme == 'dark':
             colors = Themes.dark
         else:
             colors = Themes.light
+
+        self.font = font.nametofont('TkFixedFont')
+        self.font.configure(size=self.conf.font_size)
+        self.font_size = 0  # This allows different font sizes between windows
+
         self.configure(
             background=colors.text_background,          
             foreground=colors.text_foreground,
@@ -163,13 +155,18 @@ class Textbox(Text):
         self.mark_set("insert", "1.0")
         self.focus_set()
 
-    def _make_line_numbers(self) -> None:
-        ''' Add line numbers Canvas to the text area '''
-        
+
+
+
+    def _init_line_numbers(self) -> None:
+        ''' Make the necessary bindings and set up the proxy listener '''
+        # These will call the _on_change method whenever the window is resized (<Configure>)
+        # or the proxy fires a <<Change>> event 
         self.bind("<<Change>>", self._on_change)
         self.bind("<Configure>", self._on_change)
 
-        # create a proxy for the underlying widget
+        # create a proxy for the text widget to listen for changes the 
+        # line numbers need to react to.
         self._orig = self._w + "_orig"
         self.tk.call("rename", self._w, self._orig)
         self.tk.createcommand(self._w, self._proxy)
@@ -206,3 +203,8 @@ class Textbox(Text):
         # return what the actual widget returned
         return result   
 
+    def _on_change(self, event) -> None:
+        ''' Triggered on <<Change>>. It will update the line numbers. 
+            - event: dummy argument to match the event handler signature.
+        '''
+        self.linenumbers.redraw()

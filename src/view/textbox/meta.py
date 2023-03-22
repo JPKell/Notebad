@@ -36,10 +36,10 @@ class Meta:
         self.textbox.footer.lang_lbl.config(text=language)
         logger.debug(f"Language set to: {language}")
 
-    ###                        ###
-    # Underlying file operations #
-    ###                        ###
 
+    # This could be tidied up. Also if we get a full path we should be able to
+    # get the file name and path from that. so do that. Keep in mind windows and
+    # linux paths are different.  
     def set_meta(self, file_path:str=None, file_name:str=None, full_path:str=None, tk_name:str=None) -> None:
         ''' Set various pieces of meta data. The tk name is the name of the tab in 
             tkinter land '''

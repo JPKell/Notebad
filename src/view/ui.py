@@ -80,7 +80,7 @@ class UI:
                 'activebackground': colors.bg_highlight, 
                 'activeforeground':colors.foreground 
                 }
-            self.view.controller.menu.configure(**menu_colors)  
+            self.view.controller.menu.configure(**menu_colors)   
             # Loop through the menu items and set the colors 
             for menu in self.view.controller.menu.menu_list:
                 menu.config(**menu_colors)     

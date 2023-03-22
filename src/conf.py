@@ -72,4 +72,3 @@ class Configuration:
         self.preload_file = '/home/jpk/gits/Notebad/test.p'
         self.log_performance = True
 
-

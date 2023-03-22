@@ -73,3 +73,4 @@ class Menubar(Menu):
         self.add_cascade(label="Py", menu=self.py_menu)
         self.py_menu.add_command(label="Eval line/selection", accelerator="Alt E", command=lambda: self.controller.utilities.eval_selection())
 
+####  This needs to have the ui set at first load cause it's wrong. 

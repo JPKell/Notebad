@@ -92,10 +92,6 @@ class Tabs(Notebook):
         self.forget(tab_name)
         self.event_generate("<<NotebookTabClosed>>")
 
-        # Destroy the tab widget to free up memory
-        tab_widget = self.nametowidget(tab_name)
-        tab_widget.destroy()
-
         logger.debug(f"Tab closed: {tab_name}")
 
         # If there are no tabs left, create a new one

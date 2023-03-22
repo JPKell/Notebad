@@ -9,3 +9,9 @@
 2023-03-21 19:33:09.374297	ERROR	view.textbox	Error in _proxy: text doesn't contain any characters tagged with "sel"
 2023-03-21 19:33:09.374613	ERROR	view.textbox	cmd: ('.!noteview.!tabs.!frame.!textbox_orig', 'delete', 'sel.first', 'sel.last')
 2023-03-21 20:40:30.340006	ERROR	language	Language text not found
+2023-03-21 22:00:18.321163	ERROR	language	Language text not found
+2023-03-21 22:02:58.090015	ERROR	language	Language text not found
+2023-03-21 22:09:50.051300	ERROR	language	Language text not found
+2023-03-21 22:11:44.501968	ERROR	language	Language text not found
+2023-03-21 22:12:47.989155	ERROR	language	Language text not found
+2023-03-21 22:13:05.054060	ERROR	language	Language text not found
