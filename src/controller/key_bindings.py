@@ -34,7 +34,7 @@ class KeyBindings:
         self.app.bind_class("Text", "<Control-z>", lambda event: self.controller.view.textbox.history.undo())
         self.app.bind_class("Text", "<Control-y>", lambda event: self.controller.view.textbox.history.redo())
         self.app.unbind_all("<Tab>")    # Unbind the default tab key for all widgets before overriding it
-        self.app.bind_class("Text", "<Tab>", lambda event: self.controller.view.tabs.add_indent(), add=False)
+        self.app.bind_class("Text", "<Tab>", lambda event: self.controller.view.tabs.textbox.editor.add_indent(), add=False)
 
         # Textbox management
         self.app.bind("<Control-a>", lambda event: self.controller.view.tabs.textbox.cursor.select_all())

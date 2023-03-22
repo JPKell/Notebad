@@ -35,9 +35,27 @@ class LanguageTools:
         # events which will block in the Tk main loop. 
         textbox.disable_line_no_update = True
 
-        # textbox.editor.clear_all()
-        for tok in results:
-            textbox.insert('insert',tok.value, tok.tag)
+        nl = True
+
+        if self.model.track_whitepace:
+            for tok in results:
+
+                spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
+                nl = False
+                if tok.tag == 'nl':
+                    textbox.insert('insert', tok.value)
+                    nl=True
+                    continue
+                # For some characters we dont want a trailing space
+                if tok.value in [':']:
+                    # This is a hack, maybe worth it's own variable. 
+                    nl = True
+                textbox.insert('insert',spc+tok.value, tok.tag)
+                textbox.insert('insert',tok.value, tok.tag)
+
+        else: # Dont track whitespace
+            for tok in results:
+                textbox.insert('insert',tok.value, tok.tag)
 
         textbox.disable_line_no_update = False
         # Return the cursor to the same position by deleting the place it
@@ -64,27 +82,28 @@ class LanguageTools:
 
         textbox.editor.clear_all()
         nl = True
-        for tok in results:
 
-            ###
-            # STOP! the commented out code is if whitespace is not tracked.
-            ###
-            # spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
-            # nl = False
-            # if tok.tag == 'nl':
-            #     textbox.insert('insert', tok.value)
-            #     nl=True
-            #     continue
-            # # For some characters we dont want a trailing space
-            # if tok.value in [':']:
-            #     # This is a hack, maybe worth it's own variable. 
-            #     nl = True
-            # textbox.insert('insert',spc+tok.value, tok.tag)
-            textbox.insert('insert',tok.value, tok.tag)
-            ###
-            # If restoring , delete the above line and uncomment the rest
-            ###
+        if self.model.track_whitepace:
+            for tok in results:
 
+                spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
+                nl = False
+                if tok.tag == 'nl':
+                    textbox.insert('insert', tok.value)
+                    nl=True
+                    continue
+                # For some characters we dont want a trailing space
+                if tok.value in [':']:
+                    # This is a hack, maybe worth it's own variable. 
+                    nl = True
+                textbox.insert('insert',spc+tok.value, tok.tag)
+                textbox.insert('insert',tok.value, tok.tag)
+
+        else: # Dont track whitespace
+            for tok in results:
+                textbox.insert('insert',tok.value, tok.tag)
+
+        logger.debug("Replaced text")
 
         textbox.disable_line_no_update = False
         # Return the cursor to the same position by deleting the place it

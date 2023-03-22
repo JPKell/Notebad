@@ -1,7 +1,9 @@
 from tkinter import Text
 
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class Editor:
@@ -15,8 +17,8 @@ class Editor:
         cursor_pos = self.tb.index('insert')
         x_pos = int(cursor_pos.split('.')[1])
         # Adjust the cursor position to the nearest indent
-        x_pos = x_pos % self.tb.conf.indent_size
-        self.tb.insert('insert', ' ' * (self.tb.conf.indent_size - x_pos))
+        x_pos = x_pos % cfg.indent_size
+        self.tb.insert('insert', ' ' * (cfg.indent_size - x_pos))
         return 'break'
 
     def get_current_line_text(self) -> str:

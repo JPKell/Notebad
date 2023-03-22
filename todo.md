@@ -7,7 +7,6 @@ Hopefully the bugs decrease and the missing important does too
 
 # Bugs
 
-- create a change
 
 # Missing important
 - FIND, FIND AND REPLACE

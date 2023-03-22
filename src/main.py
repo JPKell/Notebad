@@ -4,6 +4,9 @@ import pathlib
 from controller import NoteController
 from conf import Configuration
 
+## Uncomment this out to rebuild the ABL rules. Then restart app for rules to be in effect
+from language.abl_rules import build
+##
 
 cfg = Configuration()
 
@@ -18,5 +21,3 @@ if __name__ == '__main__':
     controller = NoteController(current_dir)
     controller.run()
     
-
-test = "Not a thing"

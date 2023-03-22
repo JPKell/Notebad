@@ -18,6 +18,7 @@ class LanguageModel:
         self.model = []
         self.language_module = None
         self.expand = False
+        self.track_whitepace = False
         logger.debug('LanguageModel initialized')
 
     def load_language(self, lang:str) -> None:
@@ -28,6 +29,8 @@ class LanguageModel:
         if not self.language_module:
             logger.error(f'Language {lang} not found')
             return
+        
+        self.track_whitepace = self.language_module.track_whitespace
         logger.info(f'Language {lang} loaded')
 
 

@@ -173,8 +173,9 @@ class Log:
     def __perf_console_write(self, log:dict):
         ''' Outputs the performance log information to terminal.'''
         if cfg.log_performance_to_console:
+            '\033[2;31;43m CHEESY \033[0;0m'
             time = dt.datetime.strftime(log.get('timestamp'), '%H:%M:%S.%f')[:-3]
-            print(f"{time} PERF\t{log.get('module'): <35} {log.get('name')}\t{log.get('duration'):10.5f} sec")
+            print(f"\033[2;31;43m {time} PERF\t{log.get('module'): <35} {log.get('name')}\t{log.get('duration'):10.5f} sec \033[0;0m")
 
     def __perf_file_write(self, log:dict):
         ''' Writes the performance log to flat file '''
