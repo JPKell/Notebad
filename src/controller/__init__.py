@@ -24,7 +24,12 @@ class NoteController:
 
     def __init__(self, current_dir:pathlib.Path):
         logger.info('Notebad AB-LM IDE Initializing...')
+        logger.verbose('Verbose')
         logger.debug('Controller begin init')
+        logger.info('Info')
+        logger.warn('Warn')
+        logger.error('Error')
+        logger.fatal('FATAL')
         # Instantiate controller objects
         # Root window
         self.app       = tk.Tk()        

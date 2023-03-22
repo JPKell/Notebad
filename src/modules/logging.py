@@ -18,6 +18,10 @@ class Log:
 
         Usage: 
             `log = logging.Log(__name__)`
+
+        Uses escape characters to color the output
+        https://stackabuse.com/how-to-print-colored-text-in-python/
+        
     '''
 
     log_files_exist = False
@@ -32,7 +36,8 @@ class Log:
             if they were not in a try: block
         '''
         log = self.__return_log_dict(0,txt)
-        self.__log_console_write(log)
+        color = '\033[1;30;41m'
+        self.__log_console_write(log, color)
         self.__log_file_write(log)
         
     def error(self, txt: str) -> None:
@@ -40,7 +45,8 @@ class Log:
             Use error for significant but recoverable errors
         '''
         log = self.__return_log_dict(1,txt)
-        self.__log_console_write(log)
+        color = '\033[1;30;41m'
+        self.__log_console_write(log, color)
         self.__log_file_write(log)
 
     def warn(self, txt: str) -> None:
@@ -48,7 +54,8 @@ class Log:
             Something seems off or some configuration is unsafe
         '''
         log = self.__return_log_dict(2,txt)
-        self.__log_console_write(log)
+        color = '\033[1;30;43m'
+        self.__log_console_write(log, color)
         self.__log_file_write(log)
 
     def info(self, txt: str) -> None:
@@ -56,7 +63,8 @@ class Log:
             Things you just might want to know
         '''
         log = self.__return_log_dict(3,txt)
-        self.__log_console_write(log)
+        color = '\033[1;37;42m'
+        self.__log_console_write(log, color)
         self.__log_file_write(log)
 
     def debug(self, txt: str) -> None:
@@ -146,7 +154,7 @@ class Log:
 
 
     # Output logs
-    def __log_console_write(self, log: dict):
+    def __log_console_write(self, log: dict, color=False):
         ''' Outputs the log information to terminal. 
             Params:
                 - log: a dictionary created from the methods above
@@ -155,8 +163,10 @@ class Log:
             log_lines = log.get('log','').split('\n')
             for line in log_lines:
                 if line != '': 
+                    color = '' if color == False else color
+                    close_color = '\033[0;0m' if color else ''
                     time = dt.datetime.strftime(log.get('timestamp'), '%H:%M:%S.%f')[:-3]
-                    print(f"{time} {log.get('name')}\t{log.get('module'): <35} {line}")
+                    print(f"{time} {color}{log.get('name'):10}{close_color}{log.get('module'): <35} {line}")
  
     def __log_file_write(self, log: dict): 
         ''' Writes the log to flat file 
@@ -173,9 +183,11 @@ class Log:
     def __perf_console_write(self, log:dict):
         ''' Outputs the performance log information to terminal.'''
         if cfg.log_performance_to_console:
-            '\033[2;31;43m CHEESY \033[0;0m'
+            color = '\033[1;30;46m'
+            speed_color = '\033[1;31m'
+            close_color = '\033[0;0m' 
             time = dt.datetime.strftime(log.get('timestamp'), '%H:%M:%S.%f')[:-3]
-            print(f"\033[2;31;43m {time} PERF\t{log.get('module'): <35} {log.get('name')}\t{log.get('duration'):10.5f} sec \033[0;0m")
+            print(f"{time} {color}{'PERF':10}{close_color}{log.get('module'): <35} {speed_color}{log.get('duration'):<10.5f} sec{close_color} {log.get('name')}\t")
 
     def __perf_file_write(self, log:dict):
         ''' Writes the performance log to flat file '''
