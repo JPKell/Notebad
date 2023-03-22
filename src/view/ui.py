@@ -3,7 +3,9 @@ from tkinter import PhotoImage, Frame, font
 from tkinter.ttk import Style
 
 from .colors import Themes
-from conf import cf
+from modules.logging import Log
+
+logger = Log(__name__)
 
 class UI:
     ''' Manages the appearance of the app. Custom colors are set in the colors.py file. ''
@@ -11,13 +13,15 @@ class UI:
         '''
     def __init__(self, view: Frame) -> None:
         self.view = view
-        self.theme = cf.default_theme
+        self.conf = view.conf
+        self.theme = self.conf.default_theme
         self.style = Style()
-        self.font = font.Font(**cf.font)
-        self._font_size = cf.font['size']
+        self.font = font.nametofont('TkFixedFont')
+        self._font_size = self.conf.font_size
         self._init_img_pool()
         self._init_style()
         self._root_window_setup()
+        logger.debug("UI initialized")
 
     @property
     def font_size(self) -> int:
@@ -27,6 +31,7 @@ class UI:
     def font_size(self, size: int) -> None:
         self._font_size = size
         self.font.configure(size=size)
+        logger.debug(f"Font size set to {size}")
     
     def font_size_bump(self, increase=True) -> None:
         ''' Increase or decrease the font size by 1 '''
@@ -37,6 +42,7 @@ class UI:
 
     def change_font(self, font:str):
         self.font.configure(family=font)
+        logger.debug(f"Font changed to {font}")
 
     ## UI look and feel ##
     def toggle_theme(self, reload=False) -> None:
@@ -58,6 +64,8 @@ class UI:
             self.theme = 'dark'
             colors = Themes.dark
             self.style.theme_use('dark')
+
+        logger.debug(f"Theme set to {self.theme}")
      
         ### 
         # Menu bars are not easily modified in the windows system, 
@@ -72,9 +80,9 @@ class UI:
                 'activebackground': colors.bg_highlight, 
                 'activeforeground':colors.foreground 
                 }
-            self.view.menu.menu.config(**menu_colors)  
+            self.view.controller.menu.configure(**menu_colors)  
             # Loop through the menu items and set the colors 
-            for menu in self.view.menu.menu_list:
+            for menu in self.view.controller.menu.menu_list:
                 menu.config(**menu_colors)     
     
         
@@ -112,9 +120,11 @@ class UI:
             textbox.tag_configure("grey", foreground = colors.syn_grey)
             textbox.tag_configure("error", foreground = colors.syn_error)
 
-        # Style the status bar
-        self.view.footer.status.config(bg=colors.background, fg=colors.foreground)
-        self.view.footer.pos_lbl.config(bg=colors.background, fg=colors.foreground)
+            # Style the status bar
+            textbox.footer.status.config(bg=colors.background, fg=colors.foreground)
+            textbox.footer.pos_lbl.config(bg=colors.background, fg=colors.syn_orange)
+            textbox.footer.lang_lbl.config(bg=colors.background, fg=colors.syn_yellow)
+            textbox.footer.sel_lbl.config(bg=colors.background, fg=colors.syn_orange)
 
 
     def _init_img_pool(self) -> None:
@@ -147,9 +157,15 @@ class UI:
         for title, colors in [('dark', Themes.dark), ('light', Themes.light)]:
             
             self.style.theme_create( title, parent="alt", settings={
+                "TFrame": {
+                    "configure": {
+                        "background": colors.background,
+                        "foreground": colors.foreground,
+                    }
+                },
                 "TNotebook": {
                     "configure": {
-                        "tabmargins": [cf.line_number_width + 2, 5, 10, 0], 
+                        "tabmargins": [self.conf.line_number_width + 2, 5, 10, 0], 
                         "foreground": colors.background,
                         "background": colors.background,
                         "borderwidth": 0,
@@ -181,6 +197,7 @@ class UI:
                 } 
             ) 
             self._register_tab_close_button_with_style()
+            logger.verbose(f"Created theme: {title}")
 
         # Initialize to the correct theme
         if self.theme == 'dark':
@@ -226,9 +243,9 @@ class UI:
         ''' Basic geometry and title settings for the root window.'''
         app = self.view.app
         # Window settings 
-        app.title(cf.app_title)  
-        app.geometry(cf.geometry) 
-        app.minsize(*cf.min_size)
+        app.title(self.conf.app_title)  
+        app.geometry(self.conf.geometry) 
+        app.minsize(*self.conf.min_size)
 
         path_func = self.view.controller.relative_to_abs_path
         if os.name == 'nt': 

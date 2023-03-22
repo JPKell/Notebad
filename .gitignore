@@ -4,3 +4,5 @@ __pycache__*
 venv*
 ply-master*
 cribbage.py
+logs/notebad.log
+logs/performance.log

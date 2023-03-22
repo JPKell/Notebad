@@ -1,7 +1,9 @@
 from   tkinter import Label, Toplevel
 from   tkinter.ttk import Style, Frame, Button
 
-from   conf    import cf
+from modules.logging import Log
+
+logger = Log(__name__)
 
 class View(Toplevel):
     ''' The view does all the visuals. It's a calculator so pretty easy. 
@@ -11,12 +13,12 @@ class View(Toplevel):
 
     def __init__(self, controller, style: Style) -> None:
         super().__init__() # Init the Toplevel widget to create a new window
-        self.title(cf.calc_title) 
-
         self.controller = controller
+        self.conf    = controller.conf
+        self.title(self.conf.calc_title) 
         self.style = style
         # Set up look and feel
-        self.config(bg=cf.calc_bg)
+        self.config(bg=self.conf.calc_bg)
         self.configure_button_styles()
         # Default value to display
         self.value_var = "0"
@@ -28,7 +30,14 @@ class View(Toplevel):
         self._make_number_display()
         self._make_buttons()
         self._lock_window_size()
-        
+        self.protocol("WM_DELETE_WINDOW", self.exit_calc)
+        logger.debug("Calc view init")
+
+    def exit_calc(self) -> None:
+        ''' Exit the calculator and destroy evidence on way out '''
+        self.destroy()
+        logger.info("Calculator close")
+
     def main(self) -> None:
         ''' The mainloop of the calc window '''
         self.mainloop()
@@ -54,7 +63,7 @@ class View(Toplevel):
     def _make_main_frame(self) -> None:
         ''' Create and pack the main frame all the other widgets live inside '''
         self.main_frm = Frame(self)
-        self.main_frm.pack(padx=cf.calc_outer_pad, pady=cf.calc_outer_pad) 
+        self.main_frm.pack(padx=self.conf.calc_outer_pad, pady=self.conf.calc_outer_pad) 
 
     def _make_number_display(self) -> None:
         ''' Number display is a label we update the text of '''

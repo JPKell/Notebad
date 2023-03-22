@@ -1,8 +1,15 @@
+from tkinter import font
+import os
+
 class Configuration:
     """A class to hold configuration values for the app"""
 
-    def __init__(self, dev_mode=True):
+    def __init__(self, current_dir:str, dev_mode=True):
+        # We need this multiple times. May as well have it in config. 
+        self.os = os.name
+        self.current_dir = current_dir
         self.dev_mode = dev_mode
+        
         # Window settings
         self.app_title = 'Notebad'
         self.geometry = '800x600'
@@ -21,11 +28,7 @@ class Configuration:
         self.max_undo = 50
 
         # Textbox appearance
-        self.font = {                   # This should get unpacked into the font.Font() constructor 
-            'family': 'Consolas',       # usint the ** operator ie. **cf.font
-            'size'  : 12,
-            'weight': 'normal'
-            }
+        self.font_size = 12
         self.line_number_width = 33
 
         # Textbox behaviour
@@ -42,9 +45,19 @@ class Configuration:
         self.calc_bg    = '#111'
         self.calc_outer_pad = 3
 
+        # Logging settings
+        self.log_console_level = 4
+        self.log_file_level = 2
+        self.log_dir = os.path.join(self.current_dir, 'logs')
+        self.log_file = os.path.join(self.log_dir, 'notebad.log')
+        self.log_performance = False
+        self.log_performance_to_file = True
+        self.log_performance_to_console = True
+        self.log_performance_file = os.path.join(self.log_dir, 'performance.log')
+
+
         # Developer settings. Don't change these here. If you want developer functions, use dev mode. 
         self.preload_file = False
-        self.time_functions = False
 
         if dev_mode:
             self._dev_mode()
@@ -57,7 +70,6 @@ class Configuration:
         self.hardcore_mode = True
         self.enable_syntax_highlighting = True
         self.preload_file = '/home/jpk/gits/Notebad/test.p'
-        self.time_functions = True
+        self.log_performance = True
 
 
-cf = Configuration()

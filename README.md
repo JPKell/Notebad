@@ -26,11 +26,11 @@ Most of the classes in the view are inheriting from tk widgets. The heirarchy lo
     - Menubar(): Menu() doesn't inherit directly from Menu but houses the whole menu bar
     - Tabs(): Notebook() a ttk element for the tabs
       - Textbbox(): Text() where everything happens really. 
-        - TextLineNumbers(): Canvas() the canvas gets updated with the line numbers. Kinda a pain as it needs a proxy to work. 
+        - LineNumbers(): Canvas() the canvas gets updated with the line numbers. Kinda a pain as it needs a proxy to work. 
         - scrollbars: Scrollbar() the scrollbars 
-    - Footer(): Frame() parent frame to the labels
-      - status: Label() the status you can update
-      - pos_lbl: Label() the cursor position in the document
+        - Footer(): Frame() parent frame to the labels
+          - status: Label() the status you can update
+          - pos_lbl: Label() the cursor position in the document
 
 
 ## Controller

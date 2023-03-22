@@ -1,0 +1,11 @@
+2023-03-21 14:08:09.386849	ERROR	view.textbox	Error in _proxy: text doesn't contain any characters tagged with "sel"
+2023-03-21 14:08:09.387010	ERROR	view.textbox	cmd: ('.!noteview.!tabs.!frame.!textbox_orig', 'get', 'sel.first', 'sel.last')
+2023-03-21 14:08:11.018704	ERROR	view.textbox	Error in _proxy: text doesn't contain any characters tagged with "sel"
+2023-03-21 14:08:11.018840	ERROR	view.textbox	cmd: ('.!noteview.!tabs.!frame.!textbox_orig', 'get', 'sel.first', 'sel.last')
+2023-03-21 14:11:42.756398	ERROR	view.textbox	Error in _proxy: text doesn't contain any characters tagged with "sel"
+2023-03-21 14:11:42.761579	ERROR	view.textbox	cmd: ('.!noteview.!tabs.!frame.!textbox_orig', 'get', 'sel.first', 'sel.last')
+2023-03-21 19:31:22.315155	ERROR	view.textbox	Error in _proxy: text doesn't contain any characters tagged with "sel"
+2023-03-21 19:31:22.315520	ERROR	view.textbox	cmd: ('.!noteview.!tabs.!frame.!textbox_orig', 'get', 'sel.first', 'sel.last')
+2023-03-21 19:33:09.374297	ERROR	view.textbox	Error in _proxy: text doesn't contain any characters tagged with "sel"
+2023-03-21 19:33:09.374613	ERROR	view.textbox	cmd: ('.!noteview.!tabs.!frame.!textbox_orig', 'delete', 'sel.first', 'sel.last')
+2023-03-21 20:40:30.340006	ERROR	language	Language text not found

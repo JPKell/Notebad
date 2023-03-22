@@ -3,14 +3,20 @@ from tkinter.ttk import Style
 from .model import Model
 from .view  import View
 
+from modules.logging import Log
+
+logger = Log(__name__)
+
 class Calculator:       # a.k.a Controller
     ''' The calculator is a simple MVC architecture. It was added to Notebad as 
         a more simplified example without heaps of methods and classes. It carries
         the styles from the main app since it is running on the same Tk interpreter '''
-    def __init__(self, style:Style): 
+    def __init__(self, style:Style, conf):
+        self.conf = conf 
         self.model = Model()           # Model does not know about controller
         self.view  = View(self, style) # View does. Pass the controller into view
         self._bind_keys()
+        logger.info("Calc controller init")
 
     def main(self) -> None:
         ''' Fire up the main loop. Since this example is very basic the view holds
@@ -29,6 +35,7 @@ class Calculator:       # a.k.a Controller
         self.view.operator  = result['operator']
         self.view.equals_buffer = result['equals_buffer']
         self.view._update() # update the display
+        logger.verbose(f"Button click: {caption}")
 
     def keyboard_click(self, key) -> None:
         '''Take the keyboard input and convert numbers to integers so they are 
@@ -41,7 +48,7 @@ class Calculator:       # a.k.a Controller
                 pass
         else:
             self.button_click(key)
-
+        logger.verbose(f"Keyboard click: {key}")
 
     def _bind_keys(self) -> None:
         ''' Bind keys to the calculator window '''

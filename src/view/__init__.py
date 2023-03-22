@@ -1,12 +1,13 @@
 from   tkinter import messagebox, filedialog, Frame
 
-from conf          import cf
-from views.colors  import Themes
-from views.footer  import Footer
-from views.menu    import Menubar
-from views.tabs    import Tabs
-from views.ui      import UI
+from modules.logging import Log
+from view.colors  import Themes
+from controller.menu    import Menubar
+from view.tabs    import Tabs
+from view.ui      import UI
 
+
+logger = Log(__name__)
 
 class NoteView(Frame):
     ''' The noteview class handles the look and feel of the application
@@ -20,21 +21,25 @@ class NoteView(Frame):
         the flow of data and the logic of the application.
     '''
     def __init__(self, controller) -> None:
+        logger.debug("View begin init")
         super().__init__(controller.app) # This class is a frame that live right inside the main window
         self.controller = controller    
-        self.app = controller.app        # The main window
+        self.app        = controller.app     # The main window
+        self.conf     = controller.conf    # The config object
         self._make()
+        logger.debug("View finish init")
 
     def _make(self) -> None:
         ''' The meat of the view, this is where we create the widgets '''
         self.ui     = UI(self)
+        
         self.tabs   = Tabs(self)
-        self.menu   = Menubar(self, self.controller)
-        self.footer = Footer(self)
+        # self.menu   = Menubar(self, self.controller)
         # OG tkinter widgets need themes reloaded on first build
         self.ui.toggle_theme(reload=True)
         self.pack(fill='both', expand=True)
-        self.textbox.focus_set()    # Make sure we can start typing right away  
+        self.textbox.focus_set()    # Make sure we can start typing right away
+        self.textbox.footer.update_pos()    # Update the footer position data
 
     ## Class properties ##
     @property
@@ -61,7 +66,16 @@ class NoteView(Frame):
         return filepath
 
     ## Window functions ##
-    def update_title(self, text:str=None) -> None:
+    def tab_change(self, text:str=None) -> None:
         ''' Update the title of the window. Will defualt to Notebad - filename 
             unless text is passed in. '''
-        self.app.title(f"{cf.app_title} - {self.textbox.file_name}")
+        self.tabs.set_textboxes_unfocused()
+
+        textbox = self.textbox
+        textbox.is_focus = True
+        self.app.title(f"{self.conf.app_title} - {textbox.meta.file_name}")
+        textbox.footer.lang_lbl.config(text=textbox.meta.language)
+        self.controller.load_language(textbox.meta.language)
+
+        logger.debug(f"Tab changed to {textbox.meta.file_name}")
+

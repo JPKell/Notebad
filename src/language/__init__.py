@@ -1,18 +1,38 @@
 import re
 
-from models import abl2
-from models.modules import lex
+from language import abl
+from language.modules import lex
 # from models.abl_rules import build
+
+from modules.logging import Log
+
+logger = Log(__name__)
+
+languages = {
+    'abl': abl
+}
 
 class LanguageModel:
     def __init__(self):
         # The primary widget in the model is the text area to the model should know about it
         self.model = []
-
+        self.language_module = None
         self.expand = False
+        logger.debug('LanguageModel initialized')
+
+    def load_language(self, lang:str) -> None:
+        ''' Loads a language into the model '''
+
+        self.language_module = languages.get(lang, None)
+
+        if not self.language_module:
+            logger.error(f'Language {lang} not found')
+            return
+        logger.info(f'Language {lang} loaded')
+
 
     def build_ast(self, txt:str) -> None:
-        lexer = lex.lex(module=abl2, reflags=re.VERBOSE | re.IGNORECASE)
+        lexer = lex.lex(module=abl, reflags=re.VERBOSE | re.IGNORECASE)
         lexer.input(txt)
         self.model = []
 

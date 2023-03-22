@@ -1,3 +1,7 @@
+from modules.logging import Log
+
+logger = Log(__name__)
+
 class Model:
     ''' What no imports? No, the model stands alone and since it's only doing 
         simple math and string functions there's no need for imports. '''
@@ -9,6 +13,7 @@ class Model:
         self.equals_buffer = ''
         self.clear_value_next = True
         self.last_pressed = ''
+        logger.info("Model init")
 
     def calculate(self, caption) -> str:
         ''' calculate is a bit of a misnomer. It doesn't calculate anything. It
@@ -132,6 +137,8 @@ class Model:
         # Prevent bypassing the +/- block after hitting equals
         if caption != "+/-": 
             self.last_pressed = caption
+        
+        logger.debug(f"Val: {self.value:6} Prev val: {self.prev_value:6} Op: {self.operator:2} Eq buffer: {self.equals_buffer:8}")
 
         return {
             'value':self.value, 

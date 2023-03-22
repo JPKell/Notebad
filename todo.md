@@ -13,15 +13,30 @@ Hopefully the bugs decrease and the missing important does too
 - FILE encodings ON read/WRITE. 
 - auto-save / temp backup.
 - start comment syntax as soon as comment start
-- ABL section needs to be tidied up. But probably after the parsing the grammer part gets figured out. 
+- ABL section needs to be tidied up.
+  - able tokens from kw_master 
+
+# Refactor
+## Priority
+- Status bar needs to move into the textbox item. 
+- Textbox needs to be able to freeze state when switching tab. 
+  - The issue is the functions with callbacks keep running in the background. even when tab is closed. That's terrible for longer sessions. That could get out of hand with many tabs open. 
+
+
+- Reduce controller
+  - file operations, clipboard/edit/undo, languages split out?
+- Reduce textbox
+  - scrollbars split out. 
+
+# Language
+- . or colon followed by whitespace. should be a rule.
+
 
 # Features
 - log errors in lexer for review
-- ENABLE abl only ON .p, .i, .w files
-- Better default font. Maybe search for options from a list ending withn courier
-- ADD LENGTH OF SELECTION TO STATUS bar
+
 - ADD multiline eval TO the alt-e FUNCTION https://stackoverflow.com/questions/12698028/why-is-pythons-eval-rejecting-this-multiline-string-and-how-can-i-fix-it
-- HIDE VERTICAL scrollbar / Improve scrollbars
+  
 - ADD multi SELECT. CURSOR across mutliple lines AND highlight MULTIPLE lines
 - Alt-up/DOWN TO shift whole LINE UP AND DOWN
 - list OF recent files
