@@ -8,6 +8,9 @@ class Configuration:
     os = os.name
     current_dir = ''
 
+    # This will get populated at runtime in main
+    config_file = ''
+
     # Window settings
     app_title = 'Notebad'
     geometry = '800x600'
@@ -77,7 +80,8 @@ class Configuration:
         config_file = os.path.join(self.current_dir, 'personal.cf')
         if not os.path.isfile(config_file):
             with open(config_file, 'w') as f:
-                f.write('')
+                f.write('# Make changes here to override default configuration settings.\r')
+        self.config_file = config_file
 
     def load_personal_settings(self) -> None:
         ''' Load personal settings from the personal config file. '''
@@ -95,3 +99,34 @@ class Configuration:
 
                 # Set the value of the key
                 setattr(self, key, eval(value))
+
+    def save_personal_settings(self, **kwargs) -> None:
+        ''' Save personal settings to the personal config file. '''
+        # Update the values of the active config object
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        # Update the values of the config file
+        config_file = os.path.join(self.current_dir, 'personal.cf')
+        config_text = []
+        # Update the values of the config
+        with open(config_file, 'r') as f: 
+            config_text = f.readlines()
+
+        with open(config_file, 'w') as f:
+            for ln in config_text:
+                # Write out the comment lines as is
+                if ln[0] == '#':
+                    f.write(ln)
+                else:
+                    key, value = ln.split('=')
+                    key = key.strip()
+                    if key in kwargs:
+                        value = kwargs.pop(key)
+                        f.write(f'{key} = {value}\n')
+                    else:
+                        f.write(ln)
+                    
+            # Write out any new settings
+            for key, value in kwargs.items():
+                f.write(f'{key} = {value}\n')

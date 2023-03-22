@@ -15,7 +15,6 @@ cfg = Configuration()
 current_dir = pathlib.Path(__file__).parent.resolve() # current directory 
 cfg.set_root_dir(current_dir)
 
-
 if __name__ == '__main__':
     # Set up and load configuration before loading program
     
