@@ -28,6 +28,16 @@ class NoteView(Frame):
         self.controller = controller    
         self.app        = controller.app     # The main window
         self._make()
+
+        # Filetypes that can be filtered/selected when using a tkinter filedialog.
+        # They will appear in the same order as they are listed
+        self.filetypes = [('All Files', '*.*'),
+                          ('Progress Include Files', '*.i'),
+                          ('Progress Files', '*.p'),
+                          ('Progress Window Procedure Files', '*.w'),
+                          ('Python Files', '*.py'),
+                          ('Text Documents', '*.txt')]
+
         logger.debug("View finish init")
 
     def _make(self) -> None:
@@ -62,16 +72,19 @@ class NoteView(Frame):
 
     def open_file_dialogue(self) -> str:  
         ''' Open a file dialogue and returns the path the user selected '''
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(filetypes=self.filetypes)
         return file_path
     
     def save_file_dialogue(self, file_name:str=None, path:str=None) -> str:
-        filepath = filedialog.asksaveasfilename(defaultextension=".txt", initialfile=file_name, initialdir=path)
+        filepath = filedialog.asksaveasfilename(defaultextension=".txt",
+                                                initialfile=file_name,
+                                                initialdir=path,
+                                                filetypes=self.filetypes)
         return filepath
 
     ## Window functions ##
     def tab_change(self, text:str=None) -> None:
-        ''' Update the title of the window. Will defualt to Notebad - filename 
+        ''' Update the title of the window. Will default to Notebad - filename
             unless text is passed in. '''
         self.tabs.set_textboxes_unfocused()
 
