@@ -1,5 +1,9 @@
-from tkinter import font
-import os
+import os, pathlib
+
+## We can also use variables above the config class to have constant values
+# Example: provincial tax rates and we have a calculate tax button on the calc. 
+#          They are only needed in one place and we don't want the user to change
+#          them. So we can just put them here and import them as needed.    
 
 class Configuration:
     """ A class to hold configuration values for the app. This acts as a singleton 
@@ -34,12 +38,15 @@ class Configuration:
 
     # Textbox behaviour
     indent_size = 4
-    enable_syntax_highlighting = True
     max_undo = 50              # This should get tested for memory usage
 
     # Language options
+    syntax_on_load = False
+    syntax_on_new_line = False
+    syntax_on_type = False
     syntax_uppercase = True
     syntax_expand = True    # Expand syntax tokens to full name    
+    syntax_indent = True    # This may be a problem as we will have to track whitespace and ditch it when indenting
 
     # Calculator settings
     calc_title = 'Mathbad'
@@ -63,11 +70,14 @@ class Configuration:
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(Configuration, cls).__new__(cls)
+            cls.instance.set_root_dir()
         return cls.instance
 
-    def set_root_dir(self, root_dir):
-        self.current_dir = root_dir
-        self.log_dir  = os.path.join(root_dir, 'logs')
+    def set_root_dir(self) -> None:
+        """ Set the root directory of the app. This is the directory that the
+            app source is from. """
+        self.current_dir = pathlib.Path(__file__).parent.resolve()
+        self.log_dir  = os.path.join(self.current_dir, 'logs')
         self.log_file = os.path.join(self.log_dir, 'notebad.log')
         self.log_performance_file = os.path.join(self.log_dir, 'performance.log')
         
@@ -91,33 +101,39 @@ class Configuration:
             # Grab each line of the file and strip the newline character
             lines = [ l.strip() for l in f.readlines() if l[0] != '#' ]
             for ln in lines:
+                # Skip lines that don't have an equals sign to allow whitespace 
+                if ln.find('=') == -1:
+                    continue
+
                 # Split the line into key and value
                 key, value = ln.split('=')
-                # Strip the key and value of whitespace
-                key = key.strip()
+                key   = key.strip()
                 value = value.strip() 
 
                 # Set the value of the key
                 setattr(self, key, eval(value))
 
     def save_personal_settings(self, **kwargs) -> None:
-        ''' Save personal settings to the personal config file. '''
+        ''' Save personal settings to the personal config file. Can take 
+            any number of keyword arguments. '''
         # Update the values of the active config object
         for key, value in kwargs.items():
             setattr(self, key, value)
 
         # Update the values of the config file
         config_file = os.path.join(self.current_dir, 'personal.cf')
-        config_text = []
-        # Update the values of the config
+        existing_config = []
+
         with open(config_file, 'r') as f: 
-            config_text = f.readlines()
+            existing_config = f.readlines()
 
         with open(config_file, 'w') as f:
-            for ln in config_text:
+            for ln in existing_config:
                 # Write out the comment lines as is
-                if ln[0] == '#':
+                if ln[0] == '#' or ln.find('=') == -1:
                     f.write(ln)
+
+                # Replace any existing settings
                 else:
                     key, value = ln.split('=')
                     key = key.strip()

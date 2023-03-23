@@ -9,7 +9,7 @@ from controller.utilities       import Utilities
 
 from view  import NoteView
 
-from conf  import Configuration
+from settings  import Configuration
 from modules.logging import Log
 
 cfg = Configuration()
@@ -22,7 +22,7 @@ class NoteController:
     
     view = None
 
-    def __init__(self, current_dir:pathlib.Path):
+    def __init__(self):
         logger.info('Notebad AB-LM IDE Initializing...')
         logger.debug('Controller begin init')
 

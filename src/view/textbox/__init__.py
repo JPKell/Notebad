@@ -1,7 +1,7 @@
 from tkinter     import Text, font
 from tkinter.ttk import Notebook, Frame
 
-from conf import Configuration
+from settings import Configuration
 from view.colors import Themes
 from view.textbox.clipboard import Clipboard
 from view.textbox.cursor    import Cursor
@@ -45,14 +45,14 @@ class Textbox(Text):
 
         
         # Build all the objects associated with the text area
-        self.footer = Footer(self.frame, self.tabs.view)
-        self.meta   = Meta(self, self.tabs)
+        self.footer      = Footer(self.frame, self.tabs.view)
+        self.meta        = Meta(self, self.tabs)
         self.linenumbers = LineNumbers(textbox=self)
         self.scrollbars  = Scrollbars(self)
-        self.history   = History(self, self.footer)
-        self.clipboard = Clipboard(self)
-        self.editor    = Editor(self)
-        self.cusor     = Cursor(self)
+        self.history     = History(self, self.footer)
+        self.clipboard   = Clipboard(self)
+        self.editor      = Editor(self)
+        self.cursor      = Cursor(self)
 
         # Instantiate the line numbers
         self._init_line_numbers()

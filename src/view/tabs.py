@@ -2,7 +2,7 @@ from tkinter.ttk import Notebook
 
 from .textbox import Textbox
 
-from conf import Configuration
+from settings import Configuration
 from modules.logging import Log
 
 cfg = Configuration()

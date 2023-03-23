@@ -1,6 +1,6 @@
 from tkinter import Text
 
-from conf import Configuration
+from settings import Configuration
 from modules.logging import Log
 
 cfg = Configuration()

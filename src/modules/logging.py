@@ -3,7 +3,7 @@ from    glob import glob
 import  os, pathlib
 from    time import perf_counter
 
-from conf import Configuration
+from settings import Configuration
 
 cfg = Configuration()
 

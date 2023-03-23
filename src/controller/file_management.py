@@ -1,6 +1,6 @@
 from view.textbox import Textbox
 from modules.logging import Log
-from conf import Configuration
+from settings import Configuration
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -11,8 +11,6 @@ class FileManagement:
         self.controller = controller
         logger.debug('Initialized FileManagement')
 
-
-    ## File management ##
     def new_file(self) -> None:
         ''' Creates a new tab and a crisp fresh textbox. '''
         logger.debug('Creating new file')
@@ -47,6 +45,8 @@ class FileManagement:
             save_as_file is called to let the user name it. Also thinking 
             about just sequentially naming all the files to make like hard. jk'''
         textbox = self.controller.view.textbox
+
+        # If the current file still has the default file name, prompt for a new name
         if textbox.meta.file_name == cfg.new_file_name:
             self.save_as_file(textbox)
         else:
@@ -55,6 +55,7 @@ class FileManagement:
         
     def save_as_file(self, textbox:Textbox=None) -> None:
         ''' Saves textbox to disk. If no textbox is given, the current tab is used.'''
+
         # I am giving the option here to pass a textbox object in to be saved. 
         # the time this would be useful would be in a save all function. But is that
         # something to worry about now? No. 
@@ -81,13 +82,19 @@ class FileManagement:
 
         ext = full_path.split('.')[-1]
         with open(full_path, "r") as file:
-            if ext in ['p', 'w', 'i', 'cls']:
+            
+            if not cfg.syntax_on_load: # Just load the file
+                textbox.insert('end', file.read())
+            
+            elif ext in ['p', 'w', 'i', 'cls']: # Else see if we can handle the syntax
                 self.controller.language.load_language('abl')
-                self.controller.language.load_with_basic_highlighting(txt=file.read())
-            else:
+                self.controller.language.syntax_on_file_load(txt=file.read())
+            
+            else: # Else just load the file
                 textbox.insert('end', file.read())  # Insert the file contents into the textbox
-            textbox.changed_since_saved = False # Reset the changed flag since we just opened the file
-            textbox.history.stackify()                  # Add the file contents to the undo stack
+
+            textbox.meta.changed_since_saved = False # Reset the changed flag since we just opened the file
+            textbox.history.stackify()          # Add the file contents to the undo stack
         logger.debug(f'Wrote file to textbox: {full_path}')
 
     def write_textbox_to_file(self, full_path:str, textbox:Textbox) -> None:
@@ -97,14 +104,16 @@ class FileManagement:
             if len(txt) > 1:   
                 txt = txt[:-1] # Trailing newline character that needs to be removed
             file.write(txt)
+
         # Update the textbox properties
         path_parts = self.parts_from_file_path(full_path)
         textbox.meta.set_meta(tk_name=self.controller.view.tabs.cur_tab_tk_name(),
                     full_path=full_path,
                     file_path=path_parts['path'], 
                     file_name=path_parts['file'], )
-        textbox.changed_since_saved = False
+        textbox.meta.changed_since_saved = False
         self.controller.view.tabs.set_properties(textbox.meta.tk_name, text=textbox.meta.file_name)
+
         # Update the window title
         self.controller.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
         logger.debug(f'Wrote file to textbox: {full_path}')

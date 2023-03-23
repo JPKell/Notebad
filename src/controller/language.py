@@ -1,4 +1,4 @@
-from conf import Configuration
+from settings import Configuration
 from modules.logging import Log
 from language import LanguageModel
 
@@ -11,20 +11,30 @@ class LanguageTools:
     def __init__(self, controller, view):
         self.controller = controller
         self.view = view
+        self.current_language = None
         self.model = LanguageModel()
         logger.debug('LanguageTools init')
 
     def load_language(self, lang:str) -> None:
         ''' Loads a language into the model '''
+        # Bail if we are already using this language
+        if self.current_language == lang:
+            return
 
         self.model.load_language(lang)
+        self.current_language = lang
         logger.debug('load_language finish')
 
 
     @logger.performance
-    def load_with_basic_highlighting(self, txt) -> None:
+    def syntax_on_file_load(self, txt) -> None:
         ''' Capitalizes syntax in current textbox '''
-        logger.debug('load_with_basic_highlighting begin')
+
+        # Bail if we are not doing syntax highlighting
+        if self.model.language_module is None or cfg.syntax_on_load is False:
+            return        
+
+        logger.debug('syntax_on_file_load begin')
         textbox = self.view.textbox
         cur_index = textbox.index('insert')
 
@@ -79,13 +89,14 @@ class LanguageTools:
         textbox.mark_unset('insert')
         textbox.mark_set('insert', cur_index)
         textbox.see('insert')
-        logger.debug('load_with_basic_highlighting finish')
+        logger.debug('syntax_on_file_load finish')
 
 
     @logger.performance
-    def capitalize_syntax(self, event) -> None:
+    def syntax_on_command(self, event) -> None:
         ''' Capitalizes syntax in current textbox '''
-        logger.debug('capitalize_syntax begin')
+
+        logger.debug('syntax_on_command begin')
         textbox = self.view.textbox
         cur_index = textbox.index('insert')
 
@@ -144,19 +155,21 @@ class LanguageTools:
         textbox.mark_unset('insert')
         textbox.mark_set('insert', cur_index)
         textbox.see('insert')
-        logger.debug('capitalize_syntax finish')
+        logger.debug('syntax_on_command finish')
 
     # Dont need the performance running on this all the time but the last time 
     # it was run it was taking 0.00013 seconds.
     # @logger.performance
-    def format_code(self, event) -> None:
+    def syntax_while_typing(self, event) -> None:
         ''' To properly implement syntax highlighting we need to understand the
             context of the word we are working on. This means that if we are on 
             line 5 of a multi line comment we need to know that.'''
-        if self.model.language_module is None:
+        
+        # Bail if we are not using syntax highlighting
+        if self.model.language_module is None or cfg.syntax_on_type is False:
             return
         
-        logger.verbose('format_code')
+        logger.verbose('syntax_while_typing')
 
         textbox = self.view.textbox
 
@@ -250,24 +263,13 @@ class LanguageTools:
     
         # Otherwise we just want to get and format one word
         else:
-            # # Get the current word
-            # txt, index = textbox.get_trailing_word_and_index()
-            # print('before syntax',txt, index)
-            # token = self.model.get_syntax_token(txt) 
-            # print(token)
-            # # If the token is empty we need to print the char, bail
-            # if len(token) == 0:
-            #     return
-            # textbox.disable_line_no_update = True
-            # textbox.delete(index[0], index[1])
-            # textbox.insert(index[0], token[0].value, token[0].tag)
-            # textbox.disable_line_no_update = False
-
             txt = textbox.editor.get_current_line_text()
             index = textbox.index('insert')
+
             # I like the idea of expanding as you type, but it causes some issues
             # Mainly inserting the cursor in the right place after expanding words
             tokens = self.model.format_syntax(txt, no_nl=True, expand=False, upper=False) 
+            
             # We want to disable the line number update otherwise we will block
             textbox.disable_line_no_update = True
             textbox.editor.delete_cur_line()
@@ -314,4 +316,4 @@ class LanguageTools:
             # Return the cursor to the new line
             textbox.mark_set('insert', index)
             textbox.disable_line_no_update = False
-        logger.verbose('format_code finish')
+        logger.verbose('syntax_while_typing finish')

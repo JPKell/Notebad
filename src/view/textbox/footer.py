@@ -1,6 +1,6 @@
 from tkinter import Frame, Label, StringVar
 
-from conf import Configuration
+from settings import Configuration
 from modules.logging import Log
 
 cfg = Configuration()

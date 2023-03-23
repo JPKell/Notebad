@@ -1,6 +1,6 @@
 from   tkinter import messagebox, filedialog, Frame
 
-from conf import Configuration
+from settings import Configuration
 from controller.menu    import Menubar
 from modules.logging import Log
 from view.colors  import Themes

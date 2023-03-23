@@ -41,14 +41,14 @@ class KeyBindings:
         self.app.bind("<Control-v>", lambda event: self.controller.view.textbox.clipboard.paste_text())
         self.app.bind("<Control-f>", lambda event: self.controller.view.find())
         
-    
 
         # Syntax highlighting
-        self.app.bind("<Key>", lambda event: self.controller.language.format_code(event))
-        self.app.bind_all("<space>", lambda event: self.controller.language.format_code(event))
-        self.app.bind_all("<Return>", lambda event: self.controller.language.format_code(event))
-
-        self.app.bind("<KP_Enter>", lambda event: self.controller.language.format_code(event))
+        self.app.bind("<Key>", lambda event: self.controller.language.syntax_while_typing(event))
+        self.app.bind_all("<space>", lambda event: self.controller.language.syntax_while_typing(event))
+        self.app.bind_all("<Return>", lambda event: self.controller.language.syntax_while_typing(event))
+        self.app.bind("<KP_Enter>", lambda event: self.controller.language.syntax_while_typing(event))
+        
+        self.app.bind("<Alt-p>", lambda event: self.controller.language.syntax_on_command(event))
 
         # Tab management
         self.app.bind("<<NotebookTabChanged>> ", lambda event: self.controller.view.tab_change())
@@ -56,10 +56,6 @@ class KeyBindings:
         
         # Clipboard management
         self.app.bind("<Alt-e>", lambda event: self.controller.utilities.eval_selection())
-
-        # DEVELOPMENT ONLY
-        self.app.bind("<Alt-p>", lambda event: self.controller.language.capitalize_syntax(event))
-
 
         ###
         # Various tk keybindings that exist by default

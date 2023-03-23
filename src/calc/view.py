@@ -1,7 +1,7 @@
 from   tkinter import Label, Toplevel
 from   tkinter.ttk import Style, Frame, Button
 
-from conf import Configuration
+from settings import Configuration
 from modules.logging import Log
 
 cfg = Configuration()

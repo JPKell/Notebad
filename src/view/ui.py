@@ -2,7 +2,7 @@ import os
 from tkinter import PhotoImage, Frame, font
 from tkinter.ttk import Style
 
-from conf  import Configuration
+from settings  import Configuration
 from .colors import Themes
 from modules.logging import Log
 

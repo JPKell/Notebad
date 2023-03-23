@@ -196,3 +196,10 @@
 2023-03-22 22:51:45.568041	controller.language	load_with_basic_highlighting	0.6118902160
 2023-03-22 22:52:36.965137	controller.language	load_with_basic_highlighting	0.5234848410
 2023-03-22 22:54:15.393260	controller.language	load_with_basic_highlighting	0.5336205030
+2023-03-23 08:10:33.063261	controller.language	load_with_basic_highlighting	0.5395070660
+2023-03-23 08:34:55.603421	controller.language	syntax_on_file_load	0.0000016490
+2023-03-23 09:06:45.212728	controller.language	syntax_on_command	0.5330720700
+2023-03-23 09:09:57.159367	controller.language	syntax_on_command	0.3864994480
+2023-03-23 09:10:55.174148	controller.language	syntax_on_command	0.3565101620
+2023-03-23 09:12:28.844625	controller.language	syntax_on_command	0.5341635880
+2023-03-23 09:14:00.524234	controller.language	syntax_on_command	0.5719884600
