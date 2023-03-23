@@ -42,6 +42,10 @@ tokens = [
     'RBRACKET',
     'LBRACE',
     'RBRACE',
+    'THEN_DO',
+    'ELSE_DO',
+    'OTHERWISE_DO',
+    'FOR_EACH'
 
 ]
 

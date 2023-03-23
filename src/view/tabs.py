@@ -2,8 +2,10 @@ from tkinter.ttk import Notebook
 
 from .textbox import Textbox
 
+from conf import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class Tabs(Notebook):

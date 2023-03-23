@@ -98,14 +98,10 @@ t_LTEQ = r'<='
 t_NE   = r'<>'
 t_GT = r'>'
 t_LT = r'<'
-t_EQUALS = r'='
 t_PLUS   = r'\+'
 t_MINUS  = r'\-'
 t_MULTIPLY = r'\*'
 t_DIVIDE = r'\/'
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_PERIOD = r'\.'
 t_COMMA  = r'\,'
 t_COLON  = r'\:'
 t_SEMICOLON = r'\;'
@@ -205,32 +201,96 @@ def t_COMPARISON_OP(t):
     r'\\b(?:GE|LE|GT|LT)\\b'
     return t
 
+    
+###
+# Indentation custom rules
+# These are mainly here to deal with the multiple indent initializers can exist 
+# in a single line. Until the grammer is sorted out. This will be the work around
+# These are here also incase they are needed 
+#    cBlockEndStatements = "END.,END CASE.,END FUNCTION.,END PROCEDURE.,END METHOD.,END CONSTRUCTOR.,FORWARDS.,END CATCH.,END FINALLY."
+
+def t_FOR_EACH(t):
+    r'\\bFOR\sEACH\\b'
+    t.lexer.hard_block = True
+    t.indent = 1
+    t.tag = 'blue'
+    return t
+
+def t_THEN_DO(t):
+    r'\\bTHEN\sDO[\s]?'
+    t.lexer.hard_block = True
+    t.indent = 1
+
+    # Else if might trigger multiple indentations
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = 0
+    t.tag = 'blue'
+    return t
+
+def t_ELSE_DO(t):
+    r'\\bELSE\sDO[\s]?'
+    t.indent = 1
+        
+    # Else if might trigger multiple indentations
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = 0
+
+    t.tag = 'blue'
+    return t
+
+def t_OTHERWISE_DO(t):
+    r'\\bOTHERWISE\sDO[\s]?'
+    t.indent = 1
+        
+    # Else if might trigger multiple indentations
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = 0
+
+    t.tag = 'blue'
+    return t
+
 ## Proceduraly generated the next large block of defines
 
 # Starting with indent statements.
 
 ''')
 
-## Build the stard and stop blocks words here
+## Build the start and stop blocks words here
 start_or_stop = [ kw for kw in keyword_master if kw['starts_block'] or kw['ends_block']]
-for a in start_or_stop:
+for kw in start_or_stop:
     # Get the syntax highlighting
-    tag = colors.get(a["cat"], default_color)
+    tag = colors.get(kw["cat"], default_color)
     
     # Build out marks if there are any 
-    mark = f"\n    t.mark = '{','.join(a['mark'])}'" if len(a['mark']) != 0 else ''
+    mark = f"\n    t.mark = '{','.join(kw['mark'])}'" if len(kw['mark']) != 0 else ''
 
     # Build out indent if appropriate
     indent = ''
-    if a['starts_block']:
-        indent = "\n    t.indent += 1"
-    if a['ends_block']:
-        indent = "\n    t.indent -= 1"
+
+    if kw['token'] == 'DO':
+        soft = False
+        hard = f't.lexer.hard_block = True'
+        indent = "\n    if not t.lexer.soft_block: t.indent = 1"
+    elif kw['starts_block']:
+        soft = True
+        hard = ''
+        indent = "\n    if not t.lexer.soft_block: t.indent = 1"
+    elif kw['ends_block']:
+        soft = False
+        hard = f't.lexer.hard_block = False'
+        indent = "\n    t.indent = -99"
 
     file.write(f'''
-def t_{a['token']}(t):
-    r'{build_regex(a['keyword'])}'
-    t.tag = '{tag}'{mark}{indent}
+def t_{kw['token']}(t):
+    r'{build_regex(kw['keyword'])}'
+
+    {hard}
+    t.tag = 'magenta'
+    # t.tag = '{tag}'{mark}{indent}
+    t.lexer.soft_block = {soft}
     return t
     ''')
 
@@ -244,17 +304,17 @@ file.write("""
 
 ## Build the abriviated words here
 abr = [ kw for kw in keyword_master if kw['abr'] != None and not kw['starts_block'] and not kw['ends_block']]
-for a in abr:
+for kw in abr:
     # Get the syntax highlighting
-    tag = colors.get(a["cat"], default_color)
+    tag = colors.get(kw["cat"], default_color)
     
     # Build out marks if there are any 
-    mark = f"\n    t.mark = '{','.join(a['mark'])}'" if len(a['mark']) != 0 else ''
+    mark = f"\n    t.mark = '{','.join(kw['mark'])}'" if len(kw['mark']) != 0 else ''
 
     file.write(f'''
-def t_{a['token']}(t):
-    r'{build_regex(a['keyword'],a['abr'])}'
-    t.tag = '{tag}'{mark}
+def t_{kw['token']}(t):
+    r'{build_regex(kw['keyword'],kw['abr'])}'
+    # t.tag = '{tag}'{mark}
     return t
     ''')
 
@@ -295,8 +355,43 @@ def t_ID(t):
     _id = {'keyword': '', 'token': 'ID', 'cat': '', 'tag': ['alt_blue'], 'mark': []}
     result = kw_lookup.get(t.value.upper(),_id)    # Check for reserved words
     t.type = result['token']
-    t.tag  = result['tag']
+    # t.tag  = result['tag']
     return t
+
+### Should change this out if not following whitespace rules   
+def t_PERIOD(t):
+    r'\.'
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = -1
+        t.tag = 'magenta'
+    return t
+
+def t_EQUALS(t):
+    r'='
+    
+    if not t.lexer.soft_block:
+        t.lexer.soft_block = True
+        t.indent = 1
+
+    t.tag = 'magenta'
+    return t   
+
+def t_LPAREN(t):
+    r'\('
+    if not t.lexer.soft_block:
+        t.lexer.soft_block = True
+        t.indent = 1
+    t.tag = 'yellow'
+    return t
+
+def t_RPAREN(t):
+    r'\)'
+    t.lexer.soft_block = False
+    t.indent = -1
+    t.tag = 'yellow'
+    return t
+
 
 # This is a hack to prevent the lexer from throwing an error on a bad word and deleting it.
 def t_CATCHALL(t):

@@ -56,7 +56,7 @@ class LexError(Exception):
 # Token class.  This class is used to represent the tokens produced.
 class LexToken(object):
     def __repr__(self):
-        return f'LexToken({self.type},{self.value!r},{self.lineno},{self.lexpos},{self.colno},{self.tag})'
+        return f'LexToken({self.type},{self.value!r},{self.lineno},{self.lexpos},{self.colno},{self.tag},{self.indent})'
 
 # This object is a stand-in for a logging object created by the
 # logging module.
@@ -119,6 +119,8 @@ class Lexer:
         self.lexmodule = None         # Module
         self.lineno = 1               # Current line number
         self.colno  = 0               # Current col number for tk use *Notebad*
+        self.soft_block = False       # Soft block flag. For statements that start a block but end with .
+        self.hard_block = False       # Hard block flag. For statements that start a block with : and require being ended with end. 
 
     def clone(self, object=None):
         c = copy.copy(self)
@@ -228,6 +230,7 @@ class Lexer:
                 tok.lexpos = lexpos
                 tok.colno  = colno      # *Notebad*
                 tok.tag    = None       # Syntax highlighting tag
+                tok.indent = 0          # Indentation level
 
                 i = m.lastindex
                 func, tok.type = lexindexfunc[i]
@@ -276,6 +279,7 @@ class Lexer:
                     tok.value = lexdata[lexpos]
                     tok.lineno = self.lineno
                     tok.colno  = colno # *Notebad*
+                    tok.indent = 0
                     tok.type = tok.value
                     tok.lexpos = lexpos
                     tok.tag = ''
@@ -289,6 +293,7 @@ class Lexer:
                     tok.value = self.lexdata[lexpos:]
                     tok.lineno = self.lineno
                     tok.colno  = colno # *Notebad*
+                    tok.indent = 0
                     tok.type = 'error'
                     tok.lexer = self
                     tok.lexpos = lexpos
@@ -316,6 +321,7 @@ class Lexer:
             tok.value = ''
             tok.lineno = self.lineno
             tok.colno  = colno
+            tok.indent = 0
             tok.lexpos = lexpos
             tok.lexer = self
             self.lexpos = lexpos

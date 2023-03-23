@@ -27,7 +27,7 @@ class LanguageModel:
         self.language_module = languages.get(lang, None)
 
         if not self.language_module:
-            logger.error(f'Language {lang} not found')
+            logger.info(f'Language {lang} not found')
             return
         
         self.track_whitepace = self.language_module.track_whitespace
@@ -35,7 +35,7 @@ class LanguageModel:
 
 
     def build_ast(self, txt:str) -> None:
-        lexer = lex.lex(module=abl, reflags=re.VERBOSE | re.IGNORECASE)
+        lexer = lex.lex(module=self.language_module, reflags=re.VERBOSE | re.IGNORECASE)
         lexer.input(txt)
         self.model = []
 

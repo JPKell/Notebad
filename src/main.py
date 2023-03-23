@@ -5,7 +5,8 @@ from controller import NoteController
 from conf import Configuration
 
 ## Uncomment this out to rebuild the ABL rules. Then restart app for rules to be in effect
-from language.abl_rules import build
+# You may need to change path in abl_rules/build.py
+# from language.abl_rules import build
 ##
 
 cfg = Configuration()

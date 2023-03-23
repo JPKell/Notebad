@@ -32,14 +32,10 @@ t_LTEQ = r'<='
 t_NE   = r'<>'
 t_GT = r'>'
 t_LT = r'<'
-t_EQUALS = r'='
 t_PLUS   = r'\+'
 t_MINUS  = r'\-'
 t_MULTIPLY = r'\*'
 t_DIVIDE = r'\/'
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_PERIOD = r'\.'
 t_COMMA  = r'\,'
 t_COLON  = r'\:'
 t_SEMICOLON = r'\;'
@@ -135,6 +131,57 @@ def t_COMPARISON_OP(t):
     r'\b(?:GE|LE|GT|LT)\b'
     return t
 
+    
+###
+# Indentation custom rules
+# These are mainly here to deal with the multiple indent initializers can exist 
+# in a single line. Until the grammer is sorted out. This will be the work around
+# These are here also incase they are needed 
+#    cBlockEndStatements = "END.,END CASE.,END FUNCTION.,END PROCEDURE.,END METHOD.,END CONSTRUCTOR.,FORWARDS.,END CATCH.,END FINALLY."
+
+def t_FOR_EACH(t):
+    r'\bFOR\sEACH\b'
+    t.lexer.hard_block = True
+    t.indent = 1
+    t.tag = 'blue'
+    return t
+
+def t_THEN_DO(t):
+    r'\bTHEN\sDO[\s]?'
+    t.lexer.hard_block = True
+    t.indent = 1
+
+    # Else if might trigger multiple indentations
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = 0
+    t.tag = 'blue'
+    return t
+
+def t_ELSE_DO(t):
+    r'\bELSE\sDO[\s]?'
+    t.indent = 1
+        
+    # Else if might trigger multiple indentations
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = 0
+
+    t.tag = 'blue'
+    return t
+
+def t_OTHERWISE_DO(t):
+    r'\bOTHERWISE\sDO[\s]?'
+    t.indent = 1
+        
+    # Else if might trigger multiple indentations
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = 0
+
+    t.tag = 'blue'
+    return t
+
 ## Proceduraly generated the next large block of defines
 
 # Starting with indent statements.
@@ -142,92 +189,162 @@ def t_COMPARISON_OP(t):
 
 def t_CASE(t):
     r'\b(?:CASE)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_CATCH(t):
     r'\b(?:CATCH)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_CONSTRUCTOR(t):
     r'\b(?:CONSTRUCTOR)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
+    return t
+    
+def t_DISPLAY(t):
+    r'\b(?:DISPLAY)\b'
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_DO(t):
     r'\b(?:DO)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    t.lexer.hard_block = True
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = False
     return t
     
 def t_ELSE(t):
     r'\b(?:ELSE)\b'
+
+    
     t.tag = 'magenta'
-    t.indent += 1
+    # t.tag = 'magenta'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_END(t):
     r'\b(?:END)\b'
-    t.tag = 'blue'
-    t.indent -= 1
+
+    t.lexer.hard_block = False
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    t.indent = -99
+    t.lexer.soft_block = False
     return t
     
 def t_FINALLY(t):
     r'\b(?:FINALLY)\b'
-    t.tag = 'blue'
-    t.indent += 1
-    return t
+
     
-def t_FOR(t):
-    r'\b(?:FOR)\b'
-    t.tag = 'blue'
-    t.indent += 1
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_FUNCTION(t):
     r'\b(?:FUNCTION)\b'
-    t.tag = 'cyan'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'cyan'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
+    return t
+    
+def t_MESSAGE(t):
+    r'\b(?:MESSAGE)\b'
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_METHOD(t):
     r'\b(?:METHOD)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_OTHERWISE(t):
     r'\b(?:OTHERWISE)\b'
-    t.tag = 'grey'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'grey'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_PROCEDURE(t):
     r'\b(?:PROCEDURE)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_REPEAT(t):
     r'\b(?:REPEAT)\b'
-    t.tag = 'blue'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'blue'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_THEN(t):
     r'\b(?:THEN)\b'
+
+    
     t.tag = 'magenta'
-    t.indent += 1
+    # t.tag = 'magenta'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 def t_WHILE(t):
     r'\b(?:WHILE)\b'
-    t.tag = 'grey'
-    t.indent += 1
+
+    
+    t.tag = 'magenta'
+    # t.tag = 'grey'
+    if not t.lexer.soft_block: t.indent = 1
+    t.lexer.soft_block = True
     return t
     
 ###
@@ -237,1362 +354,1357 @@ def t_WHILE(t):
 
 def t__GLOBAL_DEFINE(t):
     r'\b(?:&GLOBAL\-DEFINE|&GLOBAL\-DEFIN|&GLOBAL\-DEFI|&GLOBAL\-DEF|&GLOBAL\-DE|&GLOBAL\-D|&GLOBAL\-|&GLOBAL|&GLOBA|&GLOB)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t__SCOPED_DEFINE(t):
     r'\b(?:&SCOPED\-DEFINE|&SCOPED\-DEFIN|&SCOPED\-DEFI|&SCOPED\-DEF|&SCOPED\-DE|&SCOPED\-D|&SCOPED\-|&SCOPED|&SCOPE|&SCOP)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t__UNDEFINE(t):
     r'\b(?:&UNDEFINE|&UNDEFIN|&UNDEFI|&UNDEF)\b'
-    t.tag = 'yellow'
+    # t.tag = 'yellow'
     return t
     
 def t_ABSOLUTE(t):
     r'\b(?:ABSOLUTE|ABSOLUT|ABSOLU|ABSOL|ABSO|ABS)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_ACCUMULATE(t):
     r'\b(?:ACCUMULATE|ACCUMULAT|ACCUMULA|ACCUMUL|ACCUMU|ACCUM)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_AMBIGUOUS(t):
     r'\b(?:AMBIGUOUS|AMBIGUOU|AMBIGUO|AMBIGU|AMBIG)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_ANALYZE(t):
     r'\b(?:ANALYZE|ANALYZ)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_APPL_ALERT_BOXES(t):
     r'\b(?:APPL\-ALERT\-BOXES|APPL\-ALERT\-BOXE|APPL\-ALERT\-BOX|APPL\-ALERT\-BO|APPL\-ALERT\-B|APPL\-ALERT\-|APPL\-ALERT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_ASCENDING(t):
     r'\b(?:ASCENDING|ASCENDIN|ASCENDI|ASCEND|ASCEN|ASCE|ASC)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_ATTR_SPACE(t):
     r'\b(?:ATTR\-SPACE|ATTR\-SPAC|ATTR\-SPA|ATTR\-SP|ATTR\-S|ATTR\-|ATTR)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_AUTO_COMPLETION(t):
     r'\b(?:AUTO\-COMPLETION|AUTO\-COMPLETIO|AUTO\-COMPLETI|AUTO\-COMPLET|AUTO\-COMPLE|AUTO\-COMPL|AUTO\-COMP)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_AUTO_INDENT(t):
     r'\b(?:AUTO\-INDENT|AUTO\-INDEN|AUTO\-INDE|AUTO\-IND)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_AUTO_RETURN(t):
     r'\b(?:AUTO\-RETURN|AUTO\-RETUR|AUTO\-RETU|AUTO\-RET)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_AUTO_ZAP(t):
     r'\b(?:AUTO\-ZAP|AUTO\-ZA|AUTO\-Z)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_AVAILABLE(t):
     r'\b(?:AVAILABLE|AVAILABL|AVAILAB|AVAILA|AVAIL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_AVERAGE(t):
     r'\b(?:AVERAGE|AVERAG|AVERA|AVER|AVE)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_BACKGROUND(t):
     r'\b(?:BACKGROUND|BACKGROUN|BACKGROU|BACKGRO|BACKGR|BACKG|BACK)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BACKWARDS(t):
     r'\b(?:BACKWARDS|BACKWARD)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_BATCH_MODE(t):
     r'\b(?:BATCH\-MODE|BATCH\-MOD|BATCH\-MO|BATCH\-M|BATCH\-|BATCH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BEFORE_HIDE(t):
     r'\b(?:BEFORE\-HIDE|BEFORE\-HID|BEFORE\-HI|BEFORE\-H)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_BGCOLOR(t):
     r'\b(?:BGCOLOR|BGCOLO|BGCOL|BGCO|BGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BLOCK_LEVEL(t):
     r'\b(?:BLOCK\-LEVEL|BLOCK\-LEVE|BLOCK\-LEV)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_BORDER_BOTTOM_CHARS(t):
     r'\b(?:BORDER\-BOTTOM\-CHARS|BORDER\-BOTTOM\-CHAR|BORDER\-BOTTOM\-CHA|BORDER\-BOTTOM\-CH|BORDER\-BOTTOM\-C|BORDER\-BOTTOM\-|BORDER\-BOTTOM|BORDER\-BOTTO|BORDER\-BOTT|BORDER\-BOT|BORDER\-BO|BORDER\-B)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_BOTTOM_PIXELS(t):
     r'\b(?:BORDER\-BOTTOM\-PIXELS|BORDER\-BOTTOM\-PIXEL|BORDER\-BOTTOM\-PIXE|BORDER\-BOTTOM\-PIX|BORDER\-BOTTOM\-PI|BORDER\-BOTTOM\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_LEFT_CHARS(t):
     r'\b(?:BORDER\-LEFT\-CHARS|BORDER\-LEFT\-CHAR|BORDER\-LEFT\-CHA|BORDER\-LEFT\-CH|BORDER\-LEFT\-C|BORDER\-LEFT\-|BORDER\-LEFT|BORDER\-LEF|BORDER\-LE|BORDER\-L)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_LEFT_PIXELS(t):
     r'\b(?:BORDER\-LEFT\-PIXELS|BORDER\-LEFT\-PIXEL|BORDER\-LEFT\-PIXE|BORDER\-LEFT\-PIX|BORDER\-LEFT\-PI|BORDER\-LEFT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_RIGHT_CHARS(t):
     r'\b(?:BORDER\-RIGHT\-CHARS|BORDER\-RIGHT\-CHAR|BORDER\-RIGHT\-CHA|BORDER\-RIGHT\-CH|BORDER\-RIGHT\-C|BORDER\-RIGHT\-|BORDER\-RIGHT|BORDER\-RIGH|BORDER\-RIG|BORDER\-RI|BORDER\-R)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_RIGHT_PIXELS(t):
     r'\b(?:BORDER\-RIGHT\-PIXELS|BORDER\-RIGHT\-PIXEL|BORDER\-RIGHT\-PIXE|BORDER\-RIGHT\-PIX|BORDER\-RIGHT\-PI|BORDER\-RIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_TOP_CHARS(t):
     r'\b(?:BORDER\-TOP\-CHARS|BORDER\-TOP\-CHAR|BORDER\-TOP\-CHA|BORDER\-TOP\-CH|BORDER\-TOP\-C|BORDER\-TOP\-|BORDER\-TOP|BORDER\-TO|BORDER\-T)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BORDER_TOP_PIXELS(t):
     r'\b(?:BORDER\-TOP\-PIXELS|BORDER\-TOP\-PIXEL|BORDER\-TOP\-PIXE|BORDER\-TOP\-PIX|BORDER\-TOP\-PI|BORDER\-TOP\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BOX_SELECTABLE(t):
     r'\b(?:BOX\-SELECTABLE|BOX\-SELECTABL|BOX\-SELECTAB|BOX\-SELECTA|BOX\-SELECT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_BUTTONS(t):
     r'\b(?:BUTTONS|BUTTON)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_CASE_SENSITIVE(t):
     r'\b(?:CASE\-SENSITIVE|CASE\-SENSITIV|CASE\-SENSITI|CASE\-SENSIT|CASE\-SENSI|CASE\-SENS|CASE\-SEN)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_CENTERED(t):
     r'\b(?:CENTERED|CENTERE|CENTER)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_CHARACTER(t):
     r'\b(?:CHARACTER|CHARACTE|CHARACT|CHARAC|CHARA|CHAR)\b'
-    t.tag = 'violet'
+    # t.tag = 'violet'
     return t
     
 def t_CLEAR_SELECTION(t):
     r'\b(?:CLEAR\-SELECTION|CLEAR\-SELECTIO|CLEAR\-SELECTI|CLEAR\-SELECT)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_CLEAR_SORT_ARROWS(t):
     r'\b(?:CLEAR\-SORT\-ARROWS|CLEAR\-SORT\-ARROW)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_COLON_ALIGNED(t):
     r'\b(?:COLON\-ALIGNED|COLON\-ALIGNE|COLON\-ALIGN)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_COLUMN(t):
     r'\b(?:COLUMN|COLUM|COLU|COL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_COLUMN_LABEL(t):
     r'\b(?:COLUMN\-LABEL|COLUMN\-LABE|COLUMN\-LAB)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_CONVERT_TO_OFFSET(t):
     r'\b(?:CONVERT\-TO\-OFFSET|CONVERT\-TO\-OFFSE|CONVERT\-TO\-OFFS)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_CURRENT_ENVIRONMENT(t):
     r'\b(?:CURRENT\-ENVIRONMENT|CURRENT\-ENVIRONMEN|CURRENT\-ENVIRONME|CURRENT\-ENVIRONM|CURRENT\-ENVIRON|CURRENT\-ENVIRO|CURRENT\-ENVIR|CURRENT\-ENVI|CURRENT\-ENV)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_CURRENT_LANGUAGE(t):
     r'\b(?:CURRENT\-LANGUAGE|CURRENT\-LANGUAG|CURRENT\-LANGUA|CURRENT\-LANGU|CURRENT\-LANG)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_CURSOR(t):
     r'\b(?:CURSOR|CURSO|CURS)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_DATA_ENTRY_RETURN(t):
     r'\b(?:DATA\-ENTRY\-RETURN|DATA\-ENTRY\-RETUR|DATA\-ENTRY\-RETU|DATA\-ENTRY\-RET)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_DATA_RELATION(t):
     r'\b(?:DATA\-RELATION|DATA\-RELATIO|DATA\-RELATI|DATA\-RELAT|DATA\-RELA|DATA\-REL)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_DATA_TYPE(t):
     r'\b(?:DATA\-TYPE|DATA\-TYP|DATA\-TY|DATA\-T)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_DATE_FORMAT(t):
     r'\b(?:DATE\-FORMAT|DATE\-FORMA|DATE\-FORM|DATE\-FOR|DATE\-FO|DATE\-F)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_DBRESTRICTIONS(t):
     r'\b(?:DBRESTRICTIONS|DBRESTRICTION|DBRESTRICTIO|DBRESTRICTI|DBRESTRICT|DBRESTRIC|DBRESTRI|DBRESTR|DBREST)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_DBVERSION(t):
     r'\b(?:DBVERSION|DBVERSIO|DBVERSI|DBVERS)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_DDE_ID(t):
     r'\b(?:DDE\-ID|DDE\-I)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_DEBUG(t):
     r'\b(?:DEBUG|DEBU)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_DECIMAL(t):
     r'\b(?:DECIMAL|DECIMA|DECIM|DECI|DEC)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_DEFAULT_BUTTON(t):
     r'\b(?:DEFAULT\-BUTTON|DEFAULT\-BUTTO|DEFAULT\-BUTT|DEFAULT\-BUT|DEFAULT\-BU|DEFAULT\-B|DEFAULT\-)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_DEFAULT_EXTENSION(t):
     r'\b(?:DEFAULT\-EXTENSION|DEFAULT\-EXTENSIO|DEFAULT\-EXTENSI|DEFAULT\-EXTENS|DEFAULT\-EXTEN|DEFAULT\-EXTE|DEFAULT\-EXT|DEFAULT\-EX)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_DEFAULT_NOXLATE(t):
     r'\b(?:DEFAULT\-NOXLATE|DEFAULT\-NOXLAT|DEFAULT\-NOXLA|DEFAULT\-NOXL)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_DEFINE(t):
     r'\b(?:DEFINE|DEFIN|DEFI|DEF)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_DELETE(t):
     r'\b(?:DELETE|DELET|DELE|DEL)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_DESCENDING(t):
     r'\b(?:DESCENDING|DESCENDIN|DESCENDI|DESCEND|DESCEN|DESCE|DESC)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_DICTIONARY(t):
     r'\b(?:DICTIONARY|DICTIONAR|DICTIONA|DICTION|DICTIO|DICTI|DICT)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_DISCONNECT(t):
     r'\b(?:DISCONNECT|DISCONNEC|DISCONNE|DISCONN|DISCON)\b'
-    t.tag = 'orange'
-    return t
-    
-def t_DISPLAY(t):
-    r'\b(?:DISPLAY|DISPLA|DISPL|DISP)\b'
-    t.tag = 'blue'
+    # t.tag = 'orange'
     return t
     
 def t_DISPLAY_TYPE(t):
     r'\b(?:DISPLAY\-TYPE|DISPLAY\-TYP|DISPLAY\-TY|DISPLAY\-T)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_EDGE_CHARS(t):
     r'\b(?:EDGE\-CHARS|EDGE\-CHAR|EDGE\-CHA|EDGE\-CH|EDGE\-C|EDGE\-|EDGE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_EDGE_PIXELS(t):
     r'\b(?:EDGE\-PIXELS|EDGE\-PIXEL|EDGE\-PIXE|EDGE\-PIX|EDGE\-PI|EDGE\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_ERROR_COLUMN(t):
     r'\b(?:ERROR\-COLUMN|ERROR\-COLUM|ERROR\-COLU|ERROR\-COL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_ERROR_STATUS(t):
     r'\b(?:ERROR\-STATUS|ERROR\-STATU|ERROR\-STAT)\b'
-    t.tag = 'magenta'
+    # t.tag = 'magenta'
     return t
     
 def t_EVENT_TYPE(t):
     r'\b(?:EVENT\-TYPE|EVENT\-TYP|EVENT\-TY|EVENT\-T)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_EXCLUSIVE_LOCK(t):
     r'\b(?:EXCLUSIVE\-LOCK|EXCLUSIVE\-LOC|EXCLUSIVE\-LO|EXCLUSIVE\-L|EXCLUSIVE\-|EXCLUSIVE)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FGCOLOR(t):
     r'\b(?:FGCOLOR|FGCOLO|FGCOL|FGCO|FGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FIELDS(t):
     r'\b(?:FIELDS|FIELD)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FILE_INFORMATION(t):
     r'\b(?:FILE\-INFORMATION|FILE\-INFORMATIO|FILE\-INFORMATI|FILE\-INFORMAT|FILE\-INFORMA|FILE\-INFORM|FILE\-INFOR|FILE\-INFO)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FILE_OFFSET(t):
     r'\b(?:FILE\-OFFSET|FILE\-OFFSE|FILE\-OFFS|FILE\-OFF)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FIRST_PROCEDURE(t):
     r'\b(?:FIRST\-PROCEDURE|FIRST\-PROCEDUR|FIRST\-PROCEDU|FIRST\-PROCED|FIRST\-PROCE|FIRST\-PROC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FIRST_TAB_ITEM(t):
     r'\b(?:FIRST\-TAB\-ITEM|FIRST\-TAB\-ITE|FIRST\-TAB\-IT|FIRST\-TAB\-I)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FOREGROUND(t):
     r'\b(?:FOREGROUND|FOREGROUN|FOREGROU|FOREGRO|FOREGR|FOREG|FORE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FORMAT(t):
     r'\b(?:FORMAT|FORMA|FORM)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FORMATTED(t):
     r'\b(?:FORMATTED|FORMATTE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FORWARDS(t):
     r'\b(?:FORWARDS|FORWARD)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FRAGMENT(t):
     r'\b(?:FRAGMENT|FRAGMEN)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FRAME(t):
     r'\b(?:FRAME|FRAM)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FRAME_INDEX(t):
     r'\b(?:FRAME\-INDEX|FRAME\-INDE)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_FRAME_SPACING(t):
     r'\b(?:FRAME\-SPACING|FRAME\-SPACIN|FRAME\-SPACI|FRAME\-SPAC|FRAME\-SPA)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FRAME_VALUE(t):
     r'\b(?:FRAME\-VALUE|FRAME\-VALU|FRAME\-VAL)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_FROM_CHARS(t):
     r'\b(?:FROM\-CHARS|FROM\-CHAR|FROM\-CHA|FROM\-CH|FROM\-C)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FROM_CURRENT(t):
     r'\b(?:FROM\-CURRENT|FROM\-CURREN|FROM\-CURRE|FROM\-CURR|FROM\-CUR)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FROM_PIXELS(t):
     r'\b(?:FROM\-PIXELS|FROM\-PIXEL|FROM\-PIXE|FROM\-PIX|FROM\-PI|FROM\-P)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_FULL_HEIGHT_CHARS(t):
     r'\b(?:FULL\-HEIGHT\-CHARS|FULL\-HEIGHT\-CHAR|FULL\-HEIGHT\-CHA|FULL\-HEIGHT\-CH|FULL\-HEIGHT\-C|FULL\-HEIGHT\-|FULL\-HEIGHT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FULL_HEIGHT_PIXELS(t):
     r'\b(?:FULL\-HEIGHT\-PIXELS|FULL\-HEIGHT\-PIXEL|FULL\-HEIGHT\-PIXE|FULL\-HEIGHT\-PIX|FULL\-HEIGHT\-PI|FULL\-HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FULL_PATHNAME(t):
     r'\b(?:FULL\-PATHNAME|FULL\-PATHNAM|FULL\-PATHNA|FULL\-PATHN)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FULL_WIDTH_CHARS(t):
     r'\b(?:FULL\-WIDTH\-CHARS|FULL\-WIDTH\-CHAR|FULL\-WIDTH\-CHA|FULL\-WIDTH\-CH|FULL\-WIDTH\-C|FULL\-WIDTH\-|FULL\-WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_FULL_WIDTH_PIXELS(t):
     r'\b(?:FULL\-WIDTH\-PIXELS|FULL\-WIDTH\-PIXEL|FULL\-WIDTH\-PIXE|FULL\-WIDTH\-PIX|FULL\-WIDTH\-PI|FULL\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GATEWAYS(t):
     r'\b(?:GATEWAYS|GATEWAY)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_BLUE_VALUE(t):
     r'\b(?:GET\-BLUE\-VALUE|GET\-BLUE\-VALU|GET\-BLUE\-VAL|GET\-BLUE\-VA|GET\-BLUE\-V|GET\-BLUE\-|GET\-BLUE)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_FILE_OFFSET(t):
     r'\b(?:GET\-FILE\-OFFSET|GET\-FILE\-OFFSE)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_GREEN_VALUE(t):
     r'\b(?:GET\-GREEN\-VALUE|GET\-GREEN\-VALU|GET\-GREEN\-VAL|GET\-GREEN\-VA|GET\-GREEN\-V|GET\-GREEN\-|GET\-GREEN)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_KEY_VALUE(t):
     r'\b(?:GET\-KEY\-VALUE|GET\-KEY\-VALU|GET\-KEY\-VAL)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_GET_RED_VALUE(t):
     r'\b(?:GET\-RED\-VALUE|GET\-RED\-VALU|GET\-RED\-VAL|GET\-RED\-VA|GET\-RED\-V|GET\-RED\-|GET\-RED)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_SELECTED_WIDGET(t):
     r'\b(?:GET\-SELECTED\-WIDGET|GET\-SELECTED\-WIDGE|GET\-SELECTED\-WIDG|GET\-SELECTED\-WID|GET\-SELECTED\-WI|GET\-SELECTED\-W|GET\-SELECTED\-|GET\-SELECTED)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_TEXT_HEIGHT_CHARS(t):
     r'\b(?:GET\-TEXT\-HEIGHT\-CHARS|GET\-TEXT\-HEIGHT\-CHAR|GET\-TEXT\-HEIGHT\-CHA|GET\-TEXT\-HEIGHT\-CH|GET\-TEXT\-HEIGHT\-C|GET\-TEXT\-HEIGHT\-|GET\-TEXT\-HEIGHT)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_TEXT_HEIGHT_PIXELS(t):
     r'\b(?:GET\-TEXT\-HEIGHT\-PIXELS|GET\-TEXT\-HEIGHT\-PIXEL|GET\-TEXT\-HEIGHT\-PIXE|GET\-TEXT\-HEIGHT\-PIX|GET\-TEXT\-HEIGHT\-PI|GET\-TEXT\-HEIGHT\-P)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_TEXT_WIDTH_CHARS(t):
     r'\b(?:GET\-TEXT\-WIDTH\-CHARS|GET\-TEXT\-WIDTH\-CHAR|GET\-TEXT\-WIDTH\-CHA|GET\-TEXT\-WIDTH\-CH|GET\-TEXT\-WIDTH\-C|GET\-TEXT\-WIDTH\-|GET\-TEXT\-WIDTH)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GET_TEXT_WIDTH_PIXELS(t):
     r'\b(?:GET\-TEXT\-WIDTH\-PIXELS|GET\-TEXT\-WIDTH\-PIXEL|GET\-TEXT\-WIDTH\-PIXE|GET\-TEXT\-WIDTH\-PIX|GET\-TEXT\-WIDTH\-PI|GET\-TEXT\-WIDTH\-P)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GO_PENDING(t):
     r'\b(?:GO\-PENDING|GO\-PENDIN|GO\-PENDI|GO\-PEND)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_GRAPHIC_EDGE(t):
     r'\b(?:GRAPHIC\-EDGE|GRAPHIC\-EDG|GRAPHIC\-ED|GRAPHIC\-E)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GRID_FACTOR_HORIZONTAL(t):
     r'\b(?:GRID\-FACTOR\-HORIZONTAL|GRID\-FACTOR\-HORIZONTA|GRID\-FACTOR\-HORIZONT|GRID\-FACTOR\-HORIZON|GRID\-FACTOR\-HORIZO|GRID\-FACTOR\-HORIZ|GRID\-FACTOR\-HORI|GRID\-FACTOR\-HOR|GRID\-FACTOR\-HO|GRID\-FACTOR\-H)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GRID_FACTOR_VERTICAL(t):
     r'\b(?:GRID\-FACTOR\-VERTICAL|GRID\-FACTOR\-VERTICA|GRID\-FACTOR\-VERTIC|GRID\-FACTOR\-VERTI|GRID\-FACTOR\-VERT|GRID\-FACTOR\-VER|GRID\-FACTOR\-VE|GRID\-FACTOR\-V)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GRID_UNIT_HEIGHT_CHARS(t):
     r'\b(?:GRID\-UNIT\-HEIGHT\-CHARS|GRID\-UNIT\-HEIGHT\-CHAR|GRID\-UNIT\-HEIGHT\-CHA|GRID\-UNIT\-HEIGHT\-CH|GRID\-UNIT\-HEIGHT\-C|GRID\-UNIT\-HEIGHT\-|GRID\-UNIT\-HEIGHT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GRID_UNIT_HEIGHT_PIXELS(t):
     r'\b(?:GRID\-UNIT\-HEIGHT\-PIXELS|GRID\-UNIT\-HEIGHT\-PIXEL|GRID\-UNIT\-HEIGHT\-PIXE|GRID\-UNIT\-HEIGHT\-PIX|GRID\-UNIT\-HEIGHT\-PI|GRID\-UNIT\-HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GRID_UNIT_WIDTH_CHARS(t):
     r'\b(?:GRID\-UNIT\-WIDTH\-CHARS|GRID\-UNIT\-WIDTH\-CHAR|GRID\-UNIT\-WIDTH\-CHA|GRID\-UNIT\-WIDTH\-CH|GRID\-UNIT\-WIDTH\-C|GRID\-UNIT\-WIDTH\-|GRID\-UNIT\-WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_GRID_UNIT_WIDTH_PIXELS(t):
     r'\b(?:GRID\-UNIT\-WIDTH\-PIXELS|GRID\-UNIT\-WIDTH\-PIXEL|GRID\-UNIT\-WIDTH\-PIXE|GRID\-UNIT\-WIDTH\-PIX|GRID\-UNIT\-WIDTH\-PI|GRID\-UNIT\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_HEIGHT_CHARS(t):
     r'\b(?:HEIGHT\-CHARS|HEIGHT\-CHAR|HEIGHT\-CHA|HEIGHT\-CH|HEIGHT\-C|HEIGHT\-|HEIGHT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_HEIGHT_PIXELS(t):
     r'\b(?:HEIGHT\-PIXELS|HEIGHT\-PIXEL|HEIGHT\-PIXE|HEIGHT\-PIX|HEIGHT\-PI|HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_HORIZONTAL(t):
     r'\b(?:HORIZONTAL|HORIZONTA|HORIZONT|HORIZON|HORIZO|HORIZ|HORI)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_IMAGE_SIZE_CHARS(t):
     r'\b(?:IMAGE\-SIZE\-CHARS|IMAGE\-SIZE\-CHAR|IMAGE\-SIZE\-CHA|IMAGE\-SIZE\-CH|IMAGE\-SIZE\-C)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_IMAGE_SIZE_PIXELS(t):
     r'\b(?:IMAGE\-SIZE\-PIXELS|IMAGE\-SIZE\-PIXEL|IMAGE\-SIZE\-PIXE|IMAGE\-SIZE\-PIX|IMAGE\-SIZE\-PI|IMAGE\-SIZE\-P)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_INFORMATION(t):
     r'\b(?:INFORMATION|INFORMATIO|INFORMATI|INFORMAT|INFORMA|INFORM|INFOR|INFO)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_INHERIT_BGCOLOR(t):
     r'\b(?:INHERIT\-BGCOLOR|INHERIT\-BGCOLO|INHERIT\-BGCOL|INHERIT\-BGCO|INHERIT\-BGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_INHERIT_FGCOLOR(t):
     r'\b(?:INHERIT\-FGCOLOR|INHERIT\-FGCOLO|INHERIT\-FGCOL|INHERIT\-FGCO|INHERIT\-FGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_INITIAL(t):
     r'\b(?:INITIAL|INITIA|INITI|INIT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_INPUT_OUTPUT(t):
     r'\b(?:INPUT\-OUTPUT|INPUT\-OUTPU|INPUT\-OUTP|INPUT\-OUT|INPUT\-OU|INPUT\-O)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_INSERT_BACKTAB(t):
     r'\b(?:INSERT\-BACKTAB|INSERT\-BACKTA|INSERT\-BACKT|INSERT\-BACK|INSERT\-BAC|INSERT\-BA|INSERT\-B)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_INSERT_TAB(t):
     r'\b(?:INSERT\-TAB|INSERT\-TA|INSERT\-T)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_INTEGER(t):
     r'\b(?:INTEGER|INTEGE|INTEG|INTE|INT)\b'
-    t.tag = 'violet'
+    # t.tag = 'violet'
     return t
     
 def t_IS_ATTR_SPACE(t):
     r'\b(?:IS\-ATTR\-SPACE|IS\-ATTR\-SPAC|IS\-ATTR\-SPA|IS\-ATTR\-SP|IS\-ATTR\-S|IS\-ATTR\-|IS\-ATTR)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_IS_CLASS(t):
     r'\b(?:IS\-CLASS|IS\-CLAS)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_IS_LEAD_BYTE(t):
     r'\b(?:IS\-LEAD\-BYTE|IS\-LEAD\-BYT|IS\-LEAD\-BY|IS\-LEAD\-B|IS\-LEAD\-|IS\-LEAD)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_IS_PARTITIONED(t):
     r'\b(?:IS\-PARTITIONED|IS\-PARTITIONE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_KEEP_FRAME_Z_ORDER(t):
     r'\b(?:KEEP\-FRAME\-Z\-ORDER|KEEP\-FRAME\-Z\-ORDE|KEEP\-FRAME\-Z\-ORD|KEEP\-FRAME\-Z\-OR|KEEP\-FRAME\-Z\-O|KEEP\-FRAME\-Z\-|KEEP\-FRAME\-Z)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_KEY_FUNCTION(t):
     r'\b(?:KEY\-FUNCTION|KEY\-FUNCTIO|KEY\-FUNCTI|KEY\-FUNCT|KEY\-FUNC)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_KEYFUNCTION(t):
     r'\b(?:KEYFUNCTION|KEYFUNCTIO|KEYFUNCTI|KEYFUNCT|KEYFUNC)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_LABEL_BGCOLOR(t):
     r'\b(?:LABEL\-BGCOLOR|LABEL\-BGCOLO|LABEL\-BGCOL|LABEL\-BGCO|LABEL\-BGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_LABEL_DCOLOR(t):
     r'\b(?:LABEL\-DCOLOR|LABEL\-DCOLO|LABEL\-DCOL|LABEL\-DCO|LABEL\-DC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_LABEL_FGCOLOR(t):
     r'\b(?:LABEL\-FGCOLOR|LABEL\-FGCOLO|LABEL\-FGCOL|LABEL\-FGCO|LABEL\-FGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_LABEL_PFCOLOR(t):
     r'\b(?:LABEL\-PFCOLOR|LABEL\-PFCOLO|LABEL\-PFCOL|LABEL\-PFCO|LABEL\-PFC)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_LANGUAGES(t):
     r'\b(?:LANGUAGES|LANGUAGE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_LAST_EVENT(t):
     r'\b(?:LAST\-EVENT|LAST\-EVEN)\b'
-    t.tag = 'magenta'
+    # t.tag = 'magenta'
     return t
     
 def t_LAST_PROCEDURE(t):
     r'\b(?:LAST\-PROCEDURE|LAST\-PROCEDUR|LAST\-PROCEDU|LAST\-PROCED|LAST\-PROCE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_LAST_TAB_ITEM(t):
     r'\b(?:LAST\-TAB\-ITEM|LAST\-TAB\-ITE|LAST\-TAB\-IT|LAST\-TAB\-I)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_LEFT_ALIGNED(t):
     r'\b(?:LEFT\-ALIGNED|LEFT\-ALIGNE|LEFT\-ALIGN)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_LINE_COUNTER(t):
     r'\b(?:LINE\-COUNTER|LINE\-COUNTE|LINE\-COUNT)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_LISTING(t):
     r'\b(?:LISTING|LISTIN|LISTI)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_LOAD_MOUSE_POINTER(t):
     r'\b(?:LOAD\-MOUSE\-POINTER|LOAD\-MOUSE\-POINTE|LOAD\-MOUSE\-POINT|LOAD\-MOUSE\-POIN|LOAD\-MOUSE\-POI|LOAD\-MOUSE\-PO|LOAD\-MOUSE\-P)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MARGIN_HEIGHT_CHARS(t):
     r'\b(?:MARGIN\-HEIGHT\-CHARS|MARGIN\-HEIGHT\-CHAR|MARGIN\-HEIGHT\-CHA|MARGIN\-HEIGHT\-CH|MARGIN\-HEIGHT\-C|MARGIN\-HEIGHT\-|MARGIN\-HEIGHT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MARGIN_HEIGHT_PIXELS(t):
     r'\b(?:MARGIN\-HEIGHT\-PIXELS|MARGIN\-HEIGHT\-PIXEL|MARGIN\-HEIGHT\-PIXE|MARGIN\-HEIGHT\-PIX|MARGIN\-HEIGHT\-PI|MARGIN\-HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MARGIN_WIDTH_CHARS(t):
     r'\b(?:MARGIN\-WIDTH\-CHARS|MARGIN\-WIDTH\-CHAR|MARGIN\-WIDTH\-CHA|MARGIN\-WIDTH\-CH|MARGIN\-WIDTH\-C|MARGIN\-WIDTH\-|MARGIN\-WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MARGIN_WIDTH_PIXELS(t):
     r'\b(?:MARGIN\-WIDTH\-PIXELS|MARGIN\-WIDTH\-PIXEL|MARGIN\-WIDTH\-PIXE|MARGIN\-WIDTH\-PIX|MARGIN\-WIDTH\-PI|MARGIN\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MAX_HEIGHT_CHARS(t):
     r'\b(?:MAX\-HEIGHT\-CHARS|MAX\-HEIGHT\-CHAR|MAX\-HEIGHT\-CHA|MAX\-HEIGHT\-CH|MAX\-HEIGHT\-C)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MAX_HEIGHT_PIXELS(t):
     r'\b(?:MAX\-HEIGHT\-PIXELS|MAX\-HEIGHT\-PIXEL|MAX\-HEIGHT\-PIXE|MAX\-HEIGHT\-PIX|MAX\-HEIGHT\-PI|MAX\-HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MAX_VALUE(t):
     r'\b(?:MAX\-VALUE|MAX\-VALU|MAX\-VAL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MAX_WIDTH_CHARS(t):
     r'\b(?:MAX\-WIDTH\-CHARS|MAX\-WIDTH\-CHAR|MAX\-WIDTH\-CHA|MAX\-WIDTH\-CH|MAX\-WIDTH\-C|MAX\-WIDTH\-|MAX\-WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MAX_WIDTH_PIXELS(t):
     r'\b(?:MAX\-WIDTH\-PIXELS|MAX\-WIDTH\-PIXEL|MAX\-WIDTH\-PIXE|MAX\-WIDTH\-PIX|MAX\-WIDTH\-PI|MAX\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MAXIMUM(t):
     r'\b(?:MAXIMUM|MAXIMU|MAXIM|MAXI|MAX)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MENU_KEY(t):
     r'\b(?:MENU\-KEY|MENU\-KE|MENU\-K)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MENU_MOUSE(t):
     r'\b(?:MENU\-MOUSE|MENU\-MOUS|MENU\-MOU|MENU\-MO|MENU\-M)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_COLUMN_WIDTH_CHARS(t):
     r'\b(?:MIN\-COLUMN\-WIDTH\-CHARS|MIN\-COLUMN\-WIDTH\-CHAR|MIN\-COLUMN\-WIDTH\-CHA|MIN\-COLUMN\-WIDTH\-CH|MIN\-COLUMN\-WIDTH\-C)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_COLUMN_WIDTH_PIXELS(t):
     r'\b(?:MIN\-COLUMN\-WIDTH\-PIXELS|MIN\-COLUMN\-WIDTH\-PIXEL|MIN\-COLUMN\-WIDTH\-PIXE|MIN\-COLUMN\-WIDTH\-PIX|MIN\-COLUMN\-WIDTH\-PI|MIN\-COLUMN\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_HEIGHT_CHARS(t):
     r'\b(?:MIN\-HEIGHT\-CHARS|MIN\-HEIGHT\-CHAR|MIN\-HEIGHT\-CHA|MIN\-HEIGHT\-CH|MIN\-HEIGHT\-C|MIN\-HEIGHT\-|MIN\-HEIGHT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_HEIGHT_PIXELS(t):
     r'\b(?:MIN\-HEIGHT\-PIXELS|MIN\-HEIGHT\-PIXEL|MIN\-HEIGHT\-PIXE|MIN\-HEIGHT\-PIX|MIN\-HEIGHT\-PI|MIN\-HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_VALUE(t):
     r'\b(?:MIN\-VALUE|MIN\-VALU|MIN\-VAL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_WIDTH_CHARS(t):
     r'\b(?:MIN\-WIDTH\-CHARS|MIN\-WIDTH\-CHAR|MIN\-WIDTH\-CHA|MIN\-WIDTH\-CH|MIN\-WIDTH\-C|MIN\-WIDTH\-|MIN\-WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MIN_WIDTH_PIXELS(t):
     r'\b(?:MIN\-WIDTH\-PIXELS|MIN\-WIDTH\-PIXEL|MIN\-WIDTH\-PIXE|MIN\-WIDTH\-PIX|MIN\-WIDTH\-PI|MIN\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MINIMUM(t):
     r'\b(?:MINIMUM|MINIMU|MINIM|MINI|MIN)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MODULO(t):
     r'\b(?:MODULO|MODUL|MODU|MOD)\b'
-    t.tag = 'magenta'
+    # t.tag = 'magenta'
     return t
     
 def t_MOUSE_POINTER(t):
     r'\b(?:MOUSE\-POINTER|MOUSE\-POINTE|MOUSE\-POINT|MOUSE\-POIN|MOUSE\-POI|MOUSE\-PO|MOUSE\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_MOVE_AFTER_TAB_ITEM(t):
     r'\b(?:MOVE\-AFTER\-TAB\-ITEM|MOVE\-AFTER\-TAB\-ITE|MOVE\-AFTER\-TAB\-IT|MOVE\-AFTER\-TAB\-I|MOVE\-AFTER\-TAB\-|MOVE\-AFTER\-TAB|MOVE\-AFTER\-TA|MOVE\-AFTER\-T|MOVE\-AFTER\-|MOVE\-AFTER)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MOVE_BEFORE_TAB_ITEM(t):
     r'\b(?:MOVE\-BEFORE\-TAB\-ITEM|MOVE\-BEFORE\-TAB\-ITE|MOVE\-BEFORE\-TAB\-IT|MOVE\-BEFORE\-TAB\-I|MOVE\-BEFORE\-TAB\-|MOVE\-BEFORE\-TAB|MOVE\-BEFORE\-TA|MOVE\-BEFORE\-T|MOVE\-BEFORE\-|MOVE\-BEFORE|MOVE\-BEFOR)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MOVE_COLUMN(t):
     r'\b(?:MOVE\-COLUMN|MOVE\-COLUM|MOVE\-COLU|MOVE\-COL)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MOVE_TO_BOTTOM(t):
     r'\b(?:MOVE\-TO\-BOTTOM|MOVE\-TO\-BOTTO|MOVE\-TO\-BOTT|MOVE\-TO\-BOT|MOVE\-TO\-BO|MOVE\-TO\-B)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_MOVE_TO_TOP(t):
     r'\b(?:MOVE\-TO\-TOP|MOVE\-TO\-TO|MOVE\-TO\-T)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_NEXT_TAB_ITEM(t):
     r'\b(?:NEXT\-TAB\-ITEM|NEXT\-TAB\-ITE|NEXT\-TAB\-IT|NEXT\-TAB\-I)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_ATTR_LIST(t):
     r'\b(?:NO\-ATTR\-LIST|NO\-ATTR\-LIS|NO\-ATTR\-LI|NO\-ATTR\-L|NO\-ATTR\-|NO\-ATTR)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_ATTR_SPACE(t):
     r'\b(?:NO\-ATTR\-SPACE|NO\-ATTR\-SPAC|NO\-ATTR\-SPA|NO\-ATTR\-SP|NO\-ATTR\-S|NO\-ATTR\-|NO\-ATTR)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_FILL(t):
     r'\b(?:NO\-FILL|NO\-FIL|NO\-FI|NO\-F)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_INHERIT_BGCOLOR(t):
     r'\b(?:NO\-INHERIT\-BGCOLOR|NO\-INHERIT\-BGCOLO|NO\-INHERIT\-BGCOL|NO\-INHERIT\-BGCO|NO\-INHERIT\-BGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_INHERIT_FGCOLOR(t):
     r'\b(?:NO\-INHERIT\-FGCOLOR|NO\-INHERIT\-FGCOLO|NO\-INHERIT\-FGCOL|NO\-INHERIT\-FGCO|NO\-INHERIT\-FGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_LABELS(t):
     r'\b(?:NO\-LABELS|NO\-LABEL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_MESSAGE(t):
     r'\b(?:NO\-MESSAGE|NO\-MESSAG|NO\-MESSA|NO\-MESS|NO\-MES)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_PREFETCH(t):
     r'\b(?:NO\-PREFETCH|NO\-PREFETC|NO\-PREFET|NO\-PREFE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_UNDERLINE(t):
     r'\b(?:NO\-UNDERLINE|NO\-UNDERLIN|NO\-UNDERLI|NO\-UNDERL|NO\-UNDER|NO\-UNDE|NO\-UND)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NO_VALIDATE(t):
     r'\b(?:NO\-VALIDATE|NO\-VALIDAT|NO\-VALIDA|NO\-VALID|NO\-VALI|NO\-VAL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NUM_ALIASES(t):
     r'\b(?:NUM\-ALIASES|NUM\-ALIASE|NUM\-ALIAS|NUM\-ALIA|NUM\-ALI)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_NUM_BUTTONS(t):
     r'\b(?:NUM\-BUTTONS|NUM\-BUTTON|NUM\-BUTTO|NUM\-BUTT|NUM\-BUT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NUM_COLUMNS(t):
     r'\b(?:NUM\-COLUMNS|NUM\-COLUMN|NUM\-COLUM|NUM\-COLU|NUM\-COL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NUM_LOCKED_COLUMNS(t):
     r'\b(?:NUM\-LOCKED\-COLUMNS|NUM\-LOCKED\-COLUMN|NUM\-LOCKED\-COLUM|NUM\-LOCKED\-COLU|NUM\-LOCKED\-COL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NUM_SELECTED_WIDGETS(t):
     r'\b(?:NUM\-SELECTED\-WIDGETS|NUM\-SELECTED\-WIDGET|NUM\-SELECTED\-WIDGE|NUM\-SELECTED\-WIDG|NUM\-SELECTED\-WID|NUM\-SELECTED\-WI|NUM\-SELECTED\-W|NUM\-SELECTED\-|NUM\-SELECTED)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_NUMERIC_FORMAT(t):
     r'\b(?:NUMERIC\-FORMAT|NUMERIC\-FORMA|NUMERIC\-FORM|NUMERIC\-FOR|NUMERIC\-FO|NUMERIC\-F)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_ON_FRAME_BORDER(t):
     r'\b(?:ON\-FRAME\-BORDER|ON\-FRAME\-BORDE|ON\-FRAME\-BORD|ON\-FRAME\-BOR|ON\-FRAME\-BO|ON\-FRAME\-B|ON\-FRAME\-|ON\-FRAME)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_OS_DRIVES(t):
     r'\b(?:OS\-DRIVES|OS\-DRIVE)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_PAGE_BOTTOM(t):
     r'\b(?:PAGE\-BOTTOM|PAGE\-BOTTO|PAGE\-BOTT|PAGE\-BOT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PAGE_NUMBER(t):
     r'\b(?:PAGE\-NUMBER|PAGE\-NUMBE|PAGE\-NUMB|PAGE\-NUM)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_PAGE_WIDTH(t):
     r'\b(?:PAGE\-WIDTH|PAGE\-WIDT|PAGE\-WID)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_PARAMETER(t):
     r'\b(?:PARAMETER|PARAMETE|PARAMET|PARAME|PARAM)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PBE_HASH_ALGORITHM(t):
     r'\b(?:PBE\-HASH\-ALGORITHM|PBE\-HASH\-ALGORITH|PBE\-HASH\-ALGORIT|PBE\-HASH\-ALGORI|PBE\-HASH\-ALGOR|PBE\-HASH\-ALGO|PBE\-HASH\-ALG)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PERSISTENT(t):
     r'\b(?:PERSISTENT|PERSISTEN|PERSISTE|PERSIST)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PFCOLOR(t):
     r'\b(?:PFCOLOR|PFCOLO|PFCOL|PFCO|PFC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PIXELS_PER_COLUMN(t):
     r'\b(?:PIXELS\-PER\-COLUMN|PIXELS\-PER\-COLUM|PIXELS\-PER\-COLU|PIXELS\-PER\-COL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_POPUP_MENU(t):
     r'\b(?:POPUP\-MENU|POPUP\-MEN|POPUP\-ME|POPUP\-M)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_POPUP_ONLY(t):
     r'\b(?:POPUP\-ONLY|POPUP\-ONL|POPUP\-ON|POPUP\-O)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PREPROCESS(t):
     r'\b(?:PREPROCESS|PREPROCES|PREPROCE|PREPROC)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_PRESELECT(t):
     r'\b(?:PRESELECT|PRESELEC|PRESELE|PRESEL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PREV_TAB_ITEM(t):
     r'\b(?:PREV\-TAB\-ITEM|PREV\-TAB\-ITE|PREV\-TAB\-IT|PREV\-TAB\-I)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PRIVATE_DATA(t):
     r'\b(?:PRIVATE\-DATA|PRIVATE\-DAT|PRIVATE\-DA|PRIVATE\-D)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PROC_HANDLE(t):
     r'\b(?:PROC\-HANDLE|PROC\-HANDL|PROC\-HAND|PROC\-HAN|PROC\-HA)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_PROC_STATUS(t):
     r'\b(?:PROC\-STATUS|PROC\-STATU|PROC\-STAT|PROC\-STA|PROC\-ST)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_PROGRESS_SOURCE(t):
     r'\b(?:PROGRESS\-SOURCE|PROGRESS\-SOURC|PROGRESS\-SOUR|PROGRESS\-SOU|PROGRESS\-SO|PROGRESS\-S)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_PROMPT_FOR(t):
     r'\b(?:PROMPT\-FOR|PROMPT\-FO|PROMPT\-F)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_PROVERSION(t):
     r'\b(?:PROVERSION|PROVERSIO|PROVERSI|PROVERS)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_PUT_KEY_VALUE(t):
     r'\b(?:PUT\-KEY\-VALUE|PUT\-KEY\-VALU|PUT\-KEY\-VAL)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_RCODE_INFORMATION(t):
     r'\b(?:RCODE\-INFORMATION|RCODE\-INFORMATIO|RCODE\-INFORMATI|RCODE\-INFORMAT|RCODE\-INFORMA|RCODE\-INFORM|RCODE\-INFOR|RCODE\-INFO)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_RECTANGLE(t):
     r'\b(?:RECTANGLE|RECTANGL|RECTANG|RECTAN|RECTA|RECT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_RESIZABLE(t):
     r'\b(?:RESIZABLE|RESIZABL|RESIZAB|RESIZA)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_RETURN_INSERTED(t):
     r'\b(?:RETURN\-INSERTED|RETURN\-INSERTE|RETURN\-INSERT|RETURN\-INSER|RETURN\-INSE|RETURN\-INS)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_RETURN_TO_START_DIR(t):
     r'\b(?:RETURN\-TO\-START\-DIR|RETURN\-TO\-START\-DI)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_RETURN_VALUE(t):
     r'\b(?:RETURN\-VALUE|RETURN\-VALU|RETURN\-VAL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_RIGHT_ALIGNED(t):
     r'\b(?:RIGHT\-ALIGNED|RIGHT\-ALIGNE)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_ROW_HEIGHT_CHARS(t):
     r'\b(?:ROW\-HEIGHT\-CHARS|ROW\-HEIGHT\-CHAR|ROW\-HEIGHT\-CHA|ROW\-HEIGHT\-CH|ROW\-HEIGHT\-C|ROW\-HEIGHT\-|ROW\-HEIGHT|ROW\-HEIGH|ROW\-HEIG|ROW\-HEI|ROW\-HE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_ROW_HEIGHT_PIXELS(t):
     r'\b(?:ROW\-HEIGHT\-PIXELS|ROW\-HEIGHT\-PIXEL|ROW\-HEIGHT\-PIXE|ROW\-HEIGHT\-PIX|ROW\-HEIGHT\-PI|ROW\-HEIGHT\-P|ROW\-HEIGHT\-|ROW\-HEIGHT|ROW\-HEIGH|ROW\-HEIG)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SAX_COMPLETE(t):
     r'\b(?:SAX\-COMPLETE|SAX\-COMPLET|SAX\-COMPLE)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SCREEN_VALUE(t):
     r'\b(?:SCREEN\-VALUE|SCREEN\-VALU|SCREEN\-VAL)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SCROLL_TO_ITEM(t):
     r'\b(?:SCROLL\-TO\-ITEM|SCROLL\-TO\-ITE|SCROLL\-TO\-IT|SCROLL\-TO\-I)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_SCROLLBAR_HORIZONTAL(t):
     r'\b(?:SCROLLBAR\-HORIZONTAL|SCROLLBAR\-HORIZONTA|SCROLLBAR\-HORIZONT|SCROLLBAR\-HORIZON|SCROLLBAR\-HORIZO|SCROLLBAR\-HORIZ|SCROLLBAR\-HORI|SCROLLBAR\-HOR|SCROLLBAR\-HO|SCROLLBAR\-H)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SCROLLBAR_VERTICAL(t):
     r'\b(?:SCROLLBAR\-VERTICAL|SCROLLBAR\-VERTICA|SCROLLBAR\-VERTIC|SCROLLBAR\-VERTI|SCROLLBAR\-VERT|SCROLLBAR\-VER|SCROLLBAR\-VE|SCROLLBAR\-V)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SCROLLED_ROW_POSITION(t):
     r'\b(?:SCROLLED\-ROW\-POSITION|SCROLLED\-ROW\-POSITIO|SCROLLED\-ROW\-POSITI|SCROLLED\-ROW\-POSIT|SCROLLED\-ROW\-POSI|SCROLLED\-ROW\-POS)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SET_BLUE_VALUE(t):
     r'\b(?:SET\-BLUE\-VALUE|SET\-BLUE\-VALU|SET\-BLUE\-VAL|SET\-BLUE\-VA|SET\-BLUE\-V|SET\-BLUE\-|SET\-BLUE)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_SET_GREEN_VALUE(t):
     r'\b(?:SET\-GREEN\-VALUE|SET\-GREEN\-VALU|SET\-GREEN\-VAL|SET\-GREEN\-VA|SET\-GREEN\-V|SET\-GREEN\-|SET\-GREEN)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_SET_RED_VALUE(t):
     r'\b(?:SET\-RED\-VALUE|SET\-RED\-VALU|SET\-RED\-VAL|SET\-RED\-VA|SET\-RED\-V|SET\-RED\-|SET\-RED)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_SETUSERID(t):
     r'\b(?:SETUSERID|SETUSERI|SETUSER)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_SHARE_LOCK(t):
     r'\b(?:SHARE\-LOCK|SHARE\-LOC|SHARE\-LO|SHARE\-L|SHARE\-|SHARE)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SHOW_STATS(t):
     r'\b(?:SHOW\-STATS|SHOW\-STAT)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_SIDE_LABEL_HANDLE(t):
     r'\b(?:SIDE\-LABEL\-HANDLE|SIDE\-LABEL\-HANDL|SIDE\-LABEL\-HAND|SIDE\-LABEL\-HAN|SIDE\-LABEL\-HA|SIDE\-LABEL\-H)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SIDE_LABELS(t):
     r'\b(?:SIDE\-LABELS|SIDE\-LABEL|SIDE\-LABE|SIDE\-LAB)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SIZE_CHARS(t):
     r'\b(?:SIZE\-CHARS|SIZE\-CHAR|SIZE\-CHA|SIZE\-CH|SIZE\-C)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SIZE_PIXELS(t):
     r'\b(?:SIZE\-PIXELS|SIZE\-PIXEL|SIZE\-PIXE|SIZE\-PIX|SIZE\-PI|SIZE\-P)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_STOPPED(t):
     r'\b(?:STOPPED|STOPPE)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_STORED_PROCEDURE(t):
     r'\b(?:STORED\-PROCEDURE|STORED\-PROCEDUR|STORED\-PROCEDU|STORED\-PROCED|STORED\-PROCE|STORED\-PROC)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SUB_AVERAGE(t):
     r'\b(?:SUB\-AVERAGE|SUB\-AVERAG|SUB\-AVERA|SUB\-AVER|SUB\-AVE)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SUB_MAXIMUM(t):
     r'\b(?:SUB\-MAXIMUM|SUB\-MAXIMU|SUB\-MAXIM|SUB\-MAXI|SUB\-MAX)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SUB_MENU(t):
     r'\b(?:SUB\-MENU|SUB\-MEN|SUB\-ME|SUB\-M|SUB\-)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SUB_MINIMUM(t):
     r'\b(?:SUB\-MINIMUM|SUB\-MINIMU|SUB\-MINIM|SUB\-MINI|SUB\-MIN)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SUBSTITUTE(t):
     r'\b(?:SUBSTITUTE|SUBSTITUT|SUBSTITU|SUBSTIT|SUBSTI|SUBST)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_SUBSTRING(t):
     r'\b(?:SUBSTRING|SUBSTRIN|SUBSTRI|SUBSTR)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_SUPPRESS_WARNINGS(t):
     r'\b(?:SUPPRESS\-WARNINGS|SUPPRESS\-WARNING|SUPPRESS\-WARNIN|SUPPRESS\-WARNI|SUPPRESS\-WARN|SUPPRESS\-WAR|SUPPRESS\-WA|SUPPRESS\-W)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_SYSTEM_ALERT_BOXES(t):
     r'\b(?:SYSTEM\-ALERT\-BOXES|SYSTEM\-ALERT\-BOXE|SYSTEM\-ALERT\-BOX|SYSTEM\-ALERT\-BO|SYSTEM\-ALERT\-B|SYSTEM\-ALERT\-|SYSTEM\-ALERT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_TEMP_DIRECTORY(t):
     r'\b(?:TEMP\-DIRECTORY|TEMP\-DIRECTOR|TEMP\-DIRECTO|TEMP\-DIRECT|TEMP\-DIREC|TEMP\-DIRE|TEMP\-DIR)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_TERMINAL(t):
     r'\b(?:TERMINAL|TERMINA|TERMIN|TERMI|TERM)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_TITLE_BGCOLOR(t):
     r'\b(?:TITLE\-BGCOLOR|TITLE\-BGCOLO|TITLE\-BGCOL|TITLE\-BGCO|TITLE\-BGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_TITLE_DCOLOR(t):
     r'\b(?:TITLE\-DCOLOR|TITLE\-DCOLO|TITLE\-DCOL|TITLE\-DCO|TITLE\-DC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_TITLE_FGCOLOR(t):
     r'\b(?:TITLE\-FGCOLOR|TITLE\-FGCOLO|TITLE\-FGCOL|TITLE\-FGCO|TITLE\-FGC)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_TITLE_FONT(t):
     r'\b(?:TITLE\-FONT|TITLE\-FON|TITLE\-FO)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_TRUNCATE(t):
     r'\b(?:TRUNCATE|TRUNCAT|TRUNCA|TRUNC)\b'
-    t.tag = 'orange'
+    # t.tag = 'orange'
     return t
     
 def t_UNBUFFERED(t):
     r'\b(?:UNBUFFERED|UNBUFFERE|UNBUFFER|UNBUFFE|UNBUFF)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_UNDERLINE(t):
     r'\b(?:UNDERLINE|UNDERLIN|UNDERLI|UNDERL)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_UNFORMATTED(t):
     r'\b(?:UNFORMATTED|UNFORMATTE|UNFORMATT|UNFORMAT|UNFORMA|UNFORM)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_VARIABLE(t):
     r'\b(?:VARIABLE|VARIABL|VARIAB|VARIA|VARI|VAR)\b'
-    t.tag = 'blue'
+    # t.tag = 'blue'
     return t
     
 def t_VERTICAL(t):
     r'\b(?:VERTICAL|VERTICA|VERTIC|VERTI|VERT)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_VIRTUAL_HEIGHT_CHARS(t):
     r'\b(?:VIRTUAL\-HEIGHT\-CHARS|VIRTUAL\-HEIGHT\-CHAR|VIRTUAL\-HEIGHT\-CHA|VIRTUAL\-HEIGHT\-CH|VIRTUAL\-HEIGHT\-C|VIRTUAL\-HEIGHT\-|VIRTUAL\-HEIGHT)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_VIRTUAL_HEIGHT_PIXELS(t):
     r'\b(?:VIRTUAL\-HEIGHT\-PIXELS|VIRTUAL\-HEIGHT\-PIXEL|VIRTUAL\-HEIGHT\-PIXE|VIRTUAL\-HEIGHT\-PIX|VIRTUAL\-HEIGHT\-PI|VIRTUAL\-HEIGHT\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_VIRTUAL_WIDTH_CHARS(t):
     r'\b(?:VIRTUAL\-WIDTH\-CHARS|VIRTUAL\-WIDTH\-CHAR|VIRTUAL\-WIDTH\-CHA|VIRTUAL\-WIDTH\-CH|VIRTUAL\-WIDTH\-C|VIRTUAL\-WIDTH\-|VIRTUAL\-WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_VIRTUAL_WIDTH_PIXELS(t):
     r'\b(?:VIRTUAL\-WIDTH\-PIXELS|VIRTUAL\-WIDTH\-PIXEL|VIRTUAL\-WIDTH\-PIXE|VIRTUAL\-WIDTH\-PIX|VIRTUAL\-WIDTH\-PI|VIRTUAL\-WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_WIDGET_ENTER(t):
     r'\b(?:WIDGET\-ENTER|WIDGET\-ENTE|WIDGET\-ENT|WIDGET\-EN|WIDGET\-E)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_WIDGET_LEAVE(t):
     r'\b(?:WIDGET\-LEAVE|WIDGET\-LEAV|WIDGET\-LEA|WIDGET\-LE|WIDGET\-L)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_WIDTH_CHARS(t):
     r'\b(?:WIDTH\-CHARS|WIDTH\-CHAR|WIDTH\-CHA|WIDTH\-CH|WIDTH\-C|WIDTH\-|WIDTH)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_WIDTH_PIXELS(t):
     r'\b(?:WIDTH\-PIXELS|WIDTH\-PIXEL|WIDTH\-PIXE|WIDTH\-PIX|WIDTH\-PI|WIDTH\-P)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_WINDOW_MAXIMIZED(t):
     r'\b(?:WINDOW\-MAXIMIZED|WINDOW\-MAXIMIZE|WINDOW\-MAXIMIZ|WINDOW\-MAXIMI|WINDOW\-MAXIM)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_WINDOW_MINIMIZED(t):
     r'\b(?:WINDOW\-MINIMIZED|WINDOW\-MINIMIZE|WINDOW\-MINIMIZ|WINDOW\-MINIMI|WINDOW\-MINIM)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_WINDOW_STATE(t):
     r'\b(?:WINDOW\-STATE|WINDOW\-STAT|WINDOW\-STA)\b'
-    t.tag = 'cyan'
+    # t.tag = 'cyan'
     return t
     
 def t_WORK_TABLE(t):
     r'\b(?:WORK\-TABLE|WORK\-TABL|WORK\-TAB)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t_SEND_SQL_STATEMENT(t):
     r'\b(?:send\-sql\-statement|send\-sql\-statemen|send\-sql\-stateme|send\-sql\-statem|send\-sql\-state|send\-sql\-stat|send\-sql\-sta|send\-sql\-st|send\-sql\-s|send\-sql\-|send\-sql)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t__BATCH_MODE(t):
     r'\b(?:{&BATCH\-MODE}|{&BATCH\-MODE|{&BATCH\-MOD|{&BATCH\-MO|{&BATCH\-M|{&BATCH\-)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t__LINE_NUMBER(t):
     r'\b(?:{&LINE\-NUMBER}|{&LINE\-NUMBER)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 def t__WINDOW_SYSTEM(t):
     r'\b(?:{&WINDOW\-SYSTEM}|{&WINDOW\-SYSTEM|{&WINDOW\-SYSTE|{&WINDOW\-SYST)\b'
-    t.tag = 'grey'
+    # t.tag = 'grey'
     return t
     
 literals = [ '+','-','*','/', '"', "'", '(', ')', '[', ']', '{', '}', ',', ':', ';', '=', '?', '~', '.', '>', '<', '!' ]
@@ -1613,8 +1725,43 @@ def t_ID(t):
     _id = {'keyword': '', 'token': 'ID', 'cat': '', 'tag': ['alt_blue'], 'mark': []}
     result = kw_lookup.get(t.value.upper(),_id)    # Check for reserved words
     t.type = result['token']
-    t.tag  = result['tag']
+    # t.tag  = result['tag']
     return t
+
+### Should change this out if not following whitespace rules   
+def t_PERIOD(t):
+    r'\.'
+    if t.lexer.soft_block:
+        t.lexer.soft_block = False
+        t.indent = -1
+        t.tag = 'magenta'
+    return t
+
+def t_EQUALS(t):
+    r'='
+    
+    if not t.lexer.soft_block:
+        t.lexer.soft_block = True
+        t.indent = 1
+
+    t.tag = 'magenta'
+    return t   
+
+def t_LPAREN(t):
+    r'\('
+    if not t.lexer.soft_block:
+        t.lexer.soft_block = True
+        t.indent = 1
+    t.tag = 'yellow'
+    return t
+
+def t_RPAREN(t):
+    r'\)'
+    t.lexer.soft_block = False
+    t.indent = -1
+    t.tag = 'yellow'
+    return t
+
 
 # This is a hack to prevent the lexer from throwing an error on a bad word and deleting it.
 def t_CATCHALL(t):

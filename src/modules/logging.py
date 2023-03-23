@@ -166,7 +166,7 @@ class Log:
                     color = '' if color == False else color
                     close_color = '\033[0;0m' if color else ''
                     time = dt.datetime.strftime(log.get('timestamp'), '%H:%M:%S.%f')[:-3]
-                    print(f"{time} {color}{log.get('name'):10}{close_color}{log.get('module'): <35} {line}")
+                    print(f"{time}{color} {log.get('name'):7}{close_color}{log.get('module'): <35} {line}")
  
     def __log_file_write(self, log: dict): 
         ''' Writes the log to flat file 
@@ -187,7 +187,7 @@ class Log:
             speed_color = '\033[1;31m'
             close_color = '\033[0;0m' 
             time = dt.datetime.strftime(log.get('timestamp'), '%H:%M:%S.%f')[:-3]
-            print(f"{time} {color}{'PERF':10}{close_color}{log.get('module'): <35} {speed_color}{log.get('duration'):<10.5f} sec{close_color} {log.get('name')}\t")
+            print(f"{time}{color} {'PERF':7}{close_color}{log.get('module'): <35} {speed_color}{log.get('duration'):<7.5f} sec{close_color} for {log.get('name')}\t")
 
     def __perf_file_write(self, log:dict):
         ''' Writes the performance log to flat file '''

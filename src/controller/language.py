@@ -36,22 +36,34 @@ class LanguageTools:
         textbox.disable_line_no_update = True
 
         nl = True
-
-        if self.model.track_whitepace:
+        indent_level = 0
+        indent = ''
+        if not self.model.track_whitepace:
             for tok in results:
-
                 spc = '' if tok.value in ['.', ',', ':', '(', ')'] or nl else ' '
                 nl = False
                 if tok.tag == 'nl':
+                    # Add the indent only after a newline
+                    indent = ' ' * (cfg.indent_size * indent_level)
                     textbox.insert('insert', tok.value)
                     nl=True
                     continue
                 # For some characters we dont want a trailing space
-                if tok.value in [':']:
+                if tok.value in [':','(']:
                     # This is a hack, maybe worth it's own variable. 
                     nl = True
-                textbox.insert('insert',spc+tok.value, tok.tag)
-                textbox.insert('insert',tok.value, tok.tag)
+
+                # represents a negative indent immediately on ends of blocks
+                if tok.indent == -99:
+                    tok.indent = -1
+                    indent = indent[:-cfg.indent_size]
+                
+                textbox.insert('insert',indent+spc+tok.value, tok.tag)
+
+                # Increase and decrease points are set in the model
+                indent_level += tok.indent
+                # reset the indent so it's not between every line
+                indent = ''
 
         else: # Dont track whitespace
             for tok in results:
