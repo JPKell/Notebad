@@ -1,13 +1,8 @@
 ''' This is the main entry point to Notebad. This is an MVC architecture and 
     the view and model (language) is loaded from within the controller.'''
-import pathlib, os
+import pathlib
 from controller import NoteController
 from conf import Configuration
-
-## Uncomment this out to rebuild the ABL rules. Then restart app for rules to be in effect
-# You may need to change path in abl_rules/build.py
-# from language.abl_rules import build
-##
 
 cfg = Configuration()
 
@@ -19,8 +14,6 @@ cfg.set_root_dir(current_dir)
 if __name__ == '__main__':
     # Set up and load configuration before loading program
     
-
-
     # Load the controller
     controller = NoteController(current_dir)
     controller.run()

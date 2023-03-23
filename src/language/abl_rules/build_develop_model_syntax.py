@@ -215,6 +215,7 @@ def t_END_CASE(t):
     r'\\b(?:END\sCASE)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -223,6 +224,7 @@ def t_END_FUNCTION(t):
     r'\\b(?:END\sFUNCTION)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -231,6 +233,7 @@ def t_END_PROCEDURE(t):
     r'\\b(?:END\sPROCEDURE)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -239,6 +242,7 @@ def t_END_METHOD(t):
     r'\\b(?:END\sMETHOD)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -247,6 +251,7 @@ def t_END_CONSTRUCTOR(t):
     r'\\b(?:END\sCONSTRUCTOR)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -255,6 +260,7 @@ def t_END_CATCH(t):
     r'\\b(?:END\sCATCH)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -263,6 +269,7 @@ def t_END_FINALLY(t):
     r'\\b(?:END\sFINALLY)\\b'
     t.lexer.hard_block = False
     t.tag = 'magenta'
+    # t.tag = 'blue'
     t.indent = -99
     t.lexer.soft_block = False
     return t
@@ -360,7 +367,8 @@ def t_{kw['token']}(t):
     r'{build_regex(kw['keyword'])}'
 
     {hard}
-    t.tag = '{tag}'{mark}{indent}
+    t.tag = 'magenta'
+    # t.tag = '{tag}'{mark}{indent}
     t.lexer.soft_block = {soft}
     return t
     ''')
@@ -385,7 +393,7 @@ for kw in abr:
     file.write(f'''
 def t_{kw['token']}(t):
     r'{build_regex(kw['keyword'],kw['abr'])}'
-    t.tag = '{tag}'{mark}
+    # t.tag = '{tag}'{mark}
     return t
     ''')
 
@@ -426,7 +434,7 @@ def t_ID(t):
     _id = {'keyword': '', 'token': 'ID', 'cat': '', 'tag': ['alt_blue'], 'mark': []}
     result = kw_lookup.get(t.value.upper(),_id)    # Check for reserved words
     t.type = result['token']
-    t.tag  = result['tag']
+    # t.tag  = result['tag']
     return t
 
 ### Should change this out if not following whitespace rules   
