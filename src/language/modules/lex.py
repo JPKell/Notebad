@@ -118,10 +118,12 @@ class Lexer:
         self.lexliterals = ''         # Literal characters that can be passed through
         self.lexmodule = None         # Module
         self.lineno = 1               # Current line number
+        
         self.colno  = 0               # Current col number for tk use *Notebad*
         self.soft_block = False       # Soft block flag. For statements that start a block but end with .
         self.hard_block = False       # Hard block flag. For statements that start a block with : and require being ended with end. 
         self.in_query = False         # In query flag. While in a query, dont include equals in the indent algorithm.
+        self.preprocessor = False     # Preprocessor flag. While in a preprocessor things behave different
 
     def clone(self, object=None):
         c = copy.copy(self)

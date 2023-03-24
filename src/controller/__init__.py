@@ -3,7 +3,7 @@ import tkinter as tk
 
 from controller.file_management import FileManagement
 from controller.key_bindings    import KeyBindings
-from controller.language        import LanguageTools
+from controller.translate        import LanguageTools
 from controller.menu            import Menubar
 from controller.utilities       import Utilities    
 

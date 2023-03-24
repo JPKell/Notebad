@@ -1,0 +1,22 @@
+// Single line comment [] {} : . DEFINE INPUT
+
+/* Single line enclosed comment [] {} : . + - * */
+
+/* Single line /* nested */ comment [] {} : . + - * */
+
+/* Multi-line comment 
+// tricky bit here /* 
+*/
+DEFINE VARIABLE test AS CHARACTER NO-UNDO.
+Should still be in comment */
+
+/* Tricky things which look like others */
+RUN test/imaginary.p().
+
+
+FUNCTION CompleteOrder RETURNS LOGICAL 
+    (INPUT pcLoc AS CHARACTER, 
+        INPUT pcLinkOrder AS CHARACTER) FORWARD.  // Forward declares the existance of function and the logic can be elsewhere.
+this = this-should-not-be-indented.
+
+

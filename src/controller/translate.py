@@ -62,9 +62,13 @@ class LanguageTools:
                     nl=True
                     continue
                 # For some characters we dont want a trailing space
-                if tok.value in [':','(']:
+                if tok.type in ['COLON','LPAREN']:
                     # This is a hack, maybe worth it's own variable. 
                     nl = True
+                    spc = ''
+
+                # Some we just want to remove the leading space
+                if tok.type == 'ARRAY_BRACE':
                     spc = ''
 
                 # represents a negative indent immediately on ends of blocks
@@ -126,7 +130,7 @@ class LanguageTools:
                     nl=True
                     continue
                 # For some characters we dont want a trailing space
-                if tok.value in [':','(']:
+                if tok.type in ['COLON','LPAREN']:
                     # This is a hack, maybe worth it's own variable. 
                     nl = True
                     spc = ''
@@ -236,7 +240,7 @@ class LanguageTools:
                         nl=True
                         continue
                     # For some characters we dont want a trailing space
-                    if tok.value in [':','(']:
+                    if tok.type in ['COLON','LPAREN']:
                         # This is a hack, maybe worth it's own variable. 
                         spc = ''
                         nl = True
