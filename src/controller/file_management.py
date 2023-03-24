@@ -88,7 +88,7 @@ class FileManagement:
             
             elif ext in ['p', 'w', 'i', 'cls']: # Else see if we can handle the syntax
                 self.controller.language.load_language('abl')
-                self.controller.language.syntax_on_file_load(txt=file.read())
+                self.controller.language.static_syntax_formatting(file_txt=file.read())
             
             else: # Else just load the file
                 textbox.insert('end', file.read())  # Insert the file contents into the textbox

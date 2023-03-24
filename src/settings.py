@@ -45,8 +45,15 @@ class Configuration:
     syntax_on_new_line = False
     syntax_on_type = False
     syntax_uppercase = True
-    syntax_expand = True    # Expand syntax tokens to full name    
-    syntax_indent = True    # This may be a problem as we will have to track whitespace and ditch it when indenting
+    syntax_expand = True       # Expand syntax tokens to full name    
+    
+    # This may be a problem as we will have to track whitespace and ditch it when indenting
+    # The whitespace would have to be tracked and ditched when assembling it back together
+    # We could technically rebuild the language module and that would work, but rebuilding the
+    # language model for a feature doesn't make sense. If it can be done quickly we may as well
+    # track whitespace all the time, but unless we can do it quickly we should not track it and
+    # just implement indenting. 
+    syntax_indent = True    
 
     # Calculator settings
     calc_title = 'Mathbad'

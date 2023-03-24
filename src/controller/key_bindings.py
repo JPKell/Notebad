@@ -48,7 +48,7 @@ class KeyBindings:
         self.app.bind_all("<Return>", lambda event: self.controller.language.syntax_while_typing(event))
         self.app.bind("<KP_Enter>", lambda event: self.controller.language.syntax_while_typing(event))
         
-        self.app.bind("<Alt-p>", lambda event: self.controller.language.syntax_on_command(event))
+        self.app.bind("<Alt-p>", lambda event: self.controller.language.static_syntax_formatting())
 
         # Tab management
         self.app.bind("<<NotebookTabChanged>> ", lambda event: self.controller.view.tab_change())

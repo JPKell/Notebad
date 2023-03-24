@@ -21,7 +21,10 @@ import os
 ### 
 # Build settings
 ### 
-track_whitespace = False
+
+# Going to track white space for dynamic syntax highlighting 
+# the 
+track_whitespace = True
 dev_colors = False
 
 ###
@@ -277,24 +280,24 @@ track_whitespace = {track_whitespace}
 tokens = {tokens}
 
 # Regular expression rules for simple tokens
-t_GTEQ = r'>='
-t_LTEQ = r'<='
-t_NE   = r'<>'
-t_GT = r'>'
-t_LT = r'<'
-t_PLUS   = r'\+'
-t_MINUS  = r'\-'
-t_MULTIPLY = r'\*'
-t_DIVIDE = r'\/'
-t_COMMA  = r'\,'
+t_GTEQ      = r'>='
+t_LTEQ      = r'<='
+t_NE        = r'<>'
+t_GT        = r'>'
+t_LT        = r'<'
+t_PLUS      = r'\+'
+t_MINUS     = r'\-'
+t_MULTIPLY  = r'\*'
+t_DIVIDE    = r'\/'
+t_COMMA     = r'\,'
 t_SEMICOLON = r'\;'
-t_ASSIGN = r'\:='
-t_UNKNOWN = r'\?'
-t_TILDE = r'~'
-t_LBRACKET = r'\['
-t_RBRACKET = r'\]'
-t_LBRACE = r'\{{'
-t_RBRACE = r'\}}'
+t_ASSIGN    = r'\:='
+t_UNKNOWN   = r'\?'
+t_TILDE     = r'~'
+t_LBRACKET  = r'\['
+t_RBRACKET  = r'\]'
+t_LBRACE    = r'\{{'
+t_RBRACE    = r'\}}'
 
 ###                        
 # Rules are executed top down 
@@ -477,7 +480,7 @@ language_file.write(abbreviated_functions)
 language_file.write(f""" 
 # This will track whitespace and adds a lot of time to processing. Not tracking 
 # it however will force the user into the indent scheme
-{'' if track_whitespace else '# ' }t_WHITESPACE = r'\s+'
+{'' if track_whitespace else '# ' }t_WHITESPACE = r'[\ \t]+'
 
 # Some of these might be better not ignored. However for syntax highlighting
 # they throw a lot of errors. As this is continuing, it might be better to 

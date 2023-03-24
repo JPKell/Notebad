@@ -1,4 +1,3 @@
-import os
 from tkinter import PhotoImage, Frame, font
 from tkinter.ttk import Style
 
@@ -73,7 +72,7 @@ class UI:
         # so rather than have ugly menus, dark mode will have light
         # menus for now. I would like to change this, but it's a low 
         # priority.   
-        if os.name != 'nt':
+        if cfg.os != 'nt':
             # Menu bar styles     
             menu_colors = {
                 'bg': colors.background, 
@@ -249,7 +248,7 @@ class UI:
         app.minsize(*cfg.min_size)
 
         path_func = self.view.controller.relative_to_abs_path
-        if os.name == 'nt': 
+        if cfg.os == 'nt': 
             app.iconbitmap(path_func('assets/icon.ico'))
         else:
             logo = PhotoImage(file=path_func('assets/icon.gif'))

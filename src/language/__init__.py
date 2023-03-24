@@ -55,7 +55,7 @@ class LanguageModel:
         return [ tok for tok in self.model if tok.type != 'newline' ]
 
 
-    def format_syntax(self, txt:str, no_nl=False, expand=True, upper=True) -> list:
+    def format_syntax(self, txt:str, no_nl=False, expand=False, upper=False) -> list:
         ''' Take code as input and return code with syntax words in caps '''
         self.build_ast(txt)
         ignore = ['SNG_COMMENT', 'MULTI_COMMENT', 'SNG_STRING', 'DBL_STRING', 'NUMBER', 'ID', 'ERROR', 'CURLY_BRACE']
