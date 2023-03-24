@@ -6,6 +6,7 @@ from modules.logging import Log
 from view.colors  import Themes
 from view.tabs    import Tabs
 from view.ui      import UI
+from view.toolbar import Toolbar
 from view.find_window import FindWindow
 
 cfg = Configuration()
@@ -43,7 +44,7 @@ class NoteView(Frame):
     def _make(self) -> None:
         ''' The meat of the view, this is where we create the widgets '''
         self.ui     = UI(self)
-        
+        self.toolbar = Toolbar(self)
         self.tabs   = Tabs(self)
         # self.menu   = Menubar(self, self.controller)
         # OG tkinter widgets need themes reloaded on first build
