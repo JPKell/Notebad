@@ -39,7 +39,7 @@ class KeyBindings:
         # Textbox management
         self.app.bind("<Control-a>", lambda event: self.controller.view.tabs.textbox.cursor.select_all())
         self.app.bind("<Control-v>", lambda event: self.controller.view.textbox.clipboard.paste_text())
-        self.app.bind("<Control-f>", lambda event: self.controller.view.find())
+        self.app.bind("<Control-f>", lambda event: self.controller.view.toolbar.find_entry.focus())
         
 
         # Syntax highlighting

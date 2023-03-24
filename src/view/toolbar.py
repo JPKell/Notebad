@@ -1,3 +1,4 @@
+import tkinter
 from tkinter import Frame, StringVar, Entry, Label
 from modules.logging import Log
 
@@ -7,8 +8,9 @@ logger = Log(__name__)
 class Toolbar(Frame):
     ''' The toolbar appears above the tab titles and below the menubar.
         It is designed to house things like a find/searchbar '''
-    def __init__(self, frm):
-        super().__init__(frm, height=30)   #, bg="red")  # Red background for visibility while testing
+    def __init__(self, view):
+        super().__init__(view, height=30)   #, bg="red")  # Red background for visibility while testing
+        self.view = view
         self.pack(side='top', fill='x')
         self.find_txt = StringVar(self)
         self._make_find_entry()
@@ -34,20 +36,21 @@ class Toolbar(Frame):
     def find_entry_focus(self, event):
         ''' When the find entry widget gains focus, clear the
             placeholder text and update the foreground color to black '''
-        '''
-        * Get the current text and compare it to the placeholder text
-        * If current text matches the placeholder text then clear the text
-        * User config should have 3 settings (in priority order):
-            - Insert selected text from current Tab/Textbox
-            - Insert clipboard text 
-            - Clear all text on focus
-        * Check user config settings and manipulate entry widget accordingly
-        '''
         if self.find_entry.get() == self.placeholder_txt:
             self.find_entry.delete(0, 'end')
             self.find_entry.configure(fg='black')
 
+        ''' If there's a selection in the textbox, insert it into the find entry on focus. 
+            Otherwise, select all text in the find entry when focus is gained '''
+        if self.view.textbox.tag_ranges(tkinter.SEL):
+            self.find_entry.delete(0, 'end')
+            self.find_entry.insert(0, self.view.textbox.get(tkinter.SEL_FIRST, tkinter.SEL_LAST))
+        else:
+            self.find_entry.select_range(0, 'end')
+
     def find_entry_lose_focus(self, event):
+        ''' When the find entry is blank and loses focus, add the placeholder text back in
+            and set the foreground colour back to grey '''
         if self.find_entry.get() == "":
             self.find_entry.insert(0, self.placeholder_txt)
             self.find_entry.configure(fg='grey')
