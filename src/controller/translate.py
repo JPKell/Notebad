@@ -122,7 +122,7 @@ class LanguageTools:
     # Dont need the performance running on this all the time but the last time 
     # it was run it was taking 0.00013 seconds.
     # @logger.performance
-    def syntax_while_typing(self, event) -> None:
+    def dynamic_syntax_formatting(self, event) -> None:
         ''' To properly implement syntax highlighting we need to understand the
             context of the word we are working on. This means that if we are on 
             line 5 of a multi line comment we need to know that.'''
@@ -231,8 +231,6 @@ class LanguageTools:
                 textbox.insert('insert', indent)
 
             textbox.disable_line_no_update = False
-    
-
 
         # Otherwise we just want to get and format one word
         else:

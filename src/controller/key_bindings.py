@@ -43,10 +43,10 @@ class KeyBindings:
         
 
         # Syntax highlighting
-        self.app.bind("<Key>", lambda event: self.controller.language.syntax_while_typing(event))
-        self.app.bind_all("<space>", lambda event: self.controller.language.syntax_while_typing(event))
-        self.app.bind_all("<Return>", lambda event: self.controller.language.syntax_while_typing(event))
-        self.app.bind("<KP_Enter>", lambda event: self.controller.language.syntax_while_typing(event))
+        self.app.bind("<Key>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
+        self.app.bind_all("<space>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
+        self.app.bind_all("<Return>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
+        self.app.bind("<KP_Enter>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
         
         self.app.bind("<Alt-p>", lambda event: self.controller.language.static_syntax_formatting())
 
