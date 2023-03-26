@@ -28,8 +28,16 @@ class KeyBindings:
         self.app.bind("<Control-minus>", lambda event: self.controller.view.ui.font_size_bump(increase=False))
         self.app.bind("<Alt-c>", lambda event: self.controller.utilities.open_calculator())
 
+        # Find entry overrides
+        self.app.bind_class("Entry", "<Return>",
+                            lambda event: self.controller.view.textbox.editor.find_text(
+                                self.controller.view.toolbar.find_entry.get()))
+        self.app.bind_class("Entry", "<Shift-Return>",
+                            lambda event: self.controller.view.textbox.editor.find_text(
+                                self.controller.view.toolbar.find_entry.get(), direction=-1))
+        self.app.bind_class("Entry", "<Escape>", lambda event: self.controller.view.textbox.focus())
 
-        # Textbox overides #
+        # Textbox overrides
         self.app.bind_class("Text", "<Control-d>", lambda event: self.controller.view.ui.toggle_theme())
         self.app.bind_class("Text", "<Control-z>", lambda event: self.controller.view.textbox.history.undo())
         self.app.bind_class("Text", "<Control-y>", lambda event: self.controller.view.textbox.history.redo())
@@ -40,12 +48,16 @@ class KeyBindings:
         self.app.bind("<Control-a>", lambda event: self.controller.view.tabs.textbox.cursor.select_all())
         self.app.bind("<Control-v>", lambda event: self.controller.view.textbox.clipboard.paste_text())
         self.app.bind("<Control-f>", lambda event: self.controller.view.toolbar.find_entry.focus())
-        
+        self.app.bind("<Control-g>", lambda event: self.controller.view.textbox.editor.find_text(
+            self.controller.view.toolbar.find_entry.get(), direction=1))
+        self.app.bind("<Control-Shift-G>", lambda event: self.controller.view.textbox.editor.find_text(
+            self.controller.view.toolbar.find_entry.get(), direction=-1))
+
 
         # Syntax highlighting
         self.app.bind("<Key>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
         self.app.bind_all("<space>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
-        self.app.bind_all("<Return>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
+        #self.app.bind_all("<Return>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
         self.app.bind("<KP_Enter>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
         
         self.app.bind("<Alt-p>", lambda event: self.controller.language.static_syntax_formatting())

@@ -13,6 +13,8 @@ class Editor:
         logger.debug("Editor init")
         self.current_find = ""
         self.current_find_positions = []
+        self.find_position_index = 0
+        self.tb.tag_configure("find", background="green")
 
     def add_indent(self) -> None:
         ''' Adds an indent to the textbox '''
@@ -81,7 +83,7 @@ class Editor:
             return ""
         else:
             return self.tb.get('sel.first', 'sel.last')
-        
+
     def add_newline(self) -> None:
         ''' There are times we need to add a new line. For instance the 
             Enter key on the numberpad does not create a new line. '''
@@ -105,38 +107,78 @@ class Editor:
         ''' Returns all text in the textbox '''
         return self.tb.get("1.0", "end - 1c")
 
-    def find_text(self, find_txt, clear_tags=False):
+    def find_text(self, find_txt, direction=1):
         ''' Clear all current "find" tags and loop through the textbox
             to find any current matching text '''
-        if clear_tags:
-            for tag in self.tb.tag_names():
-                self.tb.tag_remove(tag, "1.0", "end")
+        for tag in self.tb.tag_names():
+            self.tb.tag_remove(tag, "1.0", "end")
 
-        start_index = "1.0"
-        count_matches = StringVar()
+        if find_txt != self.current_find:
+            self.current_find = find_txt
+            self.current_find_positions = []
+            self.find_position_index = 0
 
-        while start_index != "end":
-            find_position = self.tb.search(find_txt, start_index, stopindex="end", count=count_matches)
+            start_index = "1.0"
+            count_matches = StringVar()
 
-            # Tkinter error is thrown if an empty position is passed.
-            # Instead, break out of loop if that happens.
-            if find_position == "":
-                break
+            while start_index != "end":
+                find_position = self.tb.search(find_txt, start_index, stopindex="end", count=count_matches)
 
-            start_index = "%s + %sc" % (find_position, int(count_matches.get()) + 1)
-            self.tb.tag_configure("find", background="green")
-            self.tb.tag_add("find", find_position, "%s + %sc" % (find_position, count_matches.get()))
+                # Tkinter error is thrown if an empty position is passed.
+                # Instead, break out of loop if that happens.
+                if find_position == "":
+                    break
 
-            # Update current find and find_positions list
-            if find_txt != "":
-                if find_txt != self.current_find:
-                    self.current_find = find_txt
-                    self.current_find_positions = []
+                start_index = "%s + %sc" % (find_position, int(count_matches.get()) + 1)
+
+                # Update find_positions list
                 self.current_find_positions.append("%s + %sc" % (find_position, count_matches.get()))
 
+            self.find_next(direction=0)
 
-            # Move selection into view
-            #self.tb.see("%s + %sc" % (find_position, count_matches.get()))
+            return 'break'
 
-        print(self.current_find)
-        print(self.current_find_positions)
+                # TO DO:
+                # Refactor the way Find works. At the moment it is unnecessarily resource hungry, and colliding with the
+                # selection highlighting matches logic. Need more robust find feature and separation of the two
+                # different features.
+                #
+                # * Remove ability to highlight in realtime X
+                # * Only find when hitting enter in the find entry widget X
+                # * Snap to result on enter X
+                # * Map find next/prev to hotkeys and maybe buttons on the toolbar
+                # * Show the complete number of matches in the status bar
+                # * If there are no matches then populate the status bar with red text and ring system bell
+                # * If text is selected, populate the find entry when using Ctrl+f
+                # * Enter on entry widget goes to first find result, then enter again goes to next result, etc... X
+                # * Shift+Enter on find entry widget goes to the previous result X
+
+        self.find_next(direction=direction)
+
+        return "break"
+
+    def find_next(self, direction=1):
+        ''' Move to the first/next/prev result in the find_positions list.
+            Direction can equal 1, -1 or 0. 0 sets the find index to 0 for a new find to start from the top '''
+        if self.current_find_positions == []:
+            return
+
+        # Update index to next/prev find result
+        self.find_position_index += direction
+
+        print(self.find_position_index)
+
+        # Wrap around again if user goes past the end.
+        # If the direction is 0 then reset the index to 0.
+        # This is for initial find results, otherwise you always end up on index 1
+        if self.find_position_index > len(self.current_find_positions) - 1 or direction == 0:
+            self.find_position_index = 0
+        if self.find_position_index < 0:
+            self.find_position_index = len(self.current_find_positions) - 1
+
+        find_position_and_chars = self.current_find_positions[self.find_position_index]
+        position = find_position_and_chars.split("+")
+        self.tb.tag_add("find", position[0], find_position_and_chars)
+
+        # Make sure that the find result is moved into view
+        self.tb.see(find_position_and_chars)

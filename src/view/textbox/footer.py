@@ -47,14 +47,9 @@ class Footer(Frame):
         else:
             self.sel_lbl.config(text=f'(sel ln {lines} ch {chars})')
 
-        # # Find any selected text and show other places it appears
-        # current_cursor_pos = self.view.textbox.cursor.get_position()
-        # self.view.textbox.editor.find_text(selection_text, clear_tags=False)
-        # self.view.textbox.cursor.set_position(current_cursor_pos)
-        #
-        # # Clear matches when selection is empty
-        # if selection_text == "" and self.view.toolbar.find_entry.get() == "":
-        #     self.view.textbox.editor.find_text("", clear_tags=True)
+    def update_find_results(self):
+        ''' Show the number of results returned from the find entry '''
+        pass
 
     # Private methods
     def _make_label(self) -> None:
