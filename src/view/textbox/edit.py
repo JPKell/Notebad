@@ -102,11 +102,12 @@ class Editor:
         ''' Returns all text in the textbox '''
         return self.tb.get("1.0", "end - 1c")
 
-    def find_text(self, find_txt):
+    def find_text(self, find_txt, clear_tags=False):
         ''' Clear all current "find" tags and loop through the textbox
             to find any current matching text '''
-        for tag in self.tb.tag_names():
-            self.tb.tag_remove(tag, "1.0", "end")
+        if clear_tags:
+            for tag in self.tb.tag_names():
+                self.tb.tag_remove(tag, "1.0", "end")
 
         start_index = "1.0"
         count_matches = StringVar()

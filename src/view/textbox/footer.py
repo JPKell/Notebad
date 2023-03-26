@@ -46,7 +46,16 @@ class Footer(Frame):
             self.sel_lbl.config(text=' ')
         else:
             self.sel_lbl.config(text=f'(sel ln {lines} ch {chars})')
-        
+
+        # Find any selected text and show other places it appears
+        current_cursor_pos = self.view.textbox.cursor.get_position()
+        self.view.textbox.editor.find_text(selection, clear_tags=False)
+        self.view.textbox.cursor.set_position(current_cursor_pos)
+
+        # Clear matches when selection is empty
+        if selection == "":
+            self.view.textbox.editor.find_text("", clear_tags=True)
+
         ## This logger if very verbose and should be used when required only.
         # Times it might be required:
         #   - When checking that the update is turned off when the textbox is not focused

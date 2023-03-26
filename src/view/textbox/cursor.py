@@ -1,4 +1,4 @@
-from tkinter import Text
+from tkinter import Text, INSERT
 
 class Cursor:
 
@@ -12,3 +12,11 @@ class Cursor:
     def select_all(self) -> None:
         ''' Select all text in the textbox '''
         self.textbox.tag_add('sel', 1.0, 'end')
+
+    def get_position(self):
+        ''' Get the current input cursor position '''
+        return self.textbox.index(INSERT)
+
+    def set_position(self, new_position):
+        ''' Set the current input cursor position '''
+        self.textbox.insert(new_position, "")

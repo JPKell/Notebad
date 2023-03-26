@@ -36,7 +36,7 @@ class Toolbar(Frame):
     def get_current_text(self, *args):
         ''' Get the current text in the find entry and pass it along to the editor for processing textbox text '''
         current_txt = self.find_entry.get()
-        self.view.textbox.editor.find_text(current_txt)
+        self.view.textbox.editor.find_text(current_txt, clear_tags=True)
 
     def _make_find_label(self) -> None:
         ''' Label the Find entry widget '''
