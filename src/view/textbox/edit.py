@@ -1,4 +1,4 @@
-from tkinter import Text
+from tkinter import Text, StringVar
 
 from settings import Configuration
 from modules.logging import Log
@@ -101,3 +101,24 @@ class Editor:
     def get_all(self) -> str:
         ''' Returns all text in the textbox '''
         return self.tb.get("1.0", "end - 1c")
+
+    def find_text(self, find_txt):
+        ''' Clear all current "find" tags and loop through the textbox
+            to find any current matching text '''
+        for tag in self.tb.tag_names():
+            self.tb.tag_remove(tag, "1.0", "end")
+
+        start_index = "1.0"
+        count_matches = StringVar()
+
+        while start_index != "end":
+            find_position = self.tb.search(find_txt, start_index, stopindex="end", count=count_matches)
+
+            # Tkinter error is thrown if an empty position is passed.
+            # Instead, break out of loop if that happens.
+            if find_position == "":
+                break
+
+            start_index = "%s + %sc" % (find_position, int(count_matches.get()) + 1)
+            self.tb.tag_configure("find", background="green")
+            self.tb.tag_add("find", find_position, "%s + %sc" % (find_position, count_matches.get()))

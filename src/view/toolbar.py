@@ -28,6 +28,16 @@ class Toolbar(Frame):
         self.find_entry.insert(0, self.placeholder_txt)
         self.find_entry.configure(fg='grey')
 
+    def set_find_entry_trace(self):
+        ''' The trace_add listens to the StringVar attached to the entry widget for any changes and then
+            runs a callback function '''
+        self.find_txt.trace_add('write', self.get_current_text)
+
+    def get_current_text(self, *args):
+        ''' Get the current text in the find entry and pass it along to the editor for processing textbox text '''
+        current_txt = self.find_entry.get()
+        self.view.textbox.editor.find_text(current_txt)
+
     def _make_find_label(self) -> None:
         ''' Label the Find entry widget '''
         self.find_label = Label(self, text="Find in tab:")
