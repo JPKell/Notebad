@@ -1,4 +1,5 @@
-from tkinter import Text, StringVar
+import tkinter
+from tkinter import Text, StringVar, SEL_FIRST, SEL_LAST
 
 from settings import Configuration
 from modules.logging import Log
@@ -10,6 +11,8 @@ class Editor:
     def __init__(self, textbox: Text) -> None:
         self.tb = textbox
         logger.debug("Editor init")
+        self.current_find = ""
+        self.current_find_positions = []
 
     def add_indent(self) -> None:
         ''' Adds an indent to the textbox '''
@@ -123,3 +126,17 @@ class Editor:
             start_index = "%s + %sc" % (find_position, int(count_matches.get()) + 1)
             self.tb.tag_configure("find", background="green")
             self.tb.tag_add("find", find_position, "%s + %sc" % (find_position, count_matches.get()))
+
+            # Update current find and find_positions list
+            if find_txt != "":
+                if find_txt != self.current_find:
+                    self.current_find = find_txt
+                    self.current_find_positions = []
+                self.current_find_positions.append("%s + %sc" % (find_position, count_matches.get()))
+
+
+            # Move selection into view
+            #self.tb.see("%s + %sc" % (find_position, count_matches.get()))
+
+        print(self.current_find)
+        print(self.current_find_positions)

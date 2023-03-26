@@ -51,7 +51,7 @@ class NoteView(Frame):
         self.ui.toggle_theme(reload=True)
         self.pack(fill='both', expand=True)
         self.textbox.focus_set()    # Make sure we can start typing right away
-        self.textbox.footer.update_pos()    # Update the footer position data
+        self.textbox.footer.update_cursor_pos()    # Update the footer position data
         self.toolbar.set_find_entry_trace()    # Set the trace for the find widget entry to track text changes
 
     ## Class properties ##

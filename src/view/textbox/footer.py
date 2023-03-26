@@ -30,42 +30,32 @@ class Footer(Frame):
             self.after(cfg.status_bar_duration, self.status_txt.set, old_txt)
         logger.debug(f"Status bar set to: {text}")
 
-    def update_pos(self) -> None:
-        ''' Update the status bar position and selection every 100ms '''
+    def update_cursor_pos(self) -> None:
+        ''' Update the status bar position on custom <<Change>> event '''
         textbox = self.view.textbox
         ## Cursor stats
         index = textbox.index('insert') 
         index = index.split('.')
         self.pos_lbl.config(text=f"ln {index[0]} col {index[1]} ")
 
-        ## Selection stats
-        selection = textbox.editor.get_selection()
-        lines = selection.count('\n')
-        chars = len(selection)
+    def update_selection_stats(self, selection_text):
+        ''' Update selection stats when <<Selection>> event is triggered '''
+        lines = selection_text.count('\n')
+        chars = len(selection_text)
         if lines + chars == 0:
             self.sel_lbl.config(text=' ')
         else:
             self.sel_lbl.config(text=f'(sel ln {lines} ch {chars})')
 
-        # Find any selected text and show other places it appears
-        current_cursor_pos = self.view.textbox.cursor.get_position()
-        self.view.textbox.editor.find_text(selection, clear_tags=False)
-        self.view.textbox.cursor.set_position(current_cursor_pos)
+        # # Find any selected text and show other places it appears
+        # current_cursor_pos = self.view.textbox.cursor.get_position()
+        # self.view.textbox.editor.find_text(selection_text, clear_tags=False)
+        # self.view.textbox.cursor.set_position(current_cursor_pos)
+        #
+        # # Clear matches when selection is empty
+        # if selection_text == "" and self.view.toolbar.find_entry.get() == "":
+        #     self.view.textbox.editor.find_text("", clear_tags=True)
 
-        # Clear matches when selection is empty
-        if selection == "":
-            self.view.textbox.editor.find_text("", clear_tags=True)
-
-        ## This logger if very verbose and should be used when required only.
-        # Times it might be required:
-        #   - When checking that the update is turned off when the textbox is not focused
-        #   - When debugging the status bar
-        # logger.verbose(f"Status bar updated: {self.pos_lbl['text']} {self.sel_lbl['text']}")
-        if textbox.is_focus:
-            # Update the status bar selection every 200ms
-            self.after(200, self.update_pos)
-    
-    
     # Private methods
     def _make_label(self) -> None:
         ''' Main constructor for the status bar '''

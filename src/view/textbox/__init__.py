@@ -1,4 +1,4 @@
-from tkinter     import Text, font
+from tkinter     import Text, font, SEL
 from tkinter.ttk import Notebook, Frame
 
 from settings import Configuration
@@ -66,7 +66,12 @@ class Textbox(Text):
         # This is currently the primary way to check if the line numbers
         # need to be redrawn. This may need to be changed when the language server 
         # is updated (created).  
-        self.bind('<Key>', lambda event: self.check_on_key(event))  
+        self.bind('<Key>', lambda event: self.check_on_key(event))
+
+        # Store any selected text and weather the selection has changed
+        # NOTE: de-selecting a current selection will also trigger the <<Selection>> event.
+        self.current_selection_text = ""
+        self.bind("<<Selection>>", self.update_selection)
        
         logger.debug(f"Textbox finish init: {self.meta.file_name}")
 
@@ -84,7 +89,7 @@ class Textbox(Text):
         self._is_focus = is_focus
         if is_focus:
             self.scrollbars.hide_unused()
-            self.footer.update_pos()
+            self.footer.update_cursor_pos()
         
     @property
     def is_blank(self) -> bool:
@@ -93,7 +98,6 @@ class Textbox(Text):
             a good way to check if the text area is blank.
         '''
         return self.get(1.0, 'end') == '\n'
-
 
     def check_on_key(self, event) -> None:
         ''' This is the function that runs upon every keypress. If there is a
@@ -206,7 +210,16 @@ class Textbox(Text):
         return result   
 
     def _on_change(self, event) -> None:
-        ''' Triggered on <<Change>>. It will update the line numbers. 
+        ''' Triggered on <<Change>>. It will update the line numbers and cursor position in status bar (footer).
             - event: dummy argument to match the event handler signature.
         '''
         self.linenumbers.redraw()
+        self.footer.update_cursor_pos()
+
+
+    def update_selection(self, event):
+        if self.tag_ranges(SEL):
+            self.current_selection_text = self.selection_get()
+        else:
+            self.current_selection_text = ""
+        self.footer.update_selection_stats(self.current_selection_text)

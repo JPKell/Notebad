@@ -1,5 +1,4 @@
-import tkinter
-from tkinter import Frame, StringVar, Entry, Label
+from tkinter import Frame, StringVar, Entry, Label, SEL, SEL_FIRST, SEL_LAST
 from modules.logging import Log
 
 logger = Log(__name__)
@@ -52,9 +51,9 @@ class Toolbar(Frame):
 
         ''' If there's a selection in the textbox, insert it into the find entry on focus. 
             Otherwise, select all text in the find entry when focus is gained '''
-        if self.view.textbox.tag_ranges(tkinter.SEL):
+        if self.view.textbox.tag_ranges(SEL):
             self.find_entry.delete(0, 'end')
-            self.find_entry.insert(0, self.view.textbox.get(tkinter.SEL_FIRST, tkinter.SEL_LAST))
+            self.find_entry.insert(0, self.view.textbox.get(SEL_FIRST, SEL_LAST))
         else:
             self.find_entry.select_range(0, 'end')
 
