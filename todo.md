@@ -1,6 +1,6 @@
 # TODO
 
-A list OF things that need doing WHEN there IS TIME. 
+A list OF things that need doing when there is time. 
 
 Hopefully the bugs decrease and the missing important does too
 
@@ -9,7 +9,7 @@ Hopefully the bugs decrease and the missing important does too
 - Live syntax highlighting is broken 
 
 # Missing important
-- FIND, FIND AND REPLACE
+- FIND AND REPLACE
 - settings to enable and disable language
 - FILE encodings ON read/WRITE. 
 - auto-save / temp backup.
