@@ -116,8 +116,7 @@ class Editor:
     def find_text(self, find_txt, direction=1):
         ''' Clear all current "find" tags and loop through the textbox
             to find any current matching text '''
-        for tag in self.tb.tag_names():
-            self.tb.tag_remove(tag, "1.0", "end")
+        self.tb.delete_tags_by_name("find")
 
         if find_txt != self.current_find:
             self.current_find = find_txt
