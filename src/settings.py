@@ -20,6 +20,8 @@ class Configuration:
     geometry = '800x600'
     min_size = (300, 200)
     default_theme = 'light'
+    find_background = '#25f55c'     # Default background and foreground colours for highlighted Find results
+    find_foreground = '#010f05'     # They are currently high contrast to fit on top of any theme
 
     # Status bar settings
     status_bar_default_text = 'Status Bar'

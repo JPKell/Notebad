@@ -1,4 +1,4 @@
-from tkinter import Frame, StringVar, Entry, Label, SEL, SEL_FIRST, SEL_LAST, Button
+from tkinter import Frame, StringVar, Entry, Label, SEL, SEL_FIRST, SEL_LAST, Button, Checkbutton, IntVar
 from modules.logging import Log
 
 logger = Log(__name__)
@@ -12,12 +12,20 @@ class Toolbar(Frame):
         self.view = view
         self.pack(side='top', fill='x')
         self.find_txt = StringVar(self)
+        self._make_find_case_toggle()
         self._make_find_next_buttons()
         self._make_find_entry()
         self._make_find_label()
         logger.debug("Toolbar init")
 
     # Private methods
+    def _make_find_case_toggle(self):
+        self.case_variable = IntVar()
+        self.case_toggle = Checkbutton(self, text="Aa", variable=self.case_variable, onvalue=1, offvalue=0,
+                                       command=lambda: self.view.textbox.editor.set_find_case(self.case_variable.get()))
+        self.case_toggle.select()    # Default to "Checked"
+        self.case_toggle.pack(side="right", padx=2)
+
     def _make_find_next_buttons(self):
         self.find_next_btn = Button(self, text="⮞", command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=1))
         self.find_prev_btn = Button(self, text="⮜", command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=-1))

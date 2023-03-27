@@ -12,7 +12,8 @@ class Editor:
         self.current_find = ""
         self.current_find_positions = []
         self.find_position_index = 0
-        self.tb.tag_configure("find", background="green")
+        self.tb.tag_configure("find", background=cfg.find_background, foreground=cfg.find_foreground)
+        self.find_case = 1    # Default the find entry to search case-insensitive. Switch to 0 to make case-sensitive
 
     def add_indent(self) -> None:
         ''' Adds an indent to the textbox '''
@@ -105,6 +106,13 @@ class Editor:
         ''' Returns all text in the textbox '''
         return self.tb.get("1.0", "end - 1c")
 
+    def set_find_case(self, toggle_value):
+        ''' Set find_case to 0 - case-sensitive, or 1 - case-insensitive '''
+        self.find_case = toggle_value
+
+        # Reset current find so that the results are recalculated
+        self.current_find = ""
+
     def find_text(self, find_txt, direction=1):
         ''' Clear all current "find" tags and loop through the textbox
             to find any current matching text '''
@@ -119,8 +127,10 @@ class Editor:
             start_index = "1.0"
             count_matches = StringVar()
 
+
             while start_index != "end":
-                find_position = self.tb.search(find_txt, start_index, stopindex="end", count=count_matches)
+                find_position = self.tb.search(find_txt, start_index, stopindex="end", count=count_matches,
+                                               nocase=self.find_case)    # Search for matching case (0) or any case (1 - Default)
 
                 # Tkinter error is thrown if an empty position is passed.
                 # Instead, break out of loop if that happens.
@@ -138,9 +148,6 @@ class Editor:
             self.find_next(direction=0)
 
             return 'break'
-
-                # TO DO:
-                # * Add default find highlight colour option to the configuration file
 
         self.find_next(direction=direction)
 
