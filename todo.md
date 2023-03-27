@@ -7,6 +7,7 @@ Hopefully the bugs decrease and the missing important does too
 
 # Bugs
 - Live syntax highlighting is broken 
+- Find feature deletes all tags in the text widget... 🤦‍♂️
 
 # Missing important
 - FIND AND REPLACE
