@@ -26,7 +26,10 @@ class Footer(Frame):
         text = str(text)
         old_txt = self.status_txt.get()
         self.status_txt.set(text)
-        if revert:
+        # If a blank string is passed, reset the status bar default text immediately
+        if text == "" and revert:
+            self.status_txt.set(cfg.status_bar_default_text)
+        elif revert:
             self.after(cfg.status_bar_duration, self.status_txt.set, old_txt)
         logger.debug(f"Status bar set to: {text}")
 
@@ -46,10 +49,6 @@ class Footer(Frame):
             self.sel_lbl.config(text=' ')
         else:
             self.sel_lbl.config(text=f'(sel ln {lines} ch {chars})')
-
-    def update_find_results(self):
-        ''' Show the number of results returned from the find entry '''
-        pass
 
     # Private methods
     def _make_label(self) -> None:

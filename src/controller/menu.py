@@ -48,9 +48,15 @@ class Menubar(Menu):
         self.edit_menu.add_command(label="Copy",  accelerator="Ctrl C",  command=self.controller.view.textbox.clipboard.copy_text)
         self.edit_menu.add_command(label="Paste", accelerator="Ctrl V",  command=self.controller.view.textbox.clipboard.paste_text)
         self.edit_menu.add_separator()
-        # self.tools_menu.add_command(label="Find", accelerator="Ctrl F", command=self.controller.find_text) # TODO: Implement find text
+        self.edit_menu.add_command(label="Find", accelerator="Ctrl F", command=self.controller.view.toolbar.find_entry.focus)
+        self.edit_menu.add_command(label="Find Next", accelerator="Ctrl G",
+                                   command=lambda: self.controller.view.textbox.editor.find_text(
+                                       self.controller.view.toolbar.find_entry.get(), direction=1))
+        self.edit_menu.add_command(label="Find Previous", accelerator="Ctrl Shift G",
+                                   command=lambda: self.controller.view.textbox.editor.find_text(
+                                       self.controller.view.toolbar.find_entry.get(), direction=-1))
         # self.tools_menu.add_command(label="Replace", accelerator="Ctrl R", command=self.controller.replace_text) # TODO: Implement replace text
-
+        self.edit_menu.add_separator()
         self.edit_menu.add_command(label="Undo",  accelerator="Ctrl Z",  command=lambda: self.view.textbox.history.undo())
         self.edit_menu.add_command(label="Redo",  accelerator="Ctrl Y",  command=lambda: self.view.textbox.history.redo())
 

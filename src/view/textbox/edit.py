@@ -1,6 +1,4 @@
-import tkinter
-from tkinter import Text, StringVar, SEL_FIRST, SEL_LAST
-
+from tkinter import Text, StringVar
 from settings import Configuration
 from modules.logging import Log
 
@@ -134,24 +132,15 @@ class Editor:
                 # Update find_positions list
                 self.current_find_positions.append("%s + %sc" % (find_position, count_matches.get()))
 
+            # Update status bar with find information
+            self.tb.footer.set_status(f"Find Result {self.find_position_index + 1} of {len(self.current_find_positions)}", revert=False)
+
             self.find_next(direction=0)
 
             return 'break'
 
                 # TO DO:
-                # Refactor the way Find works. At the moment it is unnecessarily resource hungry, and colliding with the
-                # selection highlighting matches logic. Need more robust find feature and separation of the two
-                # different features.
-                #
-                # * Remove ability to highlight in realtime X
-                # * Only find when hitting enter in the find entry widget X
-                # * Snap to result on enter X
-                # * Map find next/prev to hotkeys and maybe buttons on the toolbar
-                # * Show the complete number of matches in the status bar
-                # * If there are no matches then populate the status bar with red text and ring system bell
-                # * If text is selected, populate the find entry when using Ctrl+f
-                # * Enter on entry widget goes to first find result, then enter again goes to next result, etc... X
-                # * Shift+Enter on find entry widget goes to the previous result X
+                # * Add default find highlight colour option to the configuration file
 
         self.find_next(direction=direction)
 
@@ -161,12 +150,12 @@ class Editor:
         ''' Move to the first/next/prev result in the find_positions list.
             Direction can equal 1, -1 or 0. 0 sets the find index to 0 for a new find to start from the top '''
         if self.current_find_positions == []:
+            self.tb.footer.set_status("No results found...", revert=True)
+            self.tb.bell()   # Play system bell
             return
 
         # Update index to next/prev find result
         self.find_position_index += direction
-
-        print(self.find_position_index)
 
         # Wrap around again if user goes past the end.
         # If the direction is 0 then reset the index to 0.
@@ -175,6 +164,9 @@ class Editor:
             self.find_position_index = 0
         if self.find_position_index < 0:
             self.find_position_index = len(self.current_find_positions) - 1
+
+        self.tb.footer.set_status(f"Find Result {self.find_position_index + 1} of {len(self.current_find_positions)}",
+                                  revert=False)
 
         find_position_and_chars = self.current_find_positions[self.find_position_index]
         position = find_position_and_chars.split("+")

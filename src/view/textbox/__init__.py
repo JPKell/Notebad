@@ -223,3 +223,12 @@ class Textbox(Text):
         else:
             self.current_selection_text = ""
         self.footer.update_selection_stats(self.current_selection_text)
+
+    def clear_current_find(self) -> None:
+        ''' Clear current find highlight tags in textbox '''
+        for tag in self.tag_names():
+            self.tag_remove(tag, "1.0", "end")
+
+        self.footer.set_status("", revert=True)
+
+        return 'break'

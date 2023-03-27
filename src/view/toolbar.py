@@ -1,4 +1,4 @@
-from tkinter import Frame, StringVar, Entry, Label, SEL, SEL_FIRST, SEL_LAST
+from tkinter import Frame, StringVar, Entry, Label, SEL, SEL_FIRST, SEL_LAST, Button
 from modules.logging import Log
 
 logger = Log(__name__)
@@ -12,11 +12,18 @@ class Toolbar(Frame):
         self.view = view
         self.pack(side='top', fill='x')
         self.find_txt = StringVar(self)
+        self._make_find_next_buttons()
         self._make_find_entry()
         self._make_find_label()
         logger.debug("Toolbar init")
 
     # Private methods
+    def _make_find_next_buttons(self):
+        self.find_next_btn = Button(self, text="⮞", command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=1))
+        self.find_prev_btn = Button(self, text="⮜", command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=-1))
+        self.find_next_btn.pack(side="right", padx=2)
+        self.find_prev_btn.pack(side="right", padx=0)
+
     def _make_find_entry(self) -> None:
         ''' Build the Find entry widget '''
         self.placeholder_txt = "Ctrl+f..."
@@ -37,7 +44,7 @@ class Toolbar(Frame):
         current_txt = self.find_entry.get()
         self.view.textbox.editor.find_text(current_txt)
 
-    def find_entry_focus(self, event):
+    def find_entry_focus(self, *args):
         ''' When the find entry widget gains focus, clear the
             placeholder text and update the foreground color to black '''
         if self.find_entry.get() == self.placeholder_txt:
