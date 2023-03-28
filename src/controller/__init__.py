@@ -28,7 +28,7 @@ class NoteController:
 
         # Instantiate controller objects
         # Root window
-        self.app       = tk.Tk()        
+        self.app       = tk.Tk()
         self.file_system = FileManagement(self)     
         self.menu      = Menubar(self.app, controller=self)   
         # Instantiate the view
@@ -67,6 +67,8 @@ class NoteController:
         ''' Start 'er up! Run is called from outside the controller allowing for 
             everything to be set up first. '''
         logger.debug('Starting the main loop')
+        if cfg.start_fullscreen:
+            self.app.state("zoomed")
         self.app.mainloop()
 
     def exit_app(self) -> None:

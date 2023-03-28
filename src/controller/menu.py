@@ -37,7 +37,9 @@ class Menubar(Menu):
         self.file_menu.add_command(label="Save",    accelerator="Ctrl S",       command=self.controller.file_system.save_file)
         self.file_menu.add_command(label="Save As", accelerator="Ctrl Shift S", command=self.controller.file_system.save_as_file)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Close tab", accelerator="Ctrl W",     command=lambda: self.view.tabs.close_tab()) 
+        self.file_menu.add_command(label="Settings", accelerator="Ctrl ,", command=self.view.open_settings_window)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Close tab", accelerator="Ctrl W",     command=lambda: self.view.tabs.close_tab())
         self.file_menu.add_command(label="Exit app",  accelerator="Alt F4",     command=self.controller.exit_app)
 
         # Edit menu
@@ -78,5 +80,6 @@ class Menubar(Menu):
         self.menu_list.append(self.py_menu)
         self.add_cascade(label="Py", menu=self.py_menu)
         self.py_menu.add_command(label="Eval line/selection", accelerator="Alt E", command=lambda: self.controller.utilities.eval_selection())
+
 
 ####  This needs to have the ui set at first load cause it's wrong. 

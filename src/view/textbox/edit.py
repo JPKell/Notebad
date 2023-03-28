@@ -12,7 +12,7 @@ class Editor:
         self.current_find = ""
         self.current_find_positions = []
         self.find_position_index = 0
-        self.tb.tag_configure("find", background=cfg.find_background, foreground=cfg.find_foreground)
+        self.tb.tag_configure("find", background=cfg.find_background)
         self.find_case = 1    # Default the find entry to search case-insensitive. Switch to 0 to make case-sensitive
 
     def add_indent(self) -> None:

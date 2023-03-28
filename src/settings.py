@@ -19,9 +19,8 @@ class Configuration:
     app_title = 'Notebad'
     geometry = '800x600'
     min_size = (300, 200)
+    start_fullscreen = False
     default_theme = 'light'
-    find_background = '#25f55c'     # Default background and foreground colours for highlighted Find results
-    find_foreground = '#010f05'     # They are currently high contrast to fit on top of any theme
 
     # Status bar settings
     status_bar_default_text = 'Status Bar'
@@ -37,6 +36,7 @@ class Configuration:
     # Textbox appearance
     font_size = 12
     line_number_width = 33
+    find_background = '#25f55c'  # Default background colour for highlighted Find results
 
     # Textbox behaviour
     indent_size = 4
@@ -122,9 +122,10 @@ class Configuration:
                 # Set the value of the key
                 setattr(self, key, eval(value))
 
-    def save_personal_settings(self, **kwargs) -> None:
+    def save_personal_settings(self, *args, **kwargs) -> None:
         ''' Save personal settings to the personal config file. Can take 
-            any number of keyword arguments. '''
+            any number of keyword arguments. Any strings must be passed with double quotes
+            e.g. setting = '"user_setting"' OR setting = '"%s"' % setting_string '''
         # Update the values of the active config object
         for key, value in kwargs.items():
             setattr(self, key, value)

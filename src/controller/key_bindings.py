@@ -21,7 +21,10 @@ class KeyBindings:
         self.app.bind("<Control-n>", lambda event: self.controller.file_system.new_file())
         self.app.bind("<Control-o>", lambda event: self.controller.file_system.open_file())
         self.app.bind("<Control-s>", lambda event: self.controller.file_system.save_file())
-        self.app.bind("<Control-S>", lambda event: self.controller.file_system.save_as_file())  # Ctrl+Shift+s
+        self.app.bind("<Control-Shift-s>", lambda event: self.controller.file_system.save_as_file())
+
+        # Settings window
+        self.app.bind("<Control-,>", self.controller.view.open_settings_window)
 
         # UI management
         self.app.bind("<Control-equal>", lambda event: self.controller.view.ui.font_size_bump(increase=True))

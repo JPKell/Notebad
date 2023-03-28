@@ -8,6 +8,7 @@ from view.tabs    import Tabs
 from view.ui      import UI
 from view.toolbar import Toolbar
 from view.find_window import FindWindow
+from view.settings_menu import SettingsDialog
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -52,6 +53,7 @@ class NoteView(Frame):
         self.pack(fill='both', expand=True)
         self.textbox.focus_set()    # Make sure we can start typing right away
         self.textbox.footer.update_cursor_pos()    # Update the footer position data
+        self.settings_window = None   # Assign to SettingsDialog object when the toplevel is needed
 
     ## Class properties ##
     @property
@@ -97,3 +99,5 @@ class NoteView(Frame):
 
         logger.debug(f"Tab changed to {textbox.meta.file_name}")
 
+    def open_settings_window(self, *args):
+        SettingsDialog(self)
