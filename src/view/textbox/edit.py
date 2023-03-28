@@ -97,7 +97,14 @@ class Editor:
 
     def delete_cur_line(self) -> None:
         ''' Delete the current line '''
-        self.tb.delete('insert linestart', 'insert lineend') 
+        self.tb.delete('insert linestart', 'insert lineend')
+
+    def delete_line(self) -> None:
+        ''' Delete the current line and remove the blank line.
+            More for the users use than the delete_cur_line function '''
+        current_line, current_char = self.tb.cursor.get_coordinates()
+        self.tb.delete('insert linestart', current_line + ".end+1c")
+
 
     def delete_selection(self):
         self.tb.delete('sel.first', 'sel.last')
