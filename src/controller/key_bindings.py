@@ -1,5 +1,7 @@
+from settings import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class KeyBindings:
@@ -24,7 +26,7 @@ class KeyBindings:
         self.app.bind("<Control-Shift-s>", lambda event: self.controller.file_system.save_as_file())
 
         # Settings window
-        self.app.bind("<Control-,>", self.controller.view.open_settings_window)
+        self.app.bind("<Control-Key-comma>", self.controller.view.open_settings_window)
 
         # UI management
         self.app.bind("<Control-equal>", lambda event: self.controller.view.ui.font_size_bump(increase=True))
