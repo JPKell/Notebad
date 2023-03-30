@@ -17,6 +17,7 @@ class SettingsDialog(Toplevel):
         self._make_startup_frame()
         self._make_textbox_frame()
         self.grab_set()     # Set focus on settings window and stop user from interacting with the root window
+        self.focus()
 
     def _make_startup_frame(self):
         ''' Stores widgets for changing startup settings '''

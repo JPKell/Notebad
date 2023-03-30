@@ -37,6 +37,9 @@ class Configuration:
     font_size = 12
     line_number_width = 33
     find_background = '#25f55c'  # Default background colour for highlighted Find results
+    block_cursor = False
+    cursor_on_time = 600
+    cursor_off_time = 300
 
     # Textbox behaviour
     indent_size = 4

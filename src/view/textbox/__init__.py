@@ -142,6 +142,9 @@ class Textbox(Text):
             highlightcolor=colors.text_background,      # around the textbox
             insertbackground=colors.cursor, 
             font=self.font,
+            blockcursor=cfg.block_cursor,
+            insertontime=cfg.cursor_on_time,
+            insertofftime=cfg.cursor_off_time,
             padx=5, 
             pady=5)
         self.pack(expand=True, fill='both')
