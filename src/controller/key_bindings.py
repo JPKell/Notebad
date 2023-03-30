@@ -45,6 +45,7 @@ class KeyBindings:
         # Textbox overrides
         self.app.bind_class("Text", "<Alt-d>", lambda event: self.controller.view.ui.toggle_theme())
         self.app.bind_class("Text", "<Control-d>", lambda event: self.controller.view.textbox.editor.delete_line())
+        self.app.bind_class("Text", "<Control-k>", lambda event: self.controller.view.textbox.editor.duplicate_line())
         self.app.bind_class("Text", "<Control-z>", lambda event: self.controller.view.textbox.history.undo())
         self.app.bind_class("Text", "<Control-y>", lambda event: self.controller.view.textbox.history.redo())
         self.app.unbind_all("<Tab>")    # Unbind the default tab key for all widgets before overriding it

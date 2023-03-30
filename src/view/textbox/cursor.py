@@ -19,7 +19,7 @@ class Cursor:
 
     def set_position(self, new_position):
         ''' Set the current input cursor position '''
-        self.textbox.insert(new_position, "")
+        self.textbox.mark_set('insert', new_position)
 
     def split_index(self, current_index='index'):
         ''' Get a selected index or the current input cursor position as a list of

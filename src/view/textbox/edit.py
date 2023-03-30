@@ -231,5 +231,9 @@ class Editor:
         self.tb.insert(current_pos + "linestart", destination_line_txt)
         self.tb.insert(destination_pos + "linestart", current_line_txt)
 
-        # Clear the default selection tkinter applies to the shift key
-        # self.tb.tag_remove("sel", "1.0", "end")
+    def duplicate_line(self):
+        ''' Duplicate the current line the cursor is on '''
+        current_line = self.get_current_line_text()
+        self.tb.insert('insert lineend', "\n" + current_line)
+        self.tb.cursor.set_position('insert + 1l')
+
