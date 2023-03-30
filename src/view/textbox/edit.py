@@ -102,9 +102,7 @@ class Editor:
     def delete_line(self) -> None:
         ''' Delete the current line and remove the blank line.
             More for the users use than the delete_cur_line function '''
-        current_line, current_char = self.tb.cursor.get_coordinates()
-        self.tb.delete('insert linestart', current_line + ".end+1c")
-
+        self.tb.delete('insert linestart', 'insert lineend+1c')
 
     def delete_selection(self):
         self.tb.delete('sel.first', 'sel.last')
@@ -187,3 +185,51 @@ class Editor:
 
         # Make sure that the find result is moved into view
         self.tb.see(find_position_and_chars)
+
+    def move_line(self, direction):
+        ''' Move a line or selection of lines up or down. '''
+        '''
+        SELECTION MOVE CODE - WIP...
+        # Check for selection text
+        if self.get_selection() != "":
+            # Reset the cursor position
+            # self.tb.cursor.set_position('insert + %sl' % direction)
+
+            # Get indexes for first and last line of selection
+            first_line = self.tb.index('sel.first')
+            last_line = self.tb.index('sel.last')
+
+            if self.tb.index('insert') < first_line:
+                print("Moving on up!")
+            elif self.tb.index('insert') > first_line:
+                print("Moving down!")
+
+            # Create the start and end indexes for the selection lines
+            start_selection = self.tb.cursor.split_index(first_line)
+            end_selection = self.tb.cursor.split_index(last_line)
+            selection_text = self.tb.get('%s.0' % start_selection[0], '%s.end' % end_selection[0])
+            print(start_selection, ":", end_selection)
+            print(selection_text)
+        '''
+
+        # Clear the default selection tkinter applies to the shift key
+        self.tb.tag_remove("sel", "1.0", "end")
+
+        # Get indexes for destination and current lines
+        destination_pos = self.tb.index('insert')
+        current_pos = str(float(destination_pos) + direction)
+
+        # Use linestart/lineend to collect all the text from the line
+        destination_line_txt = self.tb.get(destination_pos + "linestart", destination_pos + "lineend")
+        current_line_txt = self.tb.get(current_pos + "linestart", current_pos + "lineend")
+
+        # Clear the lines of any existing text
+        self.tb.delete(destination_pos + "linestart", destination_pos + "lineend")
+        self.tb.delete(current_pos + "linestart", current_pos + "lineend")
+
+        # Insert the text on the flipped lines
+        self.tb.insert(current_pos + "linestart", destination_line_txt)
+        self.tb.insert(destination_pos + "linestart", current_line_txt)
+
+        # Clear the default selection tkinter applies to the shift key
+        # self.tb.tag_remove("sel", "1.0", "end")

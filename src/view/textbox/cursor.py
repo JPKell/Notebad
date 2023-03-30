@@ -21,10 +21,9 @@ class Cursor:
         ''' Set the current input cursor position '''
         self.textbox.insert(new_position, "")
 
-    def get_coordinates(self):
-        ''' Get the current input cursor position as separate line and char values '''
-        current_pos = self.textbox.index(INSERT)
-        coordinates = current_pos.split(".")
-        current_line = coordinates[0]
-        current_char = coordinates[1]
-        return current_line, current_char
+    def split_index(self, current_index='index'):
+        ''' Get a selected index or the current input cursor position as a list of
+            separate line and char values '''
+        current_pos = self.textbox.index(current_index)
+        current_pos_split = current_pos.split(".")
+        return current_pos_split
