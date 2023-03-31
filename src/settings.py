@@ -1,6 +1,7 @@
-import os, pathlib
+import os
+import pathlib
 
-## We can also use variables above the config class to have constant values
+# We can also use variables above the config class to have constant values
 # Example: provincial tax rates and we have a calculate tax button on the calc. 
 #          They are only needed in one place and we don't want the user to change
 #          them. So we can just put them here and import them as needed.    
@@ -34,6 +35,7 @@ class Configuration:
     max_undo = 50
 
     # Textbox appearance
+    program_font = 'Courier New'
     font_size = 12
     line_number_width = 33
     find_background = '#25f55c'  # Default background colour for highlighted Find results

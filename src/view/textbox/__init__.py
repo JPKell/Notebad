@@ -133,7 +133,7 @@ class Textbox(Text):
         else:
             colors = Themes.light
 
-        self.font = font.nametofont('TkFixedFont')
+        self.font = font.Font(family=cfg.program_font)
         self.font.configure(size=cfg.font_size)
         self.font_size = 0  # This allows different font sizes between windows
 

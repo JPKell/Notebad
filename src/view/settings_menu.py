@@ -30,6 +30,7 @@ class SettingsDialog(Toplevel):
         self.theme_selection = Combobox(self.startup_frame, textvariable=self.theme_value)
         self.theme_selection.state(["readonly"])   # Only allow selection from predefined list
         self.theme_selection["values"] = ("Light", "Dark")
+        self.theme_selection.current(self.theme_selection['values'].index(cfg.default_theme.capitalize()))
         self.theme_selection.bind("<<ComboboxSelected>>", lambda event: cfg.save_personal_settings(default_theme='"%s"' % self.theme_value.get().lower()))
         self.theme_label.grid(column=0, row=0, sticky="w", padx=10, pady=10)
         self.theme_selection.grid(column=1, row=0, sticky="e", padx=10, pady=10)
@@ -46,10 +47,20 @@ class SettingsDialog(Toplevel):
         self.textbox_frame = LabelFrame(self, text="Textbox")
         self.textbox_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        self.font_size_label = Label(self.textbox_frame, text="Font Size")
-        self.font_selection = StringVar()
-        self.font_size = Combobox(self.textbox_frame, textvariable=self.font_selection, width=4)
+        self.font_size_label = Label(self.textbox_frame, text="Size")
+        self.font_size_selection = StringVar()
+        self.font_size = Combobox(self.textbox_frame, textvariable=self.font_size_selection, width=4)
         self.font_size["values"] = (6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 25, 29, 36, 48, 64)
-        self.font_size.bind("<<ComboboxSelected>>", lambda event: cfg.save_personal_settings(font_size=int(self.font_selection.get())))
-        self.font_size_label.grid(column=0, row=0, sticky="w", padx=10, pady=10)
-        self.font_size.grid(column=1, row=0, sticky="e", padx=10, pady=10)
+        self.font_size.current(6)       # Default value
+        self.font_size.bind("<<ComboboxSelected>>", lambda event: cfg.save_personal_settings(font_size=int(self.font_size_selection.get())))
+        self.font_size_label.grid(column=1, row=0, sticky="w", padx=10, pady=10)
+        self.font_size.grid(column=1, row=1, sticky="e", padx=10, pady=10)
+
+        self.font_family_label = Label(self.textbox_frame, text="Font Family")
+        self.font_family_selection = StringVar()
+        self.font_family = Combobox(self.textbox_frame, textvariable=self.font_family_selection, state='readonly')
+        self.font_family["values"] = ('Cascadia Mono', 'Cascadia Mono SemiBold', 'Cascadia Mono SemiLight', 'Consolas', 'Courier New', 'DejaVu Sans Mono', 'Fixedsys', 'Lucida Console', 'Terminal')
+        self.font_family.current(self.font_family["values"].index(cfg.program_font))        # Default value
+        self.font_family.bind("<<ComboboxSelected>>", lambda event: cfg.save_personal_settings(program_font='"%s"' % self.font_family.get()))
+        self.font_family_label.grid(column=0, row=0, sticky='w', padx=10, pady=10)
+        self.font_family.grid(column=0, row=1, sticky='w', padx=10, pady=10)
