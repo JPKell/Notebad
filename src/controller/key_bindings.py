@@ -5,9 +5,19 @@ cfg = Configuration()
 logger = Log(__name__)
 
 ''' Here's an empty keybinding dictionary.
-    {'name': '', 'key': '< >', 'bind_func': self.app.bind, 'callback': lambda event: , 'widget_class': '', 'active': True, 'can_override': False},
+    {'name': '', 'key': '< >', 'category': '',
+        'widget_class': '', 'active': True, 'can_override': False
+        'bind_func': self.app.bind, 
+        'callback': lambda event: , 
+        },
 '''
 
+###
+# Various tk keybindings that exist by default
+# 
+# <Control-p> previous line
+# <Control-k> delete to end of line
+###
 
 class KeyBindings:
     ''' This class is responsible for binding all the key bindings to the self.app. 
@@ -17,14 +27,16 @@ class KeyBindings:
         self.app = self.controller.app
         
         # Holds all the key bindings
-        self.binder = {}
-        self.user_binder = {}
+        self.binder = []
+        self.user_binder = []
 
         self._load_user_settings()
         self._unbindings()
+        self._app_triggers()
         self._init_no_override_bindings()
+        self._syntax_highlighting()
         self._textbox_important_bindings()
-        self.bind_keys()
+        self._assignable_bindings()
         logger.debug("Key bindings initialized")
 
     def register_binding(self,
@@ -48,17 +60,24 @@ class KeyBindings:
             widget_class: The widget class to bind the key to. eg: "Text" 
             active: Whether the key binding is active or not. eg: True
             override: Whether the key binding can be overridden by the user. eg: False'''
-        if name in self.user_binder:
+        if name in self.user_binder and can_override:
             key = self.user_binder[name]['key']
 
-        self.binder[name] = { 
+        # Do not process duplicates. Log a warning and return. Maybe raise an error? If there is a duplicate, it should be fixed.
+        for binding in self.binder:
+            if binding['name'] == name:
+                logger.warn(f"Key binding {name} already exists. Skipping.")
+                return
+
+        self.binder += [{
+            'name': name,
             'category': category,
             'bind_func': bind_func, 
             'key': key, 
             'callback': callback, 
             'widget_class': widget_class, 
             'active': active, 
-            'can_override': can_override }
+            'can_override': can_override }]
 
         if active:
             if widget_class:
@@ -72,13 +91,59 @@ class KeyBindings:
         # Unbind the default tab key for all widgets before overriding it
         self.app.unbind_all("<Tab>")    
         
+    def _app_triggers(self):
+        ''' These are triggers that get fired on app events not key codes'''
+
+        triggers = [{'name': '', 'key': '<<NotebookTabChanged>>', 'category': 'App triggers',
+            'widget_class': None, 'active': True, 'can_override': False,
+            'bind_func': self.app.bind, 
+            'callback': lambda event: self.controller.view.tab_change(), 
+            },
+        ]
+        
+        for binding in triggers:
+            self.register_binding(**binding)
+
     def _load_user_settings(self):
         ''' Loads the user key bindings from the config file. '''
         ... # Still to be implemented
 
+    # It would be better and more efficient to unbind this when we dont need it.
+    # Or perhaps just bind to the textbox. I'm not sure. But I'm sure its worth considering 
+    def _syntax_highlighting(self):
+        ''' These are the key bindings that are specific to the syntax highlighting. '''
+        syntax_bindings = [
+            {'name': 'Syntax: on keypress', 'key': '<Key>', 'category': 'Syntax',
+                'widget_class': None, 'active': True, 'can_override': False,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.language.dynamic_syntax_formatting(event), 
+                },
+
+            # I think this is needed, but might be redundant. Need to check
+            {'name': 'Syntax: on space', 'key': '<space>', 'category': 'Syntax',
+                'widget_class': None, 'active': True, 'can_override': False,
+                'bind_func': self.app.bind_all, 
+                'callback': lambda event: self.controller.language.dynamic_syntax_formatting(event), 
+                },
+        
+            {'name': 'Syntax: keypad enter', 'key': '<KP_Enter>', 'category': 'Syntax',
+                'widget_class': None, 'active': True, 'can_override': False,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.language.dynamic_syntax_formatting(event),
+                },
+
+            {'name': 'Syntax: statis formatting', 'key': '<Alt-p>', 'category': 'Syntax',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.language.static_syntax_formatting(), 
+                },
+        ]
+
+        for binding in syntax_bindings:
+            self.register_binding(**binding)
+
     def _init_no_override_bindings(self):
         ''' These are the key bindings that are not overridden by the user.'''
-
         no_override_bindings = [
             # File management
             {'name': 'New file', 'key': '<Control-n>', 'category': 'File management',
@@ -96,6 +161,11 @@ class KeyBindings:
             {'name': 'Save as file', 'key': '<Control-S>', 'category': 'File management', 
              'bind_func': self.app.bind, 
              'callback': lambda event: self.controller.file_system.save_as_file()},
+
+            {'name': 'Close tab', 'key': '<Control-w>', 'category': 'File management',
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.view.tabs.close_tab(), 
+                },
 
             # Find entry overrides
             # Ctrl-o inserts a newline character by default. A second binding specific to the Text class overrides this.
@@ -125,7 +195,6 @@ class KeyBindings:
         for binding in no_override_bindings:
             self.register_binding(**binding, active=True, can_override=False)
 
-
     # Bad name. Needs a new one
     def _textbox_important_bindings(self):
         ''' These are the key bindings that are specific to the textbox. Some of them
@@ -152,71 +221,115 @@ class KeyBindings:
                 'bind_func': self.app.bind, 
                 'callback': lambda event: self.controller.view.tabs.textbox.cursor.select_all() 
              },
+
             {'name': 'Indent', 'key': '<Tab>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_class, 
                 'add':False, ## Additional parameter to the bind function
                 'callback': lambda event: self.controller.view.tabs.textbox.editor.add_indent(), 
              },
+
             {'name': 'Cancel find highlight ', 'key': '<Escape>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_class, 
                 'callback': lambda event: self.controller.view.tabs.textbox.delete_tags_by_name("find")
-             }
+             },
+
+            {'name': 'Delete line', 'key': '<Control-d>', 'category': 'Text editor',
+                'widget_class': 'Text', 'active': True, 'can_override': True,
+                'bind_func': self.app.bind_class, 
+                'callback': lambda event: self.controller.view.textbox.editor.delete_line(), 
+                },
+
+            {'name': 'Duplicate line', 'key': '<Control-l>', 'category': 'Text editor',
+                'widget_class': 'Text', 'active': True, 'can_override': True,
+                'bind_func': self.app.bind_class, 
+                'callback': lambda event: self.controller.view.textbox.editor.duplicate_line(), 
+                },
+
+            {'name': 'Move line up', 'key': '<Alt-Shift-Up>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.view.textbox.editor.move_line(direction=1), 
+                },
+
+            {'name': 'Move line down', 'key': '<Alt-Shift-Down>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: lambda event: self.controller.view.textbox.editor.move_line(direction=-1), 
+                },
         ]
         for binding in textbox_bindings:
             self.register_binding(**binding)
 
-    def bind_keys(self):
+    def _assignable_bindings(self):
         ''' Key bindings are attached here. There is an important thing to know, 
             that they will be called in order from the class level up to 
             the app level. That means to override a key binding, you need to assign
             it at the class level and then return 'break' to stop the event from
-            propagating up the levels. '''
-
-        # Settings window
-        self.app.bind("<Control-Key-comma>", self.controller.view.open_settings_window)
-
-        # UI management
-        self.app.bind("<Control-equal>", lambda event: self.controller.view.ui.font_size_bump(increase=True))
-        self.app.bind("<Control-minus>", lambda event: self.controller.view.ui.font_size_bump(increase=False))
-        self.app.bind("<Alt-c>", lambda event: self.controller.utilities.open_calculator())
-
-        # Textbox overrides
-        self.app.bind_class("Text", "<Alt-d>", lambda event: self.controller.view.ui.toggle_theme())
-        self.app.bind_class("Text", "<Control-d>", lambda event: self.controller.view.textbox.editor.delete_line())
-        self.app.bind_class("Text", "<Control-l>", lambda event: self.controller.view.textbox.editor.duplicate_line())
-
-        self.app.bind("<Alt-Shift-Up>", lambda event: self.controller.view.textbox.editor.move_line(direction=1))
-        self.app.bind("<Alt-Shift-Down>", lambda event: self.controller.view.textbox.editor.move_line(direction=-1))
-
-        # Textbox management
+            propagating up the levels. 
+            
+            These should all be user updatable key commands. Might be worth splitting them out at some point. 
+            Or consolidating into a single function. Pros and cons to both. '''
         
-        self.app.bind("<Control-f>", lambda event: self.controller.view.toolbar.find_entry.focus())
-        self.app.bind("<Control-g>", lambda event: self.controller.view.textbox.editor.find_text(
-            self.controller.view.toolbar.find_entry.get(), direction=1))
-        self.app.bind("<Control-Shift-G>", lambda event: self.controller.view.textbox.editor.find_text(
-            self.controller.view.toolbar.find_entry.get(), direction=-1))
+        bindings = [ 
+            # Settings window
+            {'name': 'Open settings', 'key': '<Control-Key-comma>', 'category': 'Application settings',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': self.controller.view.open_settings_window, 
+                },
 
+            {'name': 'Increase font', 'key': '<Control-equal>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.view.ui.font_size_bump(increase=True), 
+                },
 
-        # Syntax highlighting
-        self.app.bind("<Key>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
-        self.app.bind_all("<space>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
-        #self.app.bind_all("<Return>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
-        self.app.bind("<KP_Enter>", lambda event: self.controller.language.dynamic_syntax_formatting(event))
+            {'name': 'Decrease font', 'key': '<Control-minus>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.view.ui.font_size_bump(increase=False), 
+                },
+
+            {'name': 'Calculator', 'key': '<Alt-c>', 'category': 'Utilities',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.utilities.open_calculator(), 
+                },
+
+            {'name': 'Toggle theme', 'key': '<Alt-d>', 'category': 'Ui',
+                'widget_class': 'Text', 'active': True, 'can_override': True,
+                'bind_func': self.app.bind_class, 
+                'callback': lambda event: self.controller.view.ui.toggle_theme(), 
+                },
+
+            {'name': 'Find', 'key': '<Control-f>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.view.toolbar.find_entry.focus(), 
+                },
+
+            {'name': 'Find next no focus', 'key': '<Control-g>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: lambda event: self.controller.view.textbox.editor.find_text(
+                    self.controller.view.toolbar.find_entry.get(), direction=1), 
+                },
         
-        self.app.bind("<Alt-p>", lambda event: self.controller.language.static_syntax_formatting())
+            {'name': 'Find prev no focus', 'key': '<Control-Shift-G>', 'category': 'Text editor',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.view.textbox.editor.find_text(
+                    self.controller.view.toolbar.find_entry.get(), direction=-1), 
+                },
 
-        # Tab management
-        self.app.bind("<<NotebookTabChanged>> ", lambda event: self.controller.view.tab_change())
-        self.app.bind("<Control-w>",    lambda event: self.controller.view.tabs.close_tab())
-        
-        # Clipboard management
-        self.app.bind("<Alt-e>", lambda event: self.controller.utilities.eval_selection())
+            {'name': 'Python eval', 'key': '<Alt-e>', 'category': 'Python',
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
+                'callback': lambda event: self.controller.utilities.eval_selection(), 
+                },
+        ]
 
-        ###
-        # Various tk keybindings that exist by default
-        # 
-        # <Control-p> previous line
-        # <Control-k> delete to end of line
-        ###
+        for binding in bindings:
+            self.register_binding(**binding)

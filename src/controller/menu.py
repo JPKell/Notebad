@@ -75,6 +75,7 @@ class Menubar(Menu):
         self.menu_list.append(self.tools_menu)
         self.add_cascade(label="Tools", menu=self.tools_menu)
         self.tools_menu.add_command(label="Calculator", accelerator="Alt C", command=lambda: self.controller.utilities.open_calculator())
+        self.tools_menu.add_command(label="Key commands",  command=lambda: self.view.key_command_list())
         
         self.py_menu = Menu(self, tearoff=0)
         self.menu_list.append(self.py_menu)

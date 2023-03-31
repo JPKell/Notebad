@@ -7,7 +7,7 @@ from view.colors  import Themes
 from view.tabs    import Tabs
 from view.ui      import UI
 from view.toolbar import Toolbar
-from view.find_window import FindWindow
+from view.key_commands import KeyCommandList
 from view.settings_menu import SettingsDialog
 
 cfg = Configuration()
@@ -60,8 +60,8 @@ class NoteView(Frame):
     def textbox(self):           # So common it needs to be a property in view
         return self.tabs.textbox
 
-    def find(self):
-        FindWindow(self)
+    def key_command_list(self):
+        KeyCommandList(self)
 
     ###               ###
     # User interactions #
