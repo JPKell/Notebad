@@ -65,9 +65,9 @@ class KeyBindings:
 
         # Do not process duplicates. Log a warning and return. Maybe raise an error? If there is a duplicate, it should be fixed.
         for binding in self.binder:
-            if binding['name'] == name:
-                logger.warn(f"Key binding {name} already exists. Skipping.")
-                return
+            if binding['name'] == name and widget_class == None:
+                logger.warn(f"Key binding {name} already exists.")
+
 
         self.binder += [{
             'name': name,

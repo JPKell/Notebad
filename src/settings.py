@@ -35,7 +35,7 @@ class Configuration:
     max_undo = 50
 
     # Textbox appearance
-    program_font = 'Courier New'
+    program_font = 'DejaVu Sans Mono'
     font_size = 12
     line_number_width = 33
     find_background = '#25f55c'  # Default background colour for highlighted Find results
@@ -154,6 +154,8 @@ class Configuration:
                     key = key.strip()
                     if key in kwargs:
                         value = kwargs.pop(key)
+                        if isinstance(value, str):
+                            value = f'"{value}"'
                         f.write(f'{key} = {value}\n')
                     else:
                         f.write(ln)

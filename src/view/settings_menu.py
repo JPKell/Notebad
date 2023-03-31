@@ -1,7 +1,10 @@
 from tkinter import Toplevel, Button, Frame, LabelFrame, Checkbutton, IntVar, StringVar, Label
 from tkinter.ttk import Combobox
-from settings import Configuration
 
+from settings import Configuration
+from modules.logging import Log
+
+logger = Log(__name__)
 cfg = Configuration()
 
 
@@ -59,8 +62,14 @@ class SettingsDialog(Toplevel):
         self.font_family_label = Label(self.textbox_frame, text="Font Family")
         self.font_family_selection = StringVar()
         self.font_family = Combobox(self.textbox_frame, textvariable=self.font_family_selection, state='readonly')
-        self.font_family["values"] = ('Cascadia Mono', 'Cascadia Mono SemiBold', 'Cascadia Mono SemiLight', 'Consolas', 'Courier New', 'DejaVu Sans Mono', 'Fixedsys', 'Lucida Console', 'Terminal')
+
+        # List of fonts that are available on the system
+        if cfg.os == 'nt':
+            fonts = ('Cascadia Mono', 'Cascadia Mono SemiBold', 'Cascadia Mono SemiLight', 'Consolas', 'Courier New', 'DejaVu Sans Mono', 'Fixedsys', 'Lucida Console', 'Terminal')
+        else:
+            fonts = ('Courier', 'DejaVu Sans Mono', 'FreeMono', 'Liberation Mono', 'Nimbus Mono PS', 'Noto Mono', 'Noto Sans Mono', 'Tlwg Mono', 'Ubuntu Mono')
+        self.font_family["values"] = fonts
         self.font_family.current(self.font_family["values"].index(cfg.program_font))        # Default value
-        self.font_family.bind("<<ComboboxSelected>>", lambda event: cfg.save_personal_settings(program_font='"%s"' % self.font_family.get()))
+        self.font_family.bind("<<ComboboxSelected>>", lambda event: cfg.save_personal_settings(program_font='%s' % self.font_family.get()))
         self.font_family_label.grid(column=0, row=0, sticky='w', padx=10, pady=10)
         self.font_family.grid(column=0, row=1, sticky='w', padx=10, pady=10)
