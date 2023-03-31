@@ -95,9 +95,11 @@ class Textbox(Text):
     def is_blank(self) -> bool:
         ''' Returns True if the text area has not had a single character entered. 
             By default a text area will house a new line character. So len is not
-            a good way to check if the text area is blank.
+            a good way to check if the text area is blank. Also, Ctrl-o default
+            behavior is to add a newline. So we check for a double new line when
+            trying to open a file on a blank tab using a hotkey.
         '''
-        return self.get(1.0, 'end') == '\n'
+        return self.get(1.0, 'end') == '\n' or self.get(1.0, 'end') == '\n\n'
 
     def check_on_key(self, event) -> None:
         ''' This is the function that runs upon every keypress. If there is a

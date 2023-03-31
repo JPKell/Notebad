@@ -36,6 +36,7 @@ class FileManagement:
                 file_path=path_parts['path'], 
                 file_name=path_parts['file'], 
                 )
+            textbox.delete('1.0', 'end')
             self.write_file_to_textbox(textbox, full_path)
             self.controller.view.tab_change()
         logger.info(f'Opened file: {full_path}')
