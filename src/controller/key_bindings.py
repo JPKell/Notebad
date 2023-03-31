@@ -168,6 +168,12 @@ class KeyBindings:
                 },
 
             # Find entry overrides
+            # Ctrl-o inserts a newline character by default. A second binding specific to the Text class overrides this.
+            {'name': 'Open file', 'key': '<Control-o>', 'category': 'File management',
+                'widget_class': 'Text',
+                'bind_func': self.app.bind_class,
+                'callback': lambda event: self.controller.file_system.open_file()},
+
             {'name': 'Find next', 'key': '<Return>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
