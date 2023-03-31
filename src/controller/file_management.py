@@ -21,7 +21,7 @@ class FileManagement:
     def open_file(self) -> None:
         ''' Opens a file. There should be an encoding option here. But there 
             isn't, that should get added and this note removed. '''
-        full_path = self.controller.view.open_file_dialogue()
+        full_path = self.controller.view.open_file_dialogue()   # Tkinter filedialog returns '/' filepath, even for Windows! Woohoo!
         if full_path:
             textbox = self.controller.view.textbox         # Get the current textbox
             path_parts = self.parts_from_file_path(full_path)
@@ -36,10 +36,12 @@ class FileManagement:
                 file_path=path_parts['path'], 
                 file_name=path_parts['file'], 
                 )
-            textbox.delete('1.0', 'end')
             self.write_file_to_textbox(textbox, full_path)
             self.controller.view.tab_change()
+            textbox.cursor.set_position('1.0')      # Set cursor at beginning of file
         logger.info(f'Opened file: {full_path}')
+
+        return 'break'
 
     def save_file(self) -> None:
         ''' Saves current textbox to disk. If not written to disk before,
@@ -71,12 +73,8 @@ class FileManagement:
         ''' Take the full path name and return a dictionary with the path and file name.
             `{ 'path': ..., 'file': ... }`
         '''
-        if cfg.os == 'nt':         # Windows
-            parts = full_path.split('\\')
-            return {'path': '\\'.join(parts[:-1]), 'file': parts[-1]}
-        else:                       # Linux/Mac
-            parts = full_path.split('/')
-            return {'path': '/'.join(parts[:-1]), 'file': parts[-1]}
+        parts = full_path.split('/')
+        return {'path': '/'.join(parts[:-1]), 'file': parts[-1]}
 
     def write_file_to_textbox(self, textbox:Textbox, full_path:str) -> None:
         ''' Writes the contents of a file to the textbox '''
