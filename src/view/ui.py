@@ -14,6 +14,7 @@ class UI:
         '''
     def __init__(self, view: Frame) -> None:
         self.view = view
+        self.app  = view.controller.app
         self.theme = cfg.default_theme
         self.style = Style()
         self.font = font.nametofont('TkFixedFont')
@@ -126,6 +127,9 @@ class UI:
             textbox.footer.lang_lbl.config(bg=colors.background, fg=colors.syn_yellow)
             textbox.footer.sel_lbl.config(bg=colors.background, fg=colors.syn_orange)
 
+    def test_theme(self) -> None:
+        ''' Test the theme by changing the background of the text box to the background color '''
+        self.style.theme_use('forest-dark')
 
     def _init_img_pool(self) -> None:
         ''' Images used in the tabs. These look okay at best. Would be nice to replace these'''
@@ -148,6 +152,9 @@ class UI:
 
     def _init_style(self) -> None:
         ''' This will get everything set up for the theme.'''
+        # Load a prefab theme
+        self.app.tk.call('source', '/home/jpk/gits/Notebad/src/theme/forest-dark.tcl')
+        
         # This custom element is used to make a close element for us to map over the image. 
         self.style.element_create("close", "image", "img_close",
             ("active", "pressed", "!disabled", "img_closepressed"),

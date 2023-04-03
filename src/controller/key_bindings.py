@@ -304,6 +304,12 @@ class KeyBindings:
                 'callback': lambda event: self.controller.view.ui.toggle_theme(), 
                 },
 
+            {'name': 'Test theme', 'key': '<Alt-t>', 'category': 'Ui',
+                'widget_class': 'Text', 'active': True, 'can_override': True,
+                'bind_func': self.app.bind_class, 
+                'callback': lambda event: self.controller.view.ui.test_theme(), 
+                },
+
             {'name': 'Find', 'key': '<Control-f>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
