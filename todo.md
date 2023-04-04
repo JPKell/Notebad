@@ -44,14 +44,27 @@ Hopefully the bugs decrease and the missing important does too
 - highlighting a word highlights elsewhere in document
 - create temp file at open and track changes 
   - Figure out how to do a diff view? 
-- tab and shift tab on a selected block of text to tab whole block 
+- tab and shift tab on a selected block of text to tab whole block
+- Alt-j to select the next matching instance (multi-select same word over multiple lines)
+- Bookmarks for quickly moving back and forth between sections of text
+- Ctrl-w to select an entire word (depending on users settings):
+  - First press - select word from inside CamelCase/snake_case, e.g. selection around "Chosen" in myChosenWord
+  - Second press - select the rest of the word 
+  - Third press (if text is inside parenthesis) - select the rest of the text within the parenthesis
+  - Third/Fourth press (Third if previously no parenthesis) - select the rest of the line, minus any whitespace at the start or end
+  - Fourth/Fifth press - select the rest of the line including any leading/trailing whitespace
+  - Fifth/Sixth press - select the rest of the current code block/paragraph
+  - Sixth/Seventh press - select the whole document (Ctrl-a style...)
+- Typing any surrounding characters when text is selected will auto-surround the selection. "" '' [] {} () 
+- Auto-complete available for built-in keywords as well as user defined variables, functions, methods, etc...
+- Auto-double characters, e.g. typing "(" adds "()" to the document with the cursor between them
 
 ## UI / system
 - UI window for changing and saving preferences
 - allow changing colors of themes 
 - folder as a workspace
     - file tree widget can be used here
-- list OF key commands. 
+- list OF key commands.  
 
 ## Nifty
 - add multiline python eval to the alt-e function https://stackoverflow.com/questions/12698028/why-is-pythons-eval-rejecting-this-multiline-string-and-how-can-i-fix-it

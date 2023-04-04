@@ -32,6 +32,7 @@ class UI:
     def font_size(self, size: int) -> None:
         self._font_size = size
         self.font.configure(size=size)
+        self.view.textbox.config(font=(cfg.program_font, str(self.font_size)))
         logger.debug(f"Font size set to {size}")
     
     def font_size_bump(self, increase=True) -> None:
@@ -131,6 +132,16 @@ class UI:
         ''' Test the theme by changing the background of the text box to the background color '''
         self.style.theme_use('forest-dark')
 
+    @staticmethod
+    def parse_windows_mousewheel(event, callback=None):
+        ''' Translate Windows mouse scroll events into their delta value to differentiate between up and down.
+            A Delta of 120 is up, and -120 is down. Fast scrolling seems to multiply the delta value, e.g. 240, 360, etc...'''
+        if event.delta > 0:
+            mouse_wheel_up = True
+        elif event.delta < 0:
+            mouse_wheel_up = False
+        callback(mouse_wheel_up)
+
     def _init_img_pool(self) -> None:
         ''' Images used in the tabs. These look okay at best. Would be nice to replace these'''
         self.images = (
@@ -154,7 +165,8 @@ class UI:
         ''' This will get everything set up for the theme.'''
         # Load a prefab theme
         self.app.tk.call('source', '/home/jpk/gits/Notebad/src/theme/forest-dark.tcl')
-        
+        # self.app.tk.call('source', 'C:/Users/ryanw/Documents/Python_Scripts/Notebad/src/theme/forest-dark.tcl')
+
         # This custom element is used to make a close element for us to map over the image. 
         self.style.element_create("close", "image", "img_close",
             ("active", "pressed", "!disabled", "img_closepressed"),
@@ -212,9 +224,6 @@ class UI:
         else:
             self.style.theme_use('light')
 
-
-
-
     def _register_tab_close_button_with_style(self) -> None:
         ''' The tab close is a custom element so we need to register it with the style.
             The main reason for this is so we can get that the close button is the element under 
@@ -260,4 +269,3 @@ class UI:
         else:
             logo = PhotoImage(file=path_func('assets/icon.gif'))
             app.call('wm', 'iconphoto', app._w, logo)
-

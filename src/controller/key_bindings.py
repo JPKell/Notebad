@@ -235,6 +235,26 @@ class KeyBindings:
                 'callback': lambda event: self.controller.view.tabs.textbox.delete_tags_by_name("find")
              },
 
+            # Linux uses Button-4 and Button-5 for the mouse wheel
+            {'name': 'Increase Font', 'key': '<Control-Button-4>', 'category': 'Text editor',
+             'widget_class': 'Text', 'active': True, 'can_override': False,
+             'bind_func': self.app.bind_class,
+             'callback': lambda event: self.controller.view.ui.font_size_bump(increase=True)
+             },
+
+            {'name': 'Decrease Font', 'key': '<Control-Button-5>', 'category': 'Text editor',
+             'widget_class': 'Text', 'active': True, 'can_override': False,
+             'bind_func': self.app.bind_class,
+             'callback': lambda event: self.controller.view.ui.font_size_bump(increase=False)
+             },
+
+            # Windows uses <Mousewheel> and then the events have to be parsed
+            {'name': 'Increase/Decrease Font', 'key': '<Control-MouseWheel>', 'category': 'Text editor',
+             'widget_class': 'Text', 'active': True, 'can_override': False,
+             'bind_func': self.app.bind_class,
+             'callback': lambda event: self.controller.view.ui.parse_windows_mousewheel(event, callback=self.controller.view.ui.font_size_bump)
+             },
+
             {'name': 'Delete line', 'key': '<Control-d>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': True,
                 'bind_func': self.app.bind_class, 
