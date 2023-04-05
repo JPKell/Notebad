@@ -1,5 +1,6 @@
 import os
 import pathlib
+from tkinter import messagebox
 
 # We can also use variables above the config class to have constant values
 # Example: provincial tax rates and we have a calculate tax button on the calc. 
@@ -20,7 +21,7 @@ class Configuration:
     app_title = 'Notebad'
     geometry = '800x600'
     min_size = (300, 200)
-    start_fullscreen = False
+    start_fullscreen = 0
     default_theme = 'light'
 
     # Status bar settings
@@ -163,3 +164,16 @@ class Configuration:
             # Write out any new settings
             for key, value in kwargs.items():
                 f.write(f'{key} = {value}\n')
+
+    def delete_user_settings(self):
+        ''' Factory Reset any custom user settings by deleting their personal.cf file and
+            initialize a blank version '''
+        user_choice = messagebox.askyesnocancel(title="Are you sure?...",
+                                                message="You are about to delete all custom settings.\nThis operation cannot be undone.\n\nAre you sure?")
+        if user_choice:
+            os.remove(self.config_file)
+            self.init_personal_settings()
+            messagebox.showinfo(title="Success!", message="Custom settings have been deleted.\nRestart the program for the changes to take effect.")
+        else:
+            return False
+
