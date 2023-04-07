@@ -1,8 +1,6 @@
 from view.textbox import Textbox
 from modules.logging import Log
 from settings import Configuration
-from tkinter import messagebox
-import os
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -25,11 +23,6 @@ class FileManagement:
             isn't, that should get added and this note removed. '''
         if full_path is None:
             full_path = self.controller.view.open_file_dialogue()   # Tkinter filedialog returns '/' filepath, even for Windows! Woohoo!
-
-        # Handle filepaths that do not exist
-        if full_path != "" and not os.path.exists(full_path):
-            messagebox.showinfo(title='File not found.', message=f'Filepath {full_path} cannot be found.\n\nPlease check that the file exists and try again.')
-            return 'break'
 
         if full_path:
             textbox = self.controller.view.textbox         # Get the current textbox
