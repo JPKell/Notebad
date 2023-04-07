@@ -76,6 +76,8 @@ class Menubar(Menu):
         self.add_cascade(label="Tools", menu=self.tools_menu)
         self.tools_menu.add_command(label="Calculator", accelerator="Alt C", command=lambda: self.controller.utilities.open_calculator())
         self.tools_menu.add_command(label="Key commands",  command=lambda: self.view.key_command_list())
+        self.tools_menu.add_separator()
+        self.tools_menu.add_command(label="Progress Profiler", command=lambda: self.view.tabs.new_profiler_tab())
         
         self.py_menu = Menu(self, tearoff=0)
         self.menu_list.append(self.py_menu)

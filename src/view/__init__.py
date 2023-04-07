@@ -44,9 +44,9 @@ class NoteView(Frame):
 
     def _make(self) -> None:
         ''' The meat of the view, this is where we create the widgets '''
-        self.ui     = UI(self)
+        self.ui      = UI(self)
         self.toolbar = Toolbar(self)
-        self.tabs   = Tabs(self)
+        self.tabs    = Tabs(self)
         # self.menu   = Menubar(self, self.controller)
         # OG tkinter widgets need themes reloaded on first build
         self.ui.toggle_theme(reload=True)
@@ -93,11 +93,19 @@ class NoteView(Frame):
 
         textbox = self.textbox
         textbox.is_focus = True
-        self.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
-        textbox.footer.lang_lbl.config(text=textbox.meta.language)
-        self.controller.load_language(textbox.meta.language)
 
-        logger.debug(f"Tab changed to {textbox.meta.file_name}")
+        # This is a shitty fix. The issue is if we add new tabs other than textboxes
+        # they will needs to match certain attributes. This is a quick fix for now
+        # but should be reworked in the near future
+        try:
+            self.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
+            textbox.footer.lang_lbl.config(text=textbox.meta.language)
+            self.controller.load_language(textbox.meta.language)
+
+            logger.debug(f"Tab changed to {textbox.meta.file_name}")
+        except:
+            self.app.title(f"{cfg.app_title} - Profiler")
+            logger.debug(f"Tab changed to profiler")
 
     def open_settings_window(self, *args):
         SettingsDialog(self)

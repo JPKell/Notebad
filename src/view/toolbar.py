@@ -1,4 +1,5 @@
-from tkinter import Frame, StringVar, Entry, Label, SEL, SEL_FIRST, SEL_LAST, Button, Checkbutton, IntVar
+from tkinter import IntVar, StringVar, SEL, SEL_FIRST, SEL_LAST
+from tkinter.ttk import Checkbutton, Button, Entry, Frame, Label
 from modules.logging import Log
 
 logger = Log(__name__)
@@ -9,8 +10,8 @@ class Toolbar(Frame):
         It is designed to house things like a find/searchbar '''
     def __init__(self, view):
         super().__init__(view, height=30)   #, bg="red")  # Red background for visibility while testing
+        self.pack(side='top', fill='x',ipady=3)
         self.view = view
-        self.pack(side='top', fill='x')
         self.find_txt = StringVar(self)
         self._make_find_case_toggle()
         self._make_find_next_buttons()
@@ -23,12 +24,12 @@ class Toolbar(Frame):
         self.case_variable = IntVar()
         self.case_toggle = Checkbutton(self, text="Aa", variable=self.case_variable, onvalue=1, offvalue=0,
                                        command=lambda: self.view.textbox.editor.set_find_case(self.case_variable.get()))
-        self.case_toggle.select()    # Default to "Checked"
+        self.case_toggle.setvar(value=1)   # Default to "Checked"
         self.case_toggle.pack(side="right", padx=2)
 
     def _make_find_next_buttons(self):
-        self.find_next_btn = Button(self, text="⮞", command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=1))
-        self.find_prev_btn = Button(self, text="⮜", command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=-1))
+        self.find_next_btn = Button(self, text="►", width=1, command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=1))
+        self.find_prev_btn = Button(self, text="◄", width=1, command=lambda: self.view.textbox.editor.find_text(self.find_entry.get(), direction=-1))
         self.find_next_btn.pack(side="right", padx=2)
         self.find_prev_btn.pack(side="right", padx=0)
 
@@ -40,7 +41,7 @@ class Toolbar(Frame):
         self.find_entry.bind("<FocusIn>", self.find_entry_focus)
         self.find_entry.bind("<FocusOut>", self.find_entry_lose_focus)
         self.find_entry.insert(0, self.placeholder_txt)
-        self.find_entry.configure(fg='grey')
+        self.find_entry.configure(foreground='grey')
 
     def _make_find_label(self) -> None:
         ''' Label the Find entry widget '''
@@ -57,7 +58,7 @@ class Toolbar(Frame):
             placeholder text and update the foreground color to black '''
         if self.find_entry.get() == self.placeholder_txt:
             self.find_entry.delete(0, 'end')
-            self.find_entry.configure(fg='black')
+            self.find_entry.configure(foreground='black')
 
         ''' If there's a selection in the textbox, insert it into the find entry on focus. 
             Otherwise, select all text in the find entry when focus is gained '''
@@ -72,4 +73,4 @@ class Toolbar(Frame):
             and set the foreground colour back to grey '''
         if self.find_entry.get() == "":
             self.find_entry.insert(0, self.placeholder_txt)
-            self.find_entry.configure(fg='grey')
+            self.find_entry.configure(foreground='grey')

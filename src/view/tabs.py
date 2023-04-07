@@ -1,6 +1,7 @@
 from tkinter.ttk import Notebook
 
 from .textbox import Textbox
+from .profiler import ProgressProfiler
 
 from settings import Configuration
 from modules.logging import Log
@@ -47,6 +48,13 @@ class Tabs(Notebook):
 
         logger.debug(f"New tab created: {textbox.meta.file_name}")
         
+    def new_profiler_tab(self) -> None:
+        ''' Opens a new tab for the profiler '''
+        self.set_textboxes_unfocused()
+        profiler = ProgressProfiler(self)
+        self.add(profiler, text='Profiler')
+        self.move_to_tab()
+        logger.debug("New profiler tab created")
         
     def on_close_press(self, event) -> None:
         """ Called when the button is pressed over the close button 

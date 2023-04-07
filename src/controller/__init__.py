@@ -3,9 +3,11 @@ import tkinter as tk
 
 from controller.file_management import FileManagement
 from controller.key_bindings    import KeyBindings
-from controller.translate        import LanguageTools
+from controller.translate       import LanguageTools
 from controller.menu            import Menubar
 from controller.utilities       import Utilities    
+
+from modules.parsers  import progress_profiler
 
 from view  import NoteView
 
@@ -91,3 +93,7 @@ class NoteController:
     def load_language(self, language:str) -> None:
         ''' Update the language of the current textbox. '''
         self.language.load_language(language)
+
+    def parse_progress_profiler(self, file_path:str) -> None:
+        ''' Parse the progress profiler output file. '''
+        return progress_profiler.parse_profiler_data(file_path)
