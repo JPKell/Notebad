@@ -1,5 +1,6 @@
 from settings import Configuration
 from modules.logging import Log
+import os
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -9,6 +10,7 @@ class Meta:
         self.textbox = textbox
         self.tabs = tabs
         self._file_name = cfg.new_file_name  # class property
+        self._recent_files = os.path.join(cfg.current_dir, 'app_data/recent_files.txt')
         self._language  = None  # class property
         self.tk_name    = None
         self.file_path  = None
@@ -54,5 +56,33 @@ class Meta:
         
         if self.file_name:
             self.language = langs.get(self.file_name.split('.')[-1], 'text')
+
+        self.add_recent_file()
         logger.debug(f"Meta data set: {self.file_name}")
 
+    def add_recent_file(self):
+        ''' When meta is updated, add the full filepath to the recent files '''
+        recent_files = []
+        if self.full_path is not None:
+            # Check recent files exist and extract contents to manipulate
+            if os.path.exists(self._recent_files):
+                with open(self._recent_files, 'r') as f:
+                    recent_files = f.readlines()
+
+                # Loop through and remove any files that no longer exist
+                for file in recent_files:
+                    if not os.path.exists(file.strip()):
+                        recent_files.remove(file)
+
+                # Check if current file exists in the list and remove it
+                if recent_files.count(self.full_path + '\n') != 0:
+                    recent_files.remove(self.full_path + '\n')
+                # Or trim the list if it's more than 10 items long
+                elif len(recent_files) >= 10:
+                    recent_files.pop(0)
+
+            # Write recent files to file
+            recent_files.append(self.full_path)
+            with open(self._recent_files, 'w') as f:
+                for file in recent_files:
+                    f.write(file.strip() + '\n')
