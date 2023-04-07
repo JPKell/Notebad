@@ -1,7 +1,10 @@
 from tkinter import Menu, Tk
+import os
 
+from settings import Configuration
 from modules.logging import Log
 
+cfg = Configuration()
 logger = Log(__name__)
 
 class Menubar(Menu):
@@ -34,6 +37,11 @@ class Menubar(Menu):
         self.add_cascade(label="File", menu=self.file_menu)
         self.file_menu.add_command(label="New",     accelerator="Ctrl N",       command=self.controller.file_system.new_file)
         self.file_menu.add_command(label="Open",    accelerator="Ctrl O",       command=self.controller.file_system.open_file)
+
+        self.recent_files_menu = Menu(self.file_menu, tearoff=0)
+        self.file_menu.add_cascade(menu=self.recent_files_menu, label="Open Recent...")
+        self._make_recent_file_list()
+
         self.file_menu.add_command(label="Save",    accelerator="Ctrl S",       command=self.controller.file_system.save_file)
         self.file_menu.add_command(label="Save As", accelerator="Ctrl Shift S", command=self.controller.file_system.save_as_file)
         self.file_menu.add_separator()
@@ -85,4 +93,12 @@ class Menubar(Menu):
         self.py_menu.add_command(label="Eval line/selection", accelerator="Alt E", command=lambda: self.controller.utilities.eval_selection())
 
 
-####  This needs to have the ui set at first load cause it's wrong. 
+####  This needs to have the ui set at first load cause it's wrong.
+
+    def _make_recent_file_list(self):
+        # Build recent files list from recent files .txt file
+        with open(os.path.join(cfg.current_dir, 'app_data/recent_files.txt'), 'r') as f:
+            recent_files = f.readlines()
+            recent_files.reverse()
+            for file in recent_files:
+                self.recent_files_menu.add_command(label=os.path.basename(file), command=lambda file=file: self.controller.file_system.open_file(full_path=file.strip()))

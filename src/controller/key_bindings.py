@@ -339,7 +339,7 @@ class KeyBindings:
             {'name': 'Find next no focus', 'key': '<Control-g>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: lambda event: self.controller.view.textbox.editor.find_text(
+                'callback': lambda event: self.controller.view.textbox.editor.find_text(
                     self.controller.view.toolbar.find_entry.get(), direction=1), 
                 },
         

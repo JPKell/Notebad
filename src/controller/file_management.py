@@ -1,6 +1,8 @@
 from view.textbox import Textbox
 from modules.logging import Log
 from settings import Configuration
+from tkinter import messagebox
+import os
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -18,10 +20,17 @@ class FileManagement:
         self.controller.view.tabs.move_to_tab()    # Move focus to the new tab
         logger.info('New file created')
 
-    def open_file(self) -> None:
+    def open_file(self, full_path=None) -> None:
         ''' Opens a file. There should be an encoding option here. But there 
             isn't, that should get added and this note removed. '''
-        full_path = self.controller.view.open_file_dialogue()   # Tkinter filedialog returns '/' filepath, even for Windows! Woohoo!
+        if full_path is None:
+            full_path = self.controller.view.open_file_dialogue()   # Tkinter filedialog returns '/' filepath, even for Windows! Woohoo!
+
+        # Handle filepaths that do not exist
+        if full_path != "" and not os.path.exists(full_path):
+            messagebox.showinfo(title='File not found.', message=f'Filepath {full_path} cannot be found.\n\nPlease check that the file exists and try again.')
+            return 'break'
+
         if full_path:
             textbox = self.controller.view.textbox         # Get the current textbox
             path_parts = self.parts_from_file_path(full_path)
@@ -32,7 +41,7 @@ class FileManagement:
 
             textbox.meta.set_meta(
                 tk_name=self.controller.view.tabs.select(),
-                full_path=full_path,
+                full_path=full_path.strip(),
                 file_path=path_parts['path'], 
                 file_name=path_parts['file'], 
                 )
