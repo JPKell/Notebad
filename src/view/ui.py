@@ -1,5 +1,7 @@
+import os
 from tkinter import PhotoImage, Frame, font
 from tkinter.ttk import Style
+
 
 from settings  import Configuration
 from .colors import Themes
@@ -19,7 +21,7 @@ class UI:
         self.style = Style()
         self.font = font.nametofont('TkFixedFont')
         self._font_size = cfg.font_size
-        self._init_img_pool()
+
         self._init_style()
         self._root_window_setup()
         logger.debug("UI initialized")
@@ -53,19 +55,19 @@ class UI:
         # so just load the default colors otherwise toggle the theme 
         if reload:                      
             self.style.theme_use(self.theme)
-            if self.theme == 'dark':
+            if self.theme == 'forest-dark':
                 colors = Themes.dark
             else:
                 colors = Themes.light
         # If we are not reloading then we want to toggle themes
-        elif self.theme == 'dark':
-            self.theme = 'light'
+        elif self.theme == 'forest-dark':
+            self.theme = 'forest-light'
             colors = Themes.light
-            self.style.theme_use('light')
+            self.style.theme_use('forest-light')
         else:
-            self.theme = 'dark'
+            self.theme = 'forest-dark'
             colors = Themes.dark
-            self.style.theme_use('dark')
+            self.style.theme_use('forest-dark')
 
         logger.debug(f"Theme set to {self.theme}")
      
@@ -128,10 +130,6 @@ class UI:
             textbox.footer.lang_lbl.config(bg=colors.background, fg=colors.syn_yellow)
             textbox.footer.sel_lbl.config(bg=colors.background, fg=colors.syn_orange)
 
-    def test_theme(self) -> None:
-        ''' Test the theme by changing the background of the text box to the background color '''
-        self.style.theme_use('forest-dark')
-
     @staticmethod
     def parse_windows_mousewheel(event, callback=None):
         ''' Translate Windows mouse scroll events into their delta value to differentiate between up and down.
@@ -142,6 +140,8 @@ class UI:
             mouse_wheel_up = False
         callback(mouse_wheel_up)
 
+
+    # This is not currently in use. It was for the x's on the tabs to close them.
     def _init_img_pool(self) -> None:
         ''' Images used in the tabs. These look okay at best. Would be nice to replace these'''
         self.images = (
@@ -164,65 +164,55 @@ class UI:
     def _init_style(self) -> None:
         ''' This will get everything set up for the theme.'''
         # Load a prefab theme
-        self.app.tk.call('source', '/home/jpk/gits/Notebad/src/theme/forest-dark.tcl')
-        # self.app.tk.call('source', 'C:/Users/ryanw/Documents/Python_Scripts/Notebad/src/theme/forest-dark.tcl')
+
+        self.app.tk.call('source', os.path.join(cfg.theme_dir, f'forest-dark.tcl'))
+        self.app.tk.call('source', os.path.join(cfg.theme_dir, f'forest-light.tcl'))
 
         # This custom element is used to make a close element for us to map over the image. 
-        self.style.element_create("close", "image", "img_close",
-            ("active", "pressed", "!disabled", "img_closepressed"),
-            ("active", "!disabled", "img_closeactive"), border=8, sticky='e')
-        
+
+        # This section created the custom themes previously, It has the code for the close buttons.
+        # they didn't work on windows, so there's something to figure out. Its here as a starting 
+        # point for when it gets tackled.
+
+        # self.style.element_create("close", "image", "img_close",
+        #     ("active", "pressed", "!disabled", "img_closepressed"),
+        #     ("active", "!disabled", "img_closeactive"), border=8, sticky='e')
         # This section creates the theme and sets the colors for the theme
-        for title, colors in [('dark', Themes.dark), ('light', Themes.light)]:
-            
-            self.style.theme_create( title, parent="alt", settings={
-                "TFrame": {
-                    "configure": {
-                        "background": colors.background,
-                        "foreground": colors.foreground,
-                    }
-                },
-                "TNotebook": {
-                    "configure": {
-                        "tabmargins": [cfg.line_number_width + 2, 5, 10, 0], 
-                        "foreground": colors.background,
-                        "background": colors.background,
-                        "borderwidth": 0,
-                        "highlightthickness": 0,
-                        } 
-                    },
-                "TNotebook.Tab": {
-                    "configure": {
-                        "padding": [10, 2, 10, 0], 
-                        "background": colors.tab_unselect,
-                        "foreground": colors.foreground,
-                        "compound": "right",
-                        "borderwidth": 0,
-                        },
+        # for title, colors in [('forest-dark', Themes.dark), ('forest-light', Themes.light)]: 
+        #     self.style.theme_create( title, parent="alt", settings={
+        #         "TNotebook": {
+        #             "configure": {
+        #                 "tabmargins": [cfg.line_number_width + 2, 5, 10, 0], 
+        #                 "foreground": colors.background,
+        #                 "background": colors.background,
+        #                 "borderwidth": 0,
+        #                 "highlightthickness": 0,
+        #                 } 
+        #             },
+        #         "TNotebook.Tab": {
+        #             "configure": {
+        #                 "padding": [10, 2, 10, 0], 
+        #                 "background": colors.tab_unselect,
+        #                 "foreground": colors.foreground,
+        #                 "compound": "right",
+        #                 "borderwidth": 0,
+        #                 },
                     
-                    "map": {
-                        "background": [("selected", colors.tab_select)],
-                        "expand": [("selected", [0, 1, 1, 0])] 
-                        },
-                    } ,
-                "TScrollbar": {
-                    "configure": {
-                        "background": colors.background,
-                        "troughcolor": colors.bg_highlight,
-                        "relief": "flat",
-                        "troughrelief": "flat",
-                        }
-                    }
-                } 
-            ) 
-            self._register_tab_close_button_with_style()
-            logger.verbose(f"Created theme: {title}")
+        #             "map": {
+        #                 "background": [("selected", colors.tab_select)],
+        #                 "expand": [("selected", [0, 1, 1, 0])] 
+        #                 },
+        #             } ,
+        #         } 
+        #     ) 
+        #     self._register_tab_close_button_with_style()
+        #     logger.verbose(f"Created theme: {title}")
 
         # Initialize to the correct theme
-        if self.theme == 'dark':
-            self.style.theme_use('dark')
+        if self.theme == 'forest-dark':
+            self.style.theme_use('forest-dark')
         else:
-            self.style.theme_use('light')
+            self.style.theme_use('forest-light')
 
     def _register_tab_close_button_with_style(self) -> None:
         ''' The tab close is a custom element so we need to register it with the style.

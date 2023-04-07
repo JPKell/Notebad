@@ -22,7 +22,8 @@ class Configuration:
     geometry = '800x600'
     min_size = (300, 200)
     start_fullscreen = 0
-    default_theme = 'light'
+    default_theme = 'forest-light'
+    theme_dir = ''
 
     # Status bar settings
     status_bar_default_text = 'Status Bar'
@@ -95,6 +96,7 @@ class Configuration:
         self.log_dir  = os.path.join(self.current_dir, 'logs')
         self.log_file = os.path.join(self.log_dir, 'notebad.log')
         self.log_performance_file = os.path.join(self.log_dir, 'performance.log')
+        self.theme_dir = os.path.join(self.current_dir, 'theme')
         
         # Now that we know where we are we can look for personal settings
         self.init_personal_settings()
