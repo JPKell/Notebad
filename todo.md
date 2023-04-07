@@ -75,6 +75,7 @@ Hopefully the bugs decrease and the missing important does too
 - markdown TO html
 - grab data FROM mantis. TYPE IN a task number AND retrieve details, notes, etc. 
 - send notes to mantis. 
+- create and edit XML files, with a function that allows quick tabbing between tag data for fast edits.
 
 
 

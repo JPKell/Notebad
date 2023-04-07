@@ -1,4 +1,4 @@
-from tkinter import Menu, Tk
+from tkinter import Menu, Tk, END
 import os
 
 from settings import Configuration
@@ -50,6 +50,8 @@ class Menubar(Menu):
         self.file_menu.add_command(label="Close tab", accelerator="Ctrl W",     command=lambda: self.view.tabs.close_tab())
         self.file_menu.add_command(label="Exit app",  accelerator="Alt F4",     command=self.controller.exit_app)
 
+        self.file_menu.bind("<<MenuSelect>>", lambda event: self._make_recent_file_list(event))
+
         # Edit menu
         self.edit_menu = Menu(self, tearoff=0)
         self.menu_list.append(self.edit_menu)
@@ -93,10 +95,22 @@ class Menubar(Menu):
 
 ####  This needs to have the ui set at first load cause it's wrong.
 
-    def _make_recent_file_list(self):
-        # Build recent files list from recent files .txt file
-        with open(os.path.join(cfg.current_dir, 'app_data/recent_files.txt'), 'r') as f:
-            recent_files = f.readlines()
-            recent_files.reverse()
-            for file in recent_files:
-                self.recent_files_menu.add_command(label=os.path.basename(file), command=lambda file=file: self.controller.file_system.open_file(full_path=file.strip()))
+    def _make_recent_file_list(self, event=None):
+        ''' Create the recent files list in realtime to account for deleted
+            files, and recently opened files in this session.
+            Currently, this relies on a MenuSelect event and then checking the "y" value...
+            Not sure this is the most concrete solution. May need revisiting in future. '''
+        if event is not None and event.y != 0:
+            # Remove all existing recent file menu_commands
+            last_item = self.recent_files_menu.index('end')
+            if last_item is not None:
+                self.recent_files_menu.delete(0, last_item + 1)
+
+            # Build recent files list from recent files .txt file
+            with open(os.path.join(cfg.current_dir, 'app_data/recent_files.txt'), 'r') as f:
+                recent_files = f.readlines()
+                recent_files.reverse()
+                for file in recent_files:
+                    # Check the filepath still exists on the system
+                    if os.path.exists(file.strip()):
+                        self.recent_files_menu.add_command(label=os.path.basename(file), command=lambda file=file: self.controller.file_system.open_file(full_path=file.strip()))
