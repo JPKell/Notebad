@@ -8,7 +8,7 @@ from controller.menu            import Menubar
 from controller.utilities       import Utilities    
 
 from modules.parsers  import progress_profiler
-
+from modules.parsers  import includes_expander
 from view  import NoteView
 
 from settings  import Configuration
@@ -45,10 +45,14 @@ class NoteController:
         self.key_bindings = KeyBindings(self) 
         self._app_protocols()
 
+        # Custom bindings. these need a home
+        self.app.bind('<<ProfilerSourceView>>', self.build_text_for_parser)
+
+
         # This might be better done as a function on its own. 
         # At that point, maybe we stash the open tabs at close and reopen them 
         if cfg.preload_file:
-            textbox = self.view.textbox         
+            textbox = self.view.cur_tab         
             self.file_system.write_file_to_textbox(textbox, cfg.preload_file)
             path_parts = self.file_system.parts_from_file_path(cfg.preload_file)
             textbox.meta.set_meta(tk_name=self.view.tabs.cur_tab_tk_name(),
@@ -82,10 +86,10 @@ class NoteController:
         if not cfg.hardcore_mode:
             for tab in tab_list:
                 self.view.tabs.select(tab)
-                if self.view.textbox.meta.changed_since_saved:
+                if self.view.cur_tab.meta.changed_since_saved:
                     self.view.prompt_yes_no(
                         "You have unsaved changes", 
-                        f"Save {self.view.textbox.meta.file_name}?", 
+                        f"Save {self.view.cur_tab.meta.file_name}?", 
                         self.file_system.save_file)
         self.view.master.destroy()
         logger.debug('Application closed')
@@ -97,3 +101,12 @@ class NoteController:
     def parse_progress_profiler(self, file_path:str) -> None:
         ''' Parse the progress profiler output file. '''
         return progress_profiler.parse_profiler_data(file_path)
+    
+    def build_text_for_parser(self, *_) -> str:
+        ''' Build the text to be parsed. '''
+        
+        results = includes_expander.expand_includes('rn-newp2.p')
+        tb = self.app.nametowidget(self.view.cur_tab)
+
+        tb.text.delete('1.0', tk.END)
+        tb.text.insert(tk.END, ''.join(results))

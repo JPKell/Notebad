@@ -1,17 +1,16 @@
-from tkinter import Frame, Text, Toplevel
+from widgets import NFrame, NText, NToplevel
 
-
-class KeyCommandList(Toplevel):
+class KeyCommandList(NToplevel):
     def __init__(self, master):
         super().__init__(master)
         self.keybindings = master.controller.key_bindings
-        self.root = Frame(self)
+        self.root = NFrame(self)
         self.geometry("450x900")
         self.root.pack()
         self.list_canvas()
 
     def list_canvas(self):
-        self.txt = Text(self.root, width=400, height=200, font=('courier', 10))
+        self.txt = NText(self.root, width=400, height=200, font=('courier', 10))
         
         kb = self.keybindings.binder
 

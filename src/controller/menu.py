@@ -56,11 +56,13 @@ class Menubar(Menu):
         self.edit_menu = Menu(self, tearoff=0)
         self.menu_list.append(self.edit_menu)
         self.add_cascade(label="Edit", menu=self.edit_menu)
-        self.edit_menu.add_command(label="Cut",   accelerator="Ctrl X",  command=self.controller.view.textbox.clipboard.cut_text)
-        self.edit_menu.add_command(label="Copy",  accelerator="Ctrl C",  command=self.controller.view.textbox.clipboard.copy_text)
-        self.edit_menu.add_command(label="Paste", accelerator="Ctrl V",  command=self.controller.view.textbox.clipboard.paste_text)
+
+        # self.edit_menu.add_command(label="Cut",   accelerator="Ctrl X",  command=self.controller.view.textbox.clipboard.cut_text)
+        # self.edit_menu.add_command(label="Copy",  accelerator="Ctrl C",  command=self.controller.view.textbox.clipboard.copy_text)
+        # self.edit_menu.add_command(label="Paste", accelerator="Ctrl V",  command=self.controller.view.textbox.clipboard.paste_text)
+        
         self.edit_menu.add_separator()
-        self.edit_menu.add_command(label="Find", accelerator="Ctrl F", command=self.controller.view.toolbar.find_entry.focus)
+        # self.edit_menu.add_command(label="Find", accelerator="Ctrl F", command=self.controller.view.toolbar.find_entry.focus)
         self.edit_menu.add_command(label="Find Next", accelerator="Ctrl G",
                                    command=lambda: self.controller.view.textbox.editor.find_text(
                                        self.controller.view.toolbar.find_entry.get(), direction=1))
@@ -69,8 +71,8 @@ class Menubar(Menu):
                                        self.controller.view.toolbar.find_entry.get(), direction=-1))
         # self.tools_menu.add_command(label="Replace", accelerator="Ctrl R", command=self.controller.replace_text) # TODO: Implement replace text
         self.edit_menu.add_separator()
-        self.edit_menu.add_command(label="Undo",  accelerator="Ctrl Z",  command=lambda: self.view.textbox.history.undo())
-        self.edit_menu.add_command(label="Redo",  accelerator="Ctrl Y",  command=lambda: self.view.textbox.history.redo())
+        # self.edit_menu.add_command(label="Undo",  accelerator="Ctrl Z",  command=lambda: self.view.textbox.history.undo())
+        # self.edit_menu.add_command(label="Redo",  accelerator="Ctrl Y",  command=lambda: self.view.textbox.history.redo())
 
         # View menu
         self.view_menu = Menu(self, tearoff=0)
@@ -87,7 +89,7 @@ class Menubar(Menu):
         self.tools_menu.add_command(label="Calculator", accelerator="Alt C", command=lambda: self.controller.utilities.open_calculator())
         self.tools_menu.add_command(label="Key commands",  command=lambda: self.view.key_command_list())
         self.tools_menu.add_separator()
-        self.tools_menu.add_command(label="Progress Profiler", command=lambda: self.view.tabs.new_profiler_tab())
+        self.tools_menu.add_command(label="Progress Profiler", command=lambda: self.view.tabs.new_tab('profiler'))
         
         self.py_menu = Menu(self, tearoff=0)
         self.menu_list.append(self.py_menu)

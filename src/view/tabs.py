@@ -1,16 +1,24 @@
-from tkinter.ttk import Notebook
 
-from .textbox import Textbox
+from .ide import Ide
 from .profiler import ProgressProfiler
 
 from settings import Configuration
 from modules.logging import Log
+from widgets import NNotebook, NTabFrame
 
 cfg = Configuration()
 logger = Log(__name__)
 
-class Tabs(Notebook):
-    ''' The tabbed interface for the app '''
+class Tabs(NNotebook):
+    ''' The tabbed interface for the app each tab should be a NTabeFrame as it has the common 
+        methods and attributes for the tabs.'''
+    
+    # Every tab class should superclass NTabFrame and be added to this dict
+    tab_widgets = {
+            'ide': Ide,
+            'profiler': ProgressProfiler
+        }
+
     def __init__(self, view) -> None:
         logger.debug("Tabs begin init")
         super().__init__(view)
@@ -19,42 +27,35 @@ class Tabs(Notebook):
         self.bind('<ButtonPress-1>',   lambda event: self.on_close_press(event), True)
         self.bind('<ButtonRelease-1>', lambda event: self.on_close_release(event))
         self.active_hover = None
-        self.new_tab()
+        self.new_tab(cfg.default_tab_style)
         logger.debug("Tabs finish init")  
            
     @property
-    def textbox(self) -> Textbox:
+    def cur_tab(self) -> NTabFrame:
         ''' Returns the current tab '''
         frm = self.nametowidget(self.select())
-        return frm.winfo_children()[0]
-        
-    def new_tab(self, file_name:str=None) -> None:
-        ''' Opens a new tab with the filename as the tab name.
-        If no filename is given, the tab will be named the default name.
-        '''
-        logger.debug(f"New tab requested: {file_name=}")
+        return frm
+       
+    def new_tab(self, tab_style:str, *args, **kwargs) -> None:
+        ''' Opens a new tab of the given style. '''
+        logger.debug(f"Creating new { tab_style } tab")
 
-        # Set up a new textbox and add it to the tabs
-        self.set_textboxes_unfocused()
-        textbox = Textbox(self)  
-        self.add(textbox.frame, text=textbox.meta.file_name)
+        # Fail fast and hard
+        if tab_style not in self.tab_widgets:
+            logger.fatal(f"Unknown tab style { tab_style }")
+            raise ValueError(f"Unknown tab style { tab_style }")
+
+        self.set_tabs_unfocused()
+
+        # Instantiate the new tab
+        new_tab = self.tab_widgets[tab_style](self, *args, **kwargs)
+
+        # Add the tab to the notebook and set the tab name
+        self.add(new_tab, text=new_tab.tab_title)
+        new_tab.tab_tk_name = self.select()
         self.move_to_tab()
-
-        # Set the meta data for the textbox
-        textbox.meta.tk_name = self.select()
-        textbox.meta.language = 'text'
-        if file_name:
-            textbox.meta.set_meta(file_name=file_name)
-
-        logger.debug(f"New tab created: {textbox.meta.file_name}")
         
-    def new_profiler_tab(self) -> None:
-        ''' Opens a new tab for the profiler '''
-        self.set_textboxes_unfocused()
-        profiler = ProgressProfiler(self)
-        self.add(profiler, text='Profiler')
-        self.move_to_tab()
-        logger.debug("New profiler tab created")
+        logger.debug(f"New { tab_style } tab created")
         
     def on_close_press(self, event) -> None:
         """ Called when the button is pressed over the close button 
@@ -94,7 +95,7 @@ class Tabs(Notebook):
         if not tab_name:
             tab_name = self.select()
         
-        if self.textbox.meta.changed_since_saved and not cfg.hardcore_mode:
+        if self.cur_tab.tab_save_on_close and not cfg.hardcore_mode:
             self.view.prompt_yes_no("Whoa, there...", "There are changes not yet saved. Save before you giddy on off??", self.view.controller.save_file)
 
         # Remove tab from the notebook
@@ -105,26 +106,27 @@ class Tabs(Notebook):
 
         # If there are no tabs left, create a new one
         if len(self.tabs()) == 0:
-            self.new_tab()
+            self.new_tab(cfg.default_tab_style)
     
     def move_to_tab(self, tab_name:str=None) -> None:
         ''' Selects a tab by name. tabs.select() defaults to the last created tab '''
         if not tab_name:
             tabs = self.tabs()     # returns a list of tab names 
             tab_name = tabs[-1]    # get the last tab name
-        self.set_textboxes_unfocused()
+        self.set_tabs_unfocused()
         self.select(tab_name)
         logger.debug(f"Tab moved to: {tab_name}")
 
-    def set_textboxes_unfocused(self) -> None:
+    def set_tabs_unfocused(self) -> None:
         ''' Sets all textboxes to unfocused. This focus flag should be used 
             to maintain activity in only one textbox.'''
-        _tabs = self.tabs()
-        for _tab in _tabs:
-            frm = self.nametowidget(_tab)
-            textbox = frm.winfo_children()[0]
-            textbox.is_focus = False
-        logger.verbose("All textboxes unfocused")
+        ...
+        # _tabs = self.tabs()
+        # for _tab in _tabs:
+        #     frm = self.nametowidget(_tab)
+        #     textbox = frm.winfo_children()[0]
+        #     textbox.is_focus = False
+        # logger.verbose("All textboxes unfocused")
 
     def set_properties(self, tab_name:str, **kwargs) -> None:
         ''' Set properties of a tab '''

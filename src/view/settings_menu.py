@@ -1,16 +1,15 @@
-from tkinter import (Toplevel, Frame, LabelFrame, Button,
-                     Checkbutton, IntVar, StringVar, Label,
-                     Listbox, messagebox)
-from tkinter.ttk import Spinbox
+from tkinter import IntVar, StringVar
+
 
 from settings import Configuration
 from modules.logging import Log
+from widgets import NButton, NCheckbutton, NFrame, NLabel, NLabelframe, NListbox, NScale, NSpinbox, NToplevel
 
 logger = Log(__name__)
 cfg = Configuration()
 
 
-class SettingsDialog(Toplevel):
+class SettingsDialog(NToplevel):
     ''' Settings Toplevel widget. Allows the user to change and save their personal settings.
         This class will reference the Configuration class and update the users personal.cf file.
         All the settings are created as different objects and displayed inside a LabelFrame
@@ -42,15 +41,15 @@ class SettingsDialog(Toplevel):
         ''' Settings selection lets us divide up the settings into related groups. '''
         self.settings_sections = ["General Settings", "Font Settings", "Colours/Appearance", "Keybindings"]
         self.settings_list = StringVar(value=self.settings_sections)
-        self.setting_selection = Listbox(self, width=20, height=10, listvariable=self.settings_list)
+        self.setting_selection = NListbox(self, width=20, height=10, listvariable=self.settings_list)
         self.setting_selection.selection_set(0)     # Default to "General Settings" section
         self.setting_selection.bind("<<ListboxSelect>>", self.update_settings_frame)
 
     def _make_buttons(self):
         ''' Make the usual "Apply" and "Close" buttons. '''
-        self.btn_frame = Frame(self)
-        self.apply_btn = Button(self.btn_frame, text="Apply", width=20, command=self.save_settings)
-        self.close_btn = Button(self.btn_frame, text="Close", width=20, command=self.destroy)
+        self.btn_frame = NFrame(self)
+        self.apply_btn = NButton(self.btn_frame, text="Apply", width=20, command=self.save_settings)
+        self.close_btn = NButton(self.btn_frame, text="Close", width=20, command=self.destroy)
 
         self.apply_btn.grid(column=0, row=1, sticky='ew', padx=5, pady=5)
         self.close_btn.grid(column=0, row=2, sticky='ew', padx=5, pady=5)
@@ -58,7 +57,7 @@ class SettingsDialog(Toplevel):
     def _make_settings_frame(self):
         ''' This frame is fixed in size and allows the user to view different
             settings sections. Each settings section is an object with its own widgets and layout '''
-        self.cur_settings_frame = Frame(self, width=450, height=350)
+        self.cur_settings_frame = NFrame(self, width=450, height=350)
         self.update_settings_frame()
 
     def _build_layout(self):
@@ -69,7 +68,7 @@ class SettingsDialog(Toplevel):
         self.cur_settings_frame.grid_propagate(0)       # Stops frame from resizing to it's contents
 
 
-class GeneralSettings(Frame):
+class GeneralSettings(NFrame):
     '''
         General Settings include:
             - Start in Fullscreen y/N
@@ -83,7 +82,7 @@ class GeneralSettings(Frame):
         super().__init__(view)
         self.view = view
         # self.screen_layout_frame = LabelFrame(self, text=" Fullscreen / Program Geometry ")
-        self.reset_btn_frame = LabelFrame(self, text=" Reset All Settings: ")
+        self.reset_btn_frame = NLabelframe(self, text=" Reset All Settings: ")
         self._make_fullscreen_toggle()
         self._make_default_size_options()
         self._make_factory_reset_btn()
@@ -99,7 +98,7 @@ class GeneralSettings(Frame):
 
     def _make_fullscreen_toggle(self):
         self.fullscreen_toggle = IntVar()
-        self.fullscreen_checkbtn = Checkbutton(self, text="Start Fullscreen",
+        self.fullscreen_checkbtn = NCheckbutton(self, text="Start Fullscreen",
                                                variable=self.fullscreen_toggle,
                                                onvalue=True, offvalue=False,
                                                command=self.update_screen_settings)
@@ -107,14 +106,14 @@ class GeneralSettings(Frame):
 
     def _make_default_size_options(self):
         ''' Set the default window size when opening the program. Currently set to max out at 8k. '''
-        self.wxh_label = Label(self, text="Set the width and height for the program window on startup:")
-        self.width_label = Label(self, text="Program Window Width:")
-        self.height_label = Label(self, text="Program Window Height:")
+        self.wxh_label = NLabel(self, text="Set the width and height for the program window on startup:")
+        self.width_label = NLabel(self, text="Program Window Width:")
+        self.height_label = NLabel(self, text="Program Window Height:")
 
         self.width_value = StringVar()
         self.height_value = StringVar()
-        self.screen_width = Spinbox(self, from_=cfg.min_size[0], to=7680, increment=1, textvariable=self.width_value, width=4)
-        self.screen_height = Spinbox(self, from_=cfg.min_size[1], to=4320, increment=1, textvariable=self.height_value, width=4)
+        self.screen_width = NSpinbox(self, from_=cfg.min_size[0], to=7680, increment=1, textvariable=self.width_value, width=4)
+        self.screen_height = NSpinbox(self, from_=cfg.min_size[1], to=4320, increment=1, textvariable=self.height_value, width=4)
 
         # Set the default values to display
         config_geometry = cfg.geometry.split("x")
@@ -128,11 +127,11 @@ class GeneralSettings(Frame):
         self.screen_height.grid(column=1, row=3, sticky='w', padx=5, pady=5)
 
     def _make_factory_reset_btn(self):
-        self.reset_btn = Button(self.reset_btn_frame, text="Delete All Settings", bg="#aa0000", command=cfg.delete_user_settings)
+        self.reset_btn = NButton(self.reset_btn_frame, text="Delete All Settings", bg="#aa0000", command=cfg.delete_user_settings)
         self.reset_btn.grid(column=0, row=0, columnspan=2, sticky='nesw', padx=20, pady=20)
 
 
-class FontSettings(Frame):
+class FontSettings(NFrame):
     ''' Contains all widgets needed for updating font settings. Including font-family,
         font-size and an editable Text widget that updates to show the selected font. '''
     def __init__(self, view):

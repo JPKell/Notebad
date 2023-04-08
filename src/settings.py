@@ -22,8 +22,13 @@ class Configuration:
     geometry = '800x600'
     min_size = (300, 200)
     start_fullscreen = 0
-    default_theme = 'forest-light'
+    theme = 'forest-light'
     theme_dir = ''
+
+    # Tab behaviour
+    # The default tab style to use when creating a new tab
+    # 'text', 'profiler'
+    default_tab_style = 'ide' 
 
     # Status bar settings
     status_bar_default_text = 'Status Bar'
@@ -82,6 +87,10 @@ class Configuration:
 
     # Developer settings. Don't change these here. If you want developer functions, use dev mode. 
     preload_file = False
+
+    # Source file locations for things like whole codebase search   
+    project_src = ''
+
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):

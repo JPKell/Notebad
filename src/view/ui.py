@@ -1,11 +1,11 @@
 import os
-from tkinter import PhotoImage, Frame, font
+from tkinter import PhotoImage, font
 from tkinter.ttk import Style
-
 
 from settings  import Configuration
 from .colors import Themes
 from modules.logging import Log
+from widgets import NFrame
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -14,10 +14,9 @@ class UI:
     ''' Manages the appearance of the app. Custom colors are set in the colors.py file. ''
         Primarily used to toggle between light and dark themes.
         '''
-    def __init__(self, view: Frame) -> None:
+    def __init__(self, view: NFrame) -> None:
         self.view = view
         self.app  = view.controller.app
-        self.theme = cfg.default_theme
         self.style = Style()
         self.font = font.nametofont('TkFixedFont')
         self._font_size = cfg.font_size
@@ -54,22 +53,26 @@ class UI:
         # We don't want to toggle the theme if we are just reloading
         # so just load the default colors otherwise toggle the theme 
         if reload:                      
-            self.style.theme_use(self.theme)
-            if self.theme == 'forest-dark':
+            self.style.theme_use(cfg.theme)
+            if cfg.theme == 'forest-dark':
+                cfg.theme = 'forest-dark'
                 colors = Themes.dark
             else:
+                cfg.theme = 'forest-light'
                 colors = Themes.light
         # If we are not reloading then we want to toggle themes
-        elif self.theme == 'forest-dark':
-            self.theme = 'forest-light'
+        elif cfg.theme == 'forest-dark':
+            cfg.theme = 'forest-light'
             colors = Themes.light
             self.style.theme_use('forest-light')
         else:
-            self.theme = 'forest-dark'
+            cfg.theme = 'forest-dark'
             colors = Themes.dark
             self.style.theme_use('forest-dark')
 
-        logger.debug(f"Theme set to {self.theme}")
+        self.app.event_generate('<<ThemeToggle>>')
+
+        logger.debug(f"Theme set to {cfg.theme}")
      
         ### 
         # Menu bars are not easily modified in the windows system, 
@@ -90,45 +93,47 @@ class UI:
                 menu.config(**menu_colors)     
     
         
+        ## This all needs to get done in the widgets themselves
+
         # Tab styles. We need to cycle through all the tabs and set the styles.
         # otherwise the active tab will be the only one to change. 
-        for tab in self.view.tabs.tabs():
-            # The tab is a frame so we need to get the textbox from the frame.
-            # Other widgets are in the tab as well but they are in the ttk 
-            # style so they will get updated with the theme.
-            tab = self.view.tabs.nametowidget(tab)
-            textbox = tab.winfo_children()[0]
-            textbox.config(
-                background=colors.text_background, 
-                foreground=colors.text_foreground, 
-                insertbackground=colors.cursor, 
+        # for tab in self.view.tabs.tabs():
+        #     # The tab is a frame so we need to get the textbox from the frame.
+        #     # Other widgets are in the tab as well but they are in the ttk 
+        #     # style so they will get updated with the theme.
+        #     tab = self.view.tabs.nametowidget(tab)
+        #     textbox = tab.winfo_children()[0]
+        #     textbox.config(
+        #         background=colors.text_background, 
+        #         foreground=colors.text_foreground, 
+        #         insertbackground=colors.cursor, 
 
-                highlightbackground=colors.text_background, 
-                highlightcolor=colors.text_background,
-                )
-            # Style the line numbers on the side
-            textbox.linenumbers.config(bg=colors.background, highlightbackground=colors.background)
+        #         highlightbackground=colors.text_background, 
+        #         highlightcolor=colors.text_background,
+        #         )
+        #     # Style the line numbers on the side
+        #     textbox.linenumbers.config(bg=colors.background, highlightbackground=colors.background)
             
-            # textbox.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
+        #     # textbox.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
             
-            # Style the syntax highlighting
-            textbox.tag_configure("red", foreground = colors.syn_red)
-            textbox.tag_configure("orange", foreground = colors.syn_orange)
-            textbox.tag_configure("yellow", foreground = colors.syn_yellow)
-            textbox.tag_configure("green", foreground = colors.syn_green)
-            textbox.tag_configure("cyan", foreground = colors.syn_cyan)
-            textbox.tag_configure("blue", foreground = colors.syn_blue)
-            textbox.tag_configure("alt_blue", foreground = colors.syn_alt_blue)
-            textbox.tag_configure("violet", foreground = colors.syn_violet)
-            textbox.tag_configure("magenta", foreground = colors.syn_magenta)
-            textbox.tag_configure("grey", foreground = colors.syn_grey)
-            textbox.tag_configure("error", foreground = colors.syn_error)
+        #     # Style the syntax highlighting
+        #     textbox.tag_configure("red", foreground = colors.syn_red)
+        #     textbox.tag_configure("orange", foreground = colors.syn_orange)
+        #     textbox.tag_configure("yellow", foreground = colors.syn_yellow)
+        #     textbox.tag_configure("green", foreground = colors.syn_green)
+        #     textbox.tag_configure("cyan", foreground = colors.syn_cyan)
+        #     textbox.tag_configure("blue", foreground = colors.syn_blue)
+        #     textbox.tag_configure("alt_blue", foreground = colors.syn_alt_blue)
+        #     textbox.tag_configure("violet", foreground = colors.syn_violet)
+        #     textbox.tag_configure("magenta", foreground = colors.syn_magenta)
+        #     textbox.tag_configure("grey", foreground = colors.syn_grey)
+        #     textbox.tag_configure("error", foreground = colors.syn_error)
 
-            # Style the status bar
-            textbox.footer.status.config(bg=colors.background, fg=colors.foreground)
-            textbox.footer.pos_lbl.config(bg=colors.background, fg=colors.syn_orange)
-            textbox.footer.lang_lbl.config(bg=colors.background, fg=colors.syn_yellow)
-            textbox.footer.sel_lbl.config(bg=colors.background, fg=colors.syn_orange)
+        #     # Style the status bar
+        #     textbox.footer.status.config(bg=colors.background, fg=colors.foreground)
+        #     textbox.footer.pos_lbl.config(bg=colors.background, fg=colors.syn_orange)
+        #     textbox.footer.lang_lbl.config(bg=colors.background, fg=colors.syn_yellow)
+        #     textbox.footer.sel_lbl.config(bg=colors.background, fg=colors.syn_orange)
 
     @staticmethod
     def parse_windows_mousewheel(event, callback=None):
@@ -209,7 +214,7 @@ class UI:
         #     logger.verbose(f"Created theme: {title}")
 
         # Initialize to the correct theme
-        if self.theme == 'forest-dark':
+        if cfg.theme == 'forest-dark':
             self.style.theme_use('forest-dark')
         else:
             self.style.theme_use('forest-light')

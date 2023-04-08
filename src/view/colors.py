@@ -3,12 +3,12 @@ from types import SimpleNamespace
 Themes = SimpleNamespace(
     light = SimpleNamespace(
         # Text
-        text_background = '#FBF6F1',
+        text_background = '#F9F6F1',
         text_foreground = '#28190E',
         cursor = "#379392",
         # UI elements
-        background   = '#ECEBE4',
-        bg_highlight = '#FBF6F1',
+        background   = '#FFFFFF',
+        bg_highlight = '#FCFCFC',
         foreground   = '#28190E',
         tab_select   = '#ECDBD4',
         tab_unselect = '#E5E0E8',
@@ -32,8 +32,8 @@ Themes = SimpleNamespace(
         text_foreground = '#E1DEE9',
         cursor = "#B0DED9",
         # UI elements
-        background   = '#202122',
-        bg_highlight = '#28292A',
+        background   = '#313131',
+        bg_highlight = '#313131',
         foreground   = '#E1DEE9',
         tab_select   = '#38292A',
         tab_unselect = '#32323A',

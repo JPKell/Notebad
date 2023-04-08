@@ -101,19 +101,21 @@ def parse_profiler_data(file_path:str) -> dict:
 
     src_unique = list(set([x['src'] for x in profile_data['src'].values()]))
 
+    ## Build the final output dict. 
     output = {'meta': profile_data['meta']}
     for src in src_unique:
-        output[src] = {'ids': [], 'lines': {}}
+        output[src] = {'ids': [], 'lines': {}, 'line_count':0, 'exec_time': 0, 'tot_time': 0}
 
         id_list = [k for k,v in profile_data['src'].items() if v['src'] == src]
         # Build the initial dictionary for the source file
         # { 'src': {'ids': [], 'lines': {'func':..., 'name':...,'lines_exec':..., 'exec_count', 'exec_time', 'tot_time', 'callee', 'call_count'} }
         exec_path = [ x for x in profile_data['exec_path'] if x['src_id'] in id_list]
+
         for line in exec_path:
             func = profile_data['src'][line['src_id']]['func']
             name = line['name'].replace('"', '')
             for ln in line['lines']:
-                output[src]['lines'][ln] = {'func': func, 'name': name, 'lines_exec': line['lines_exec'], 'exec_count': 0, 'exec_time': 0, 'tot_time': 0, 'callee': None, 'call_count': None}
+                output[src]['lines'][int(ln)] = {'func': func, 'name': name, 'lines_exec': line['lines_exec'], 'exec_count': 0, 'exec_time': 0, 'tot_time': 0, 'callee': None, 'call_count': None}
 
         # Add the call tree components
         call_tree = [ x for x in profile_data['call_tree'] if x['caller'] in id_list ]
@@ -122,9 +124,9 @@ def parse_profiler_data(file_path:str) -> dict:
                 src_dict = profile_data['src'][line['caller']]
                 func = src_dict['func']
                 # name = src_dict['name']
-                output[src]['lines'][line['src_line']] = {'func': func, 'name': '', 'lines_exec': None, 'exec_count': 0, 'exec_time': 0, 'tot_time': 0, 'callee': None, 'call_count': None}
-            output[src]['lines'][line['src_line']]['callee'] = line['callee']
-            output[src]['lines'][line['src_line']]['call_count']  = line['count']
+                output[src]['lines'][int(line['src_line'])] = {'func': func, 'name': '', 'lines_exec': None, 'exec_count': 0, 'exec_time': 0, 'tot_time': 0, 'callee': None, 'call_count': None}
+            output[src]['lines'][int(line['src_line'])]['callee'] = line['callee']
+            output[src]['lines'][int(line['src_line'])]['call_count']  = line['count']
 
         # Add the timing components
         timings = [ x for x in profile_data['timings'] if x['id'] in id_list ]
@@ -134,13 +136,33 @@ def parse_profiler_data(file_path:str) -> dict:
 
                 func = src_dict['func']
                 # name = src_dict['name']
-                output[src]['lines'][line['src_line']] = {'func': func, 'name': '', 'lines_exec': None, 'exec_count': 0, 'exec_time': 0, 'tot_time': 0, 'callee': None, 'call_count': None}
-            output[src]['lines'][line['src_line']]['exec_count'] += float(line['exec_count'])
-            output[src]['lines'][line['src_line']]['exec_time']  += float(line['exec_time'])
-            output[src]['lines'][line['src_line']]['tot_time']   += float(line['tot_time'])
-    
+                output[src]['lines'][int(line['src_line'])] = {'func': func, 'name': '', 'lines_exec': None, 'exec_count': 0, 'exec_time': 0, 'tot_time': 0, 'callee': None, 'call_count': None}
+            output[src]['lines'][int(line['src_line'])]['exec_count'] += float(line['exec_count'])
+            output[src]['lines'][int(line['src_line'])]['exec_time']  += float(line['exec_time'])
+            output[src]['lines'][int(line['src_line'])]['tot_time']   += float(line['tot_time'])
+
+            output[src]['exec_time'] += float(line['exec_time'])
+            output[src]['tot_time']  += float(line['tot_time'])
+
+        # Sort all the lines in the source file
+        lines = list(output[src]['lines'].keys())
+        lines.sort()
+        output[src]['lines'] = {k: output[src]['lines'][k] for k in lines}
+
+        # Add the line count
+        output[src]['line_count'] = len(output[src]['lines'])   
+
         # Add the ids
         output[src]['ids'] = id_list
+
+    # Final sort my number of lines executed
+    # Meta data has no lines number so we need to remove it from the sort
+    sorter = [(k, v['line_count']) for k,v in output.items() if k != 'meta']
+    sorter.sort(key=lambda x: x[1], reverse=True)
+    # Meta data gets wiped out in the sort so we need to save it and restore it
+    meta = output['meta']
+    output = {k: output[k] for k,v in sorter}
+    output['meta'] = meta
 
     return output
 

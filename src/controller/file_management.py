@@ -1,4 +1,4 @@
-from view.textbox import Textbox
+from view.ide import Ide
 from modules.logging import Log
 from settings import Configuration
 
@@ -14,7 +14,7 @@ class FileManagement:
     def new_file(self) -> None:
         ''' Creates a new tab and a crisp fresh textbox. '''
         logger.debug('Creating new file')
-        self.controller.view.tabs.new_tab()
+        self.controller.view.tabs.new_tab('ide')
         self.controller.view.tabs.move_to_tab()    # Move focus to the new tab
         logger.info('New file created')
 
@@ -58,7 +58,7 @@ class FileManagement:
             self.write_textbox_to_file(textbox.meta.full_path, textbox)
         logger.info(f'Saved file: {textbox.meta.full_path}')
         
-    def save_as_file(self, textbox:Textbox=None) -> None:
+    def save_as_file(self, textbox:Ide=None) -> None:
         ''' Saves textbox to disk. If no textbox is given, the current tab is used.'''
 
         # I am giving the option here to pass a textbox object in to be saved. 
@@ -78,7 +78,7 @@ class FileManagement:
         parts = full_path.split('/')
         return {'path': '/'.join(parts[:-1]), 'file': parts[-1]}
 
-    def write_file_to_textbox(self, textbox:Textbox, full_path:str) -> None:
+    def write_file_to_textbox(self, textbox:Ide, full_path:str) -> None:
         ''' Writes the contents of a file to the textbox '''
 
         ext = full_path.split('.')[-1]
@@ -98,7 +98,7 @@ class FileManagement:
             textbox.history.stackify()          # Add the file contents to the undo stack
         logger.debug(f'Wrote file to textbox: {full_path}')
 
-    def write_textbox_to_file(self, full_path:str, textbox:Textbox) -> None:
+    def write_textbox_to_file(self, full_path:str, textbox:Ide) -> None:
         ''' Private method to write file to disk. Needs encoding option. '''
         with open(full_path, "w") as file:
             txt = textbox.get(1.0, 'end')
