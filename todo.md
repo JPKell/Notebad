@@ -6,6 +6,7 @@ Hopefully the bugs decrease and the missing important does too
 
 
 # Bugs
+- expanding includes is not catching every one, and fails on some encoding issues. 
 - Live syntax highlighting is broken 
 
 # Missing important
@@ -33,6 +34,7 @@ Hopefully the bugs decrease and the missing important does too
 
 # Features
 - log errors in lexer for review
+- Add syntax highlighting to profiler source view
 
 # IDE functions 
 - multiselect. cursor across multiple lines and highlight columns of multiple lines

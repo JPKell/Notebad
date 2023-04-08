@@ -1,14 +1,14 @@
-from tkinter import StringVar, IntVar
+from tkinter import StringVar
 
 from modules.logging import Log
 from settings import Configuration
-from widgets import NButton, NFrame, NLabel, NLabelframe, NTabFrame, NText, NTreeview, NNotebook, open_file_dialog
+from widgets  import NButton, NFrame, NLabel, NTabFrame, NText, NTreeview, NNotebook, open_file_dialog
 
 cfg = Configuration()
 logger = Log(__name__)
 
 '''
-Something super cool to do here would be to have this ssh into the server and run the profiler
+Something super cool to do here would be to have this ssh into the server and grab the profiler data
 This will require adding an ssh profile to the app and then using that to connect to the server
 '''
 
@@ -29,17 +29,21 @@ class ProgressProfiler(NTabFrame):
         # Tab variables
         self.filename  = StringVar()
         self.timestamp = StringVar()
-        self.mode_btn_txt = StringVar(value="Source")
+        self.mode      = StringVar(value="Source")
         self.profiler_data = {}
 
         # Build everything
         self._build_toolbar()
-        self._build_summary()
+        self._build_summary_view()
+
         
     def load_profiler_data(self, data:dict) -> None:
         ''' Load the profiler data into the tree after destroying the existing tree '''
         self.profiler_data = data
-        self._build_summary()
+        if self.mode.get() == 'Source':
+            self._build_summary_view()
+        else:
+            self._build_src_view()
 
     ###
     # Private methods
@@ -65,19 +69,19 @@ class ProgressProfiler(NTabFrame):
         NLabel(self.toolbar, textvariable=self.filename).grid(row=0, column=1, sticky='w')
         NLabel(self.toolbar, text='Datetime:').grid(row=0, column=2, sticky='w',)
         NLabel(self.toolbar, textvariable=self.timestamp).grid(row=0, column=3, sticky='w')
-        NButton(self.toolbar, textvariable=self.mode_btn_txt, width=8, command=self._toggle_mode).grid(row=0, column=4, sticky='e',pady=(0,5), padx=5)
+        NButton(self.toolbar, textvariable=self.mode, width=8, command=self._toggle_mode).grid(row=0, column=4, sticky='e',pady=(0,5), padx=5)
         NButton(self.toolbar, text='Open profile', width=15, command=self._prompt_for_file).grid(row=0, column=5, sticky='e',pady=(0,5), padx=5)
 
     def _toggle_mode(self, *_) -> None:
         ''' Toggle between source and summary view '''
-        if self.mode_btn_txt.get() == 'Source':
-            self.mode_btn_txt.set('Summary')
+        if self.mode.get() == 'Source':
+            self.mode.set('Summary')
             self._build_src_view()
         else:
-            self.mode_btn_txt.set('Source')
-            self._build_summary()
+            self.mode.set('Source')
+            self._build_summary_view()
 
-    def _build_summary(self) -> None:
+    def _build_summary_view(self) -> None:
         ''' Summary shows a treeview of the data with a focus on the number of lines
             executed and the time spent executing them. '''
         
@@ -126,14 +130,12 @@ class ProgressProfiler(NTabFrame):
 
 
     def _build_src_view(self, *_) -> None:
-        ''' Build the source view '''
-        
-       
-        # The tab will show the tree view on the left hand side and the source code on the right. 
-        # you wont be able to edit the source since it will be a combination of files. Might be 
-        # nice to have a button to open the file in the editor though.
-        
-        self.file = self.tree.focus()
+        ''' Build the source code view. This has a treeview on the left and a text 
+            widget on the right that shows the source code. The profiler results 
+            are with expanded includes. That means the files must be built.
+             
+            Currently the there is a discrepancy between the line numbers in the 
+            debugger and the profiler.  '''
 
         # Build the main frame
         self.main_frame = NFrame(self)
@@ -148,6 +150,9 @@ class ProgressProfiler(NTabFrame):
         self.tree.column('#0', width=200, stretch=True)
         self.tree.column('exec_time', width=50)
         self.tree.column('lines', width=30)
+
+        # Setup the tree to generate an event when a row is clicked
+        self.tree.on_click(self._event('<<ProfilerSourceView>>'))
 
         # Build the treeview data
         for src, d in self.profiler_data.items():
@@ -175,5 +180,3 @@ class ProgressProfiler(NTabFrame):
         # Todo This needs to be themed and have a scrollbar
         self.text = NText(self.main_frame)
         self.text.grid(row=0, column=2, sticky='nsew')
-
-        self.event_generate('<<ProfilerSourceView>>')

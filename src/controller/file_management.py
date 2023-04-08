@@ -39,7 +39,6 @@ class FileManagement:
                 file_name=path_parts['file'], 
                 )
             self.write_file_to_textbox(textbox, full_path)
-            self.controller.view.tab_change()
             textbox.cursor.set_position('1.0')      # Set cursor at beginning of file
         logger.info(f'Opened file: {full_path}')
 

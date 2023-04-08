@@ -1,10 +1,10 @@
 import os, re
-# This will take a file, open it and insert includes into files. 
-# this may have to happen multiple levels deep. This kind of turns into a recursive function to do it properly. 
 from settings import Configuration
 
 cfg = Configuration()
  
+
+
 def expand_includes(filename:str) -> list:
     # Validate file path
     path = os.path.join(cfg.project_src, filename)

@@ -26,7 +26,7 @@ class NTabFrame(Frame):
         self.tab_save_on_close = kwargs.get('tab_save_on_close', False)
 
     def _event(self, event:str) -> object:
-        def callback(): # This is the function that is returned to the caller
+        def callback(*_): # This is the function that is returned to the caller
             self.event_generate(event)
         return callback     
 

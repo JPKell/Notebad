@@ -31,6 +31,9 @@ class NoteController:
         # Instantiate controller objects
         # Root window
         self.app       = tk.Tk()
+        self.app.columnconfigure(0, weight=1)
+        self.app.rowconfigure(0, weight=1)
+        
         self.events_master()
         self.file_system = FileManagement(self)     
         self.menu      = Menubar(self.app, controller=self)   
@@ -117,6 +120,7 @@ class NoteController:
     def build_text_for_parser(self, event) -> str:
         ''' Build the text to be parsed. '''
         profiler = event.widget
-        results = includes_expander.expand_includes(profiler.file)
+        
+        results = includes_expander.expand_includes(profiler.tree.current_line())
         profiler.text.delete('1.0', tk.END)
         profiler.text.insert(tk.END, ''.join(results))

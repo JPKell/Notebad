@@ -1,23 +1,28 @@
-
+from modules.logging import Log
 from settings import Configuration
 
-from modules.logging import Log
-from view.colors  import Themes
-from view.tabs    import Tabs
-from view.ui      import UI
-
-from view.key_commands import KeyCommandList
+from view.key_commands  import KeyCommandList
 from view.settings_menu import SettingsDialog
+from view.tabs          import Tabs
+from view.ui            import UI
 from widgets import NFrame
+
 
 cfg = Configuration()
 logger = Log(__name__)
 
 class NoteView(NFrame):
-    ''' The noteview class handles the look and feel of the application
-        Generally the view should not be reliant on the controller, but there 
-        are applications for it since the menu is very much a look and feel
-        thing, but needs to be able to call controller functions.
+    ''' The noteview class is a launching point for the UI. It initializes
+        the UI and the tabs. The tabs are the main container for the content
+        of the application. 
+
+        Additional panes and gutters can be added here, and new windows can 
+        be created here or in the controller.
+
+        Generally the view should not be reliant on the controller and communicate 
+        via events. An event generated in the view carries with it a copy of the
+        widget that generated the event. This is how the view passes data to the 
+        controller.
 
         Items in the heirarchy should mainly handle themselves and child
         widgets. The main business logic and data handling should be in the
@@ -26,25 +31,20 @@ class NoteView(NFrame):
     '''
     def __init__(self, controller) -> None:
         logger.debug("View begin init")
-        super().__init__(controller.app) # This class is a frame that live right inside the main window
+
+        # Set up the root frame
+        super().__init__(controller.app) 
+
+        # App objects
         self.controller = controller    
-        self.app        = controller.app     # The main window
-        self.theme      = ''       
-        self._make()
+        self.app        = controller.app     
+        
+        # Build the app frame
+        self._build_ojects()
+        self._setup_and_grid()
 
         logger.debug("View finish init")
 
-    def _make(self) -> None:
-        ''' The meat of the view, this is where we create the widgets '''
-        self.ui      = UI(self)
-        self.tabs    = Tabs(self)
-    
-        # OG tkinter widgets need themes reloaded on first build
-        self.ui.toggle_theme(reload=True)
-        self.pack(fill='both', expand=True)
-        # self.cur_tab.focus_set()    # Make sure we can start typing right away
-        # self.textbox.footer.update_cursor_pos()    # Update the footer position data
-        self.settings_window = None   # Assign to SettingsDialog object when the toplevel is needed
 
     ## Class properties ##
     @property
@@ -54,28 +54,34 @@ class NoteView(NFrame):
     def key_command_list(self):
         KeyCommandList(self)
 
-
-    ## Window functions ##
-    def tab_change(self, text:str=None) -> None:
-        ''' Update the title of the window. Will default to Notebad - filename
-            unless text is passed in. '''
-        self.tabs.set_tabs_unfocused()
-
-        textbox = self.cur_tab
-        textbox.is_focus = True
-
-        # This is a shitty fix. The issue is if we add new tabs other than textboxes
-        # they will needs to match certain attributes. This is a quick fix for now
-        # but should be reworked in the near future
-        try:
-            self.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
-            # textbox.footer.lang_lbl.config(text=textbox.meta.language)
-            self.controller.load_language(textbox.meta.language)
-
-            logger.debug(f"Tab changed to {textbox.meta.file_name}")
-        except:
-            self.app.title(f"{cfg.app_title} - Profiler")
-            logger.debug(f"Tab changed to profiler")
-
     def open_settings_window(self, *args):
         SettingsDialog(self)
+
+    ###
+    # Private methods
+    ###
+
+    def _build_ojects(self) -> None:
+        ''' The meat of the view, this is where we create the widgets '''
+        self.ui      = UI(self)
+        self.tabs    = Tabs(self)
+
+        self.l_gutter = NFrame(self)
+        self.r_gutter = NFrame(self)
+
+    def _setup_and_grid(self) -> None:
+        ''' This is where we set up the widgets and grid them '''
+        # OG tkinter widgets need themes reloaded on first build
+        self.ui.toggle_theme(reload=True)
+
+        # Set up weights. This will have to change when we add content to the gutters
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        # Grid everything
+        self.grid(row=0, column=0, sticky='nsew')
+
+        self.l_gutter.grid(row=0, column=0, sticky='nsew')
+        self.r_gutter.grid(row=0, column=2, sticky='nsew')
+
+        self.tabs.grid(row=0, column=1, sticky='nsew')

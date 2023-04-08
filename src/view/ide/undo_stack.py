@@ -2,7 +2,7 @@ from collections import deque
 
 from settings import Configuration
 from modules.logging import Log
-from widgets import NText
+from widgets import NFrame
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -11,7 +11,7 @@ logger = Log(__name__)
 # It may be memory inefficient and it might be better to use marks 
 # in the future take a look once the language server is running. 
 class History:
-    def __init__(self, ide: NText) -> None:
+    def __init__(self, ide: NFrame) -> None:
         self.ide = ide
 
         # Stack for undo/redo
@@ -45,7 +45,7 @@ class History:
             txt = self.redo_stack.pop()
             self.undo_stack.append(txt)
             self.ide.editor.clear_all()
-            self.ide.insert("0.0", txt)
+            self.ide.test.insert("0.0", txt)
             logger.debug(f"Redo {self.ide.meta.tk_name}")
         except IndexError:
             logger.debug("Nothing to redo")

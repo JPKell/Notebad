@@ -138,7 +138,7 @@ class NText(Text):
             if dline is None: 
                 break
             # Get the y coordinate of the line
-            y = dline[1] + 1
+            y = dline[1] - 2
             # Get the line number
             linenum = str(i).split(".")[0]
             # Set the font size

@@ -22,7 +22,6 @@ class Tabs(NNotebook):
         logger.debug("Tabs begin init")
         super().__init__(view)
         self.view = view
-        self.pack(expand=True, fill='both')
         self.bind('<ButtonPress-1>',   lambda event: self.on_close_press(event), True)
         self.bind('<ButtonRelease-1>', lambda event: self.on_close_release(event))
         self.active_hover = None

@@ -32,7 +32,6 @@ class KeyBindings:
 
         self._load_user_settings()
         self._unbindings()
-        self._app_triggers()
         self._init_no_override_bindings()
         self._syntax_highlighting()
         self._textbox_important_bindings()
@@ -91,18 +90,6 @@ class KeyBindings:
         # Unbind the default tab key for all widgets before overriding it
         self.app.unbind_all("<Tab>")    
         
-    def _app_triggers(self):
-        ''' These are triggers that get fired on app events not key codes'''
-
-        triggers = [{'name': '', 'key': '<<NotebookTabChanged>>', 'category': 'App triggers',
-            'widget_class': None, 'active': True, 'can_override': False,
-            'bind_func': self.app.bind, 
-            'callback': lambda event: self.controller.view.tab_change(), 
-            },
-        ]
-        
-        for binding in triggers:
-            self.register_binding(**binding)
 
     def _load_user_settings(self):
         ''' Loads the user key bindings from the config file. '''
