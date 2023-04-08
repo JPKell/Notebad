@@ -64,12 +64,12 @@ class Meta:
         ''' When meta is updated, add the full filepath to the recent files '''
         recent_files = []
         if self.full_path is not None:
-            # Check recent files exist and extract contents to manipulate
+            # Check "recent files" file exists and extract contents to manipulate the paths inside
             if os.path.exists(self._recent_files):
                 with open(self._recent_files, 'r') as f:
                     recent_files = f.readlines()
 
-                # Loop through and remove any files that no longer exist
+                # Loop through and remove any filepaths that no longer exist
                 for file in recent_files:
                     if not os.path.exists(file.strip()):
                         recent_files.remove(file)
@@ -81,7 +81,7 @@ class Meta:
                 elif len(recent_files) >= 10:
                     recent_files.pop(0)
 
-            # Write recent files to file
+            # Write "recent filepaths" to file
             recent_files.append(self.full_path)
             with open(self._recent_files, 'w') as f:
                 for file in recent_files:

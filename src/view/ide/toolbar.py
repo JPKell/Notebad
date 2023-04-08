@@ -11,7 +11,7 @@ class Toolbar(NFrame):
     ''' The toolbar appears above the tab titles and below the menubar.
         It is designed to house things like a find/searchbar '''
     def __init__(self, view):
-        super().__init__(view, height=30)   #, bg="red")  # Red background for visibility while testing
+        super().__init__(view, height=30)
         self.pack(side='top', fill='x',ipady=3)
         self.view = view
         self.find_txt = StringVar(self)
