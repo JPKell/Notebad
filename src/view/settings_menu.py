@@ -127,7 +127,7 @@ class GeneralSettings(NFrame):
         self.screen_height.grid(column=1, row=3, sticky='w', padx=5, pady=5)
 
     def _make_factory_reset_btn(self):
-        self.reset_btn = NButton(self.reset_btn_frame, text="Delete All Settings", bg="#aa0000", command=cfg.delete_user_settings)
+        self.reset_btn = NButton(self.reset_btn_frame, text="Delete All Settings", command=cfg.delete_user_settings)
         self.reset_btn.grid(column=0, row=0, columnspan=2, sticky='nesw', padx=20, pady=20)
 
 

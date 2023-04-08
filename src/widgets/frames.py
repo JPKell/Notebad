@@ -25,7 +25,7 @@ class NTabFrame(Frame):
         self.tab_tk_name = kwargs.get('tab_tk_name', '')
         self.tab_save_on_close = kwargs.get('tab_save_on_close', False)
 
-    def _event(self, event:str='<<DefaultEvent>>') -> object:
+    def _event(self, event:str) -> object:
         def callback(): # This is the function that is returned to the caller
             self.event_generate(event)
         return callback     
@@ -36,7 +36,7 @@ class NToplevel(Toplevel):
     def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
         
-    def _event(self, event:str='<<DefaultEvent>>') -> object:
+    def _event(self, event:str) -> object:
         def callback(): # This is the function that is returned to the caller
             self.event_generate(event)
         return callback 
