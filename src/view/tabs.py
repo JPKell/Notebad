@@ -1,10 +1,9 @@
-
-from .ide import Ide
-from .profiler import ProgressProfiler
-
-from settings import Configuration
 from modules.logging import Log
-from widgets import NNotebook, NTabFrame
+from settings   import Configuration
+from widgets    import NNotebook, NTabFrame
+# Views 
+from .ide       import Ide
+from .profiler  import ProgressProfiler
 
 cfg = Configuration()
 logger = Log(__name__)

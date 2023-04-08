@@ -9,14 +9,13 @@ logger = Log(__name__)
 
 # TODO Make it listen for <<Change>> events and update the status bar
 
-class Footer(NFrame):
+class IdeFooter(NFrame):
     ''' Runs the status bar at the bottom of the screen. I would like to see this
         displaying useful information, but I'm not sure what that would be yet.
         Process run times, remote connections, etc. '''
     def __init__(self, view):
-        super().__init__(view, height=30)
+        super().__init__(view, height=30)        
         self.view = view
-        self.pack(side='bottom', fill='x')
         self.status_txt = StringVar(self, value=cfg.status_bar_default_text)
         self._make_label()
         self._make_selection_labels()

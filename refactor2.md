@@ -115,3 +115,10 @@ All in all I think that this should be fairly painless. It's a bunch of work to 
 # Update what I did 
 - Created custom classed for the main tkinter widgets. Use these forward. They can get added to with tasty defaults and such. So anywhere you are using the same default, you can instead code it into the class and then make it overridable
 - I broke the text box out of the textbox.. What was named textbox is now ide, as textbox is usable in multiple places now. I didn't get started on the events yet. I added the helped function into the main frames so anything that superclasses the NFrame, NTabFrame, or NToplevel now has the _event() method, so you can send events from the top level of the widget to capture all the attributes.
+
+
+# Things I Broke. 
+
+- Footer
+  - I am not sure if it should be a global footer or change with the tab. Kinda makes sense to be associated with each tab so the state can remain with the tab rather than having to rebuild the same footer. 
+  - 

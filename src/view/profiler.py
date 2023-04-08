@@ -1,8 +1,8 @@
-from tkinter import filedialog
+from tkinter import StringVar, IntVar
 
 from modules.logging import Log
 from settings import Configuration
-from widgets import NButton, NFrame, NLabel, NLabelframe, NTabFrame, NText, NTreeview, NNotebook
+from widgets import NButton, NFrame, NLabel, NLabelframe, NTabFrame, NText, NTreeview, NNotebook, open_file_dialog
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -16,63 +16,81 @@ class ProgressProfiler(NTabFrame):
     ''' Displays the profiler data '''
     def __init__(self, tab_widget:NNotebook) -> None:
         logger.debug("Profiler begin init")
+
         # Build the outer frame
         super().__init__(tab_widget)
-        self.grid_columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.grid(row=0, column=0, sticky='nswe')
+
+        # Tab widget is the parent widget
         self.tab_title = 'Profiler'
 
-        self.tab_widget = tab_widget # This can go as soon as that monster call is gone
-        self.pack(expand=True, fill='both') # Change this to grid 
-        self.filename = self._get_file_name()
-        self.text = NText
+        # Tab variables
+        self.filename  = StringVar()
+        self.timestamp = StringVar()
+        self.mode_btn_txt = StringVar(value="Source")
+        self.profiler_data = {}
+
+        # Build everything
+        self._build_toolbar()
         self._build_summary()
         
-    # Change this into controller method
-    def _get_file_name(self) -> str:
-        ''' Returns the file name from the path '''
-        # filedialog.askopenfilename(filetypes=[('Progress Profiler Files', '*.prof'), ('All Files', '*.*')])
-        return '/home/jpk/profile.profile'
-    
-    def _retry_file_name(self, *_) -> None:
+    def load_profiler_data(self, data:dict) -> None:
+        ''' Load the profiler data into the tree after destroying the existing tree '''
+        self.profiler_data = data
+        self._build_summary()
+
+    ###
+    # Private methods
+    ###
+
+    def _prompt_for_file(self, *_) -> None:
         ''' Retry getting the file name '''
-        self.filename = self._get_file_name()
-        self.meta_frame.destroy()
-        self._build_summary()
+        user_input = open_file_dialog(filetypes=[('Progress Profiler Files', '*.prof*'), ('All Files', '*.*')])
+        if user_input:
+            self.filename.set(user_input)
+            self.event_generate('<<ProfilerFileChanged>>')
 
-
-    def _build_summary(self) -> None:
-        ''' Create the widgets '''
-        
-        self.meta_frame = NLabelframe(self, text='Profiler meta data', labelanchor='n')
-        self.meta_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
-        for i in range(4):
-            self.meta_frame.columnconfigure(i, weight=1)
-
-        if not self.filename:
-            NLabel(self.meta_frame, text=f'You must supply a profiler output to use this feature').pack( )
-            NButton(self.meta_frame, text='Select file', command=self._retry_file_name).pack()
-            return
-        
-        # We have a filename so parse the data and display it
-        self.data = self.tab_widget.view.controller.parse_progress_profiler(self.filename)
+    def _build_toolbar(self) -> None:
+        ''' Build the toolbar for the profiler. We dont need to assign everything to self because
+            we are not going to be using it anywhere else. We can change the values with StringVar '''
+        self.toolbar = NFrame(self)
+        self.toolbar.grid(row=0, column=0, sticky='nsew', padx=5, pady=(5,2))
+        self.toolbar.columnconfigure(1, weight=1)
+        self.toolbar.columnconfigure(3, weight=1)
 
         # Build the meta data frame
-        NLabel(self.meta_frame, text=f"File: {self.filename}").grid(row=0, column=0, padx=(5,0), sticky='w')
-        NLabel(self.meta_frame, text=f"Run: {self.data['meta']['timestamp']}").grid(row=0, column=1, sticky='w')
-        NButton(self.meta_frame, text='View src', width=8, command=self._build_src_view).grid(row=0, column=2, sticky='e',pady=(0,5), padx=5)
-        NButton(self.meta_frame, text='New file', width=8, command=self._retry_file_name).grid(row=0, column=3, sticky='e',pady=(0,5), padx=5)
+        NLabel(self.toolbar, text='File:').grid(row=0, column=0, sticky='w', padx=(5,0))
+        NLabel(self.toolbar, textvariable=self.filename).grid(row=0, column=1, sticky='w')
+        NLabel(self.toolbar, text='Datetime:').grid(row=0, column=2, sticky='w',)
+        NLabel(self.toolbar, textvariable=self.timestamp).grid(row=0, column=3, sticky='w')
+        NButton(self.toolbar, textvariable=self.mode_btn_txt, width=8, command=self._toggle_mode).grid(row=0, column=4, sticky='e',pady=(0,5), padx=5)
+        NButton(self.toolbar, text='Open profile', width=15, command=self._prompt_for_file).grid(row=0, column=5, sticky='e',pady=(0,5), padx=5)
 
+    def _toggle_mode(self, *_) -> None:
+        ''' Toggle between source and summary view '''
+        if self.mode_btn_txt.get() == 'Source':
+            self.mode_btn_txt.set('Summary')
+            self._build_src_view()
+        else:
+            self.mode_btn_txt.set('Source')
+            self._build_summary()
+
+    def _build_summary(self) -> None:
+        ''' Summary shows a treeview of the data with a focus on the number of lines
+            executed and the time spent executing them. '''
+        
         # Build the main frame
         self.main_frame = NFrame(self)
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
-        self.rowconfigure(1, weight=1)
 
         # Build the treeview
         self.tree = NTreeview(self.main_frame, columns=('line',  'exec_time', 'tot_time', 'exec_count'))
+        # It would be nice to have a lot of this in the treeview class
         self.tree.heading('#0', text='Source', anchor='w')
-
         self.tree.heading('line', text='Lines', anchor='w')
         self.tree.heading('exec_time', text='Execution time', anchor='w')
         self.tree.heading('tot_time', text='Total time', anchor='w')
@@ -84,41 +102,38 @@ class ProgressProfiler(NTabFrame):
         self.tree.column('exec_count', width=20, stretch=True)
         self.tree.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
-        # Build the treeview data
-        for src, d in self.data.items():
-            if src == 'meta':
-                continue
+        if self.profiler_data:
+            # Build the treeview data
+            for src, d in self.profiler_data.items():
+                if src == 'meta':
+                    continue
 
-            exec_time = f"{d['exec_time']:0.6f}" if d['exec_time'] else 0
-            tot_time = f"{d['tot_time']:0.6f}" if d['tot_time'] else 0
+                exec_time = f"{d['exec_time']:0.6f}" if d['exec_time'] else 0
+                tot_time = f"{d['tot_time']:0.6f}" if d['tot_time'] else 0
 
-            self.tree.insert('', 'end', src,text=src, values=(d['line_count'], exec_time, tot_time, ''))
-            for line_no, ln_dic in d['lines'].items():
-                if ln_dic['func'] != None:
-                    name = ln_dic['func']
-                else:
-                    name = ln_dic['name']
-                exec_time = f"{ln_dic['exec_time']:0.6f}" if ln_dic['exec_time'] else 0
-                tot_time = f"{ln_dic['tot_time']:0.6f}" if ln_dic['tot_time'] else 0
-                self.tree.insert(src, 'end', text=name, values=(line_no, exec_time, tot_time, int(ln_dic['exec_count'])))
+                self.tree.insert('', 'end', src,text=src, values=(d['line_count'], exec_time, tot_time, ''))
+                for line_no, ln_dic in d['lines'].items():
+                    if ln_dic['func'] != None:
+                        name = ln_dic['func']
+                    else:
+                        name = ln_dic['name']
+                    exec_time = f"{ln_dic['exec_time']:0.6f}" if ln_dic['exec_time'] else 0
+                    tot_time = f"{ln_dic['tot_time']:0.6f}" if ln_dic['tot_time'] else 0
+                    self.tree.insert(src, 'end', text=name, values=(line_no, exec_time, tot_time, int(ln_dic['exec_count'])))
+
+            self.timestamp.set(self.profiler_data['meta']['timestamp'])
 
 
-
-    # def _get_file_name(self) -> str:
 
     def _build_src_view(self, *_) -> None:
         ''' Build the source view '''
         
-        # This will need the source code to be built from the various includes
-        
+       
         # The tab will show the tree view on the left hand side and the source code on the right. 
         # you wont be able to edit the source since it will be a combination of files. Might be 
         # nice to have a button to open the file in the editor though.
         
         self.file = self.tree.focus()
-
-        # First destroy the existing main frame
-        self.main_frame.destroy()
 
         # Build the main frame
         self.main_frame = NFrame(self)
@@ -126,29 +141,29 @@ class ProgressProfiler(NTabFrame):
         self.rowconfigure(1, weight=2)
 
         # Att the treeview to the left
-        self.tree = NTreeview(self.main_frame, columns=('exec_time', 'exec_count'))
+        self.tree = NTreeview(self.main_frame, columns=('exec_time', 'lines'))
         self.tree.heading('#0', text='Source', anchor='w')
-        self.tree.heading('exec_time', text='Execution time', anchor='w')
-        self.tree.heading('exec_count', text='Count', anchor='w')
-        self.tree.column('#0', width=100, stretch=True)
-        self.tree.column('exec_time', width=50, stretch=True)
-        self.tree.column('exec_count', width=20, stretch=True)
+        self.tree.heading('exec_time', text='Time', anchor='w')
+        self.tree.heading('lines', text='Lines', anchor='w')
+        self.tree.column('#0', width=200, stretch=True)
+        self.tree.column('exec_time', width=50)
+        self.tree.column('lines', width=30)
 
         # Build the treeview data
-        for src, d in self.data.items():
+        for src, d in self.profiler_data.items():
             if src == 'meta':
                 continue
 
-            exec_time = f"{d['exec_time']:0.6f}" if d['exec_time'] else 0
+            exec_time = f"{d['exec_time']:0.3f}" if d['exec_time'] else ''
 
-            self.tree.insert('', 'end', src,text=src, values=(exec_time))
+            self.tree.insert('', 'end', src,text=src, values=(exec_time, d['line_count']))
             for line_no, ln_dic in d['lines'].items():
                 if ln_dic['func'] != None:
                     name = ln_dic['func']
                 else:
                     name = ln_dic['name']
-                exec_time = f"{ln_dic['exec_time']:0.6f}" if ln_dic['exec_time'] else 0
-                self.tree.insert(src, 'end', text=line_no, values=(exec_time, int(ln_dic['exec_count'])))
+                exec_time = f"{ln_dic['exec_time']:0.4f}" if ln_dic['exec_time'] else ''
+                self.tree.insert(src, 'end', text=line_no, values=(exec_time, ''))
 
 
         self.tree.grid(row=0, column=1, sticky='nsew')

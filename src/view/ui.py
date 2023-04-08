@@ -1,11 +1,11 @@
 import os
-from tkinter import PhotoImage, font
-from tkinter.ttk import Style
+from   tkinter     import PhotoImage, font
+from   tkinter.ttk import Style
 
-from settings  import Configuration
-from .colors import Themes
-from modules.logging import Log
-from widgets import NFrame
+from   settings        import Configuration
+from   modules.logging import Log
+from   widgets         import NFrame
+from   .colors         import Themes
 
 cfg = Configuration()
 logger = Log(__name__)

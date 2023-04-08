@@ -8,7 +8,7 @@ from view.ide.edit          import Editor
 from view.ide.meta          import Meta
 from view.ide.undo_stack    import History
 from view.ide.toolbar       import Toolbar
-from widgets import NText, NNotebook, NTabFrame
+from widgets import NText, NNotebook, NTabFrame, IdeFooter
 
 
 cfg = Configuration()
@@ -48,6 +48,7 @@ class Ide(NTabFrame):
         self.history   = History(self)
         self.clipboard = Clipboard(self)
         self.editor    = Editor(self.text)
+        self.footer    = IdeFooter(self)
 
         # Handle special keybindings
         self._bind_keys()
@@ -79,9 +80,9 @@ class Ide(NTabFrame):
     def is_focus(self, is_focus:bool) -> None:
         # Turn on any of the items in the event loop
         self._is_focus = is_focus
-        # if is_focus:
+        if is_focus:
+            self.footer.update_cursor_pos()
         #     self.scrollbars.hide_unused()
-            # self.footer.update_cursor_pos()
         
     @property
     def is_blank(self) -> bool:
@@ -125,12 +126,12 @@ class Ide(NTabFrame):
         self.text.mark_unset("insert")
         self.text.mark_set("insert", "1.0")
         self.text.focus_set()
-
+        self.footer.grid(row=2, column=0, sticky='nsew')
 
     def update_selection(self, event):
         if self.text.tag_ranges(SEL):
             self.current_selection_text = self.selection_get()
         else:
             self.current_selection_text = ""
-        # self.footer.update_selection_stats(self.current_selection_text)
+        self.footer.update_selection_stats(self.current_selection_text)
 

@@ -1,13 +1,11 @@
-from   tkinter import messagebox, filedialog
 
 from settings import Configuration
-from controller.menu    import Menubar
+
 from modules.logging import Log
 from view.colors  import Themes
-from view.footer  import Footer
 from view.tabs    import Tabs
 from view.ui      import UI
-from view.ide.toolbar import Toolbar
+
 from view.key_commands import KeyCommandList
 from view.settings_menu import SettingsDialog
 from widgets import NFrame
@@ -34,24 +32,13 @@ class NoteView(NFrame):
         self.theme      = ''       
         self._make()
 
-        # Filetypes that can be filtered/selected when using a tkinter filedialog.
-        # They will appear in the same order as they are listed
-        self.filetypes = [('All Files', '*.*'),
-                          ('Progress Include Files', '*.i'),
-                          ('Progress Files', '*.p'),
-                          ('Progress Window Procedure Files', '*.w'),
-                          ('Python Files', '*.py'),
-                          ('Text Documents', '*.txt')]
-
         logger.debug("View finish init")
 
     def _make(self) -> None:
         ''' The meat of the view, this is where we create the widgets '''
         self.ui      = UI(self)
-        # self.toolbar = Toolbar(self)
         self.tabs    = Tabs(self)
-        self.footer  = Footer(self)
-        # self.menu   = Menubar(self, self.controller)
+    
         # OG tkinter widgets need themes reloaded on first build
         self.ui.toggle_theme(reload=True)
         self.pack(fill='both', expand=True)
@@ -67,27 +54,6 @@ class NoteView(NFrame):
     def key_command_list(self):
         KeyCommandList(self)
 
-    ###               ###
-    # User interactions #
-    ###               ###
-    # Here we deal with user prompts and popups
-
-    def prompt_yes_no(self, title:str, msg:str, callback:callable) -> None:
-        ''' Show a message and call a callback function when done '''
-        if messagebox.askokcancel(title, msg):
-            callback()
-
-    def open_file_dialogue(self) -> str:  
-        ''' Open a file dialogue and returns the path the user selected '''
-        file_path = filedialog.askopenfilename(filetypes=self.filetypes)
-        return file_path
-    
-    def save_file_dialogue(self, file_name:str=None, path:str=None) -> str:
-        filepath = filedialog.asksaveasfilename(defaultextension=".txt",
-                                                initialfile=file_name,
-                                                initialdir=path,
-                                                filetypes=self.filetypes)
-        return filepath
 
     ## Window functions ##
     def tab_change(self, text:str=None) -> None:

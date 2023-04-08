@@ -31,6 +31,7 @@ class NoteController:
         # Instantiate controller objects
         # Root window
         self.app       = tk.Tk()
+        self.events_master()
         self.file_system = FileManagement(self)     
         self.menu      = Menubar(self.app, controller=self)   
         # Instantiate the view
@@ -44,10 +45,7 @@ class NoteController:
         
         self.key_bindings = KeyBindings(self) 
         self._app_protocols()
-
-        # Custom bindings. these need a home
-        self.app.bind('<<ProfilerSourceView>>', self.build_text_for_parser)
-
+        
 
         # This might be better done as a function on its own. 
         # At that point, maybe we stash the open tabs at close and reopen them 
@@ -60,6 +58,16 @@ class NoteController:
                         file_path=path_parts['path'], 
                         file_name=path_parts['file'], )
         logger.debug('Controller finish init')
+
+    def events_master(self) -> None:
+        ''' Events are things that happen in the application. '''
+        self.events = {
+        '<<ProfilerFileChanged>>': self.parse_progress_profiler,
+        '<<ProfilerSourceView>>':  self.build_text_for_parser,
+        }
+        for k,v in self.events.items():
+            self.app.bind(k, v)
+
 
     def _app_protocols(self) -> None:
         ''' Application protocols deal with system commands such as closing the window. '''
@@ -98,15 +106,17 @@ class NoteController:
         ''' Update the language of the current textbox. '''
         self.language.load_language(language)
 
-    def parse_progress_profiler(self, file_path:str) -> None:
+    def parse_progress_profiler(self, event) -> None:
         ''' Parse the progress profiler output file. '''
-        return progress_profiler.parse_profiler_data(file_path)
-    
-    def build_text_for_parser(self, *_) -> str:
-        ''' Build the text to be parsed. '''
-        
-        results = includes_expander.expand_includes('rn-newp2.p')
-        tb = self.app.nametowidget(self.view.cur_tab)
+        profiler = event.widget
+        filename = profiler.filename.get()
+        parser_data = progress_profiler.parse_profiler_data(filename)
+        profiler.load_profiler_data(parser_data)
 
-        tb.text.delete('1.0', tk.END)
-        tb.text.insert(tk.END, ''.join(results))
+
+    def build_text_for_parser(self, event) -> str:
+        ''' Build the text to be parsed. '''
+        profiler = event.widget
+        results = includes_expander.expand_includes(profiler.file)
+        profiler.text.delete('1.0', tk.END)
+        profiler.text.insert(tk.END, ''.join(results))

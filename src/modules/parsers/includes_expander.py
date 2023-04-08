@@ -20,8 +20,10 @@ def expand_includes(filename:str) -> list:
     for ln in lines:
         if re.search(pattern, ln):
             # Get the file name
+            # {filename.p new} -> filename.p
             _filename = ln.split('{')[1].split('}')[0].strip()
-
+            if _filename.find(' ') != -1:
+                _filename = _filename.split(' ')[0]
             results = expand_includes(_filename)
             # Add the file contents to the output
             output.extend(results)
