@@ -153,7 +153,7 @@ class NoteController:
     def build_text_for_parser(self, event) -> str:
         ''' Build the text to be parsed. '''
         profiler = event.widget
-        
-        results = includes_expander.expand_includes(profiler.tree.current_line())
-        profiler.text.delete('1.0', tk.END)
-        profiler.text.insert(tk.END, ''.join(results))
+        if cfg.project_src:
+            results = includes_expander.expand_includes(profiler.tree.current_line())
+            profiler.text.delete('1.0', tk.END)
+            profiler.text.insert(tk.END, ''.join(results))

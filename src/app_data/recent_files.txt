@@ -1,7 +1,4 @@
-/home/jpk/personal.cf
 /home/jpk/Jordan_Kell_Assignment_2.txt
-/home/jpk/abl.py
 /home/jpk/profile.profile
-/home/jpk/overview.drawio
 /home/jpk/test.txt3
-/home/jpk/new.txt
+/home/jpk/Downloads/profile.profile
