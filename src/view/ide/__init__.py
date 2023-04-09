@@ -1,14 +1,11 @@
-import os
-from tkinter     import SEL
-
-from modules.logging        import Log
-from settings               import Configuration
-
-from view.ide.clipboard     import Clipboard
-from view.ide.edit          import Editor
-from view.ide.history    import History
-from view.ide.toolbar       import Toolbar
-from widgets import NText, NTabFrame, IdeFooter
+# Local imports
+from modules.logging    import Log
+from settings           import Configuration
+from view.ide.clipboard import Clipboard
+from view.ide.editor    import Editor
+from view.ide.history   import History
+from view.ide.toolbar   import Toolbar
+from widgets            import NText, NTabFrame, TextFooter
 
 
 cfg = Configuration()
@@ -30,21 +27,22 @@ class Ide(NTabFrame):
         self.file_name = cfg.new_file_name 
 
         # Build the objects
-        self.toolbar   = Toolbar(self)
         self.text      = NText(self)
-        self.history   = History(self)
-        self.clipboard = Clipboard(self)
-        self.editor    = Editor(self.text)
-        self.footer    = IdeFooter(self)
+        self.editor    = Editor(text=self.text)
+        self.clipboard = Clipboard(editor=self.editor, text=self.text)
+        self.history   = History(ide=self, editor=self.editor, text=self.text)
+        self.toolbar   = Toolbar(ide=self, editor=self.editor, text=self.text)
+        self.footer    = TextFooter(parent=self, text=self.text)
 
         self._binds()
         self._prep_ide()
         self._grid()
 
-        # Some items need to be initialized after the view is created and tab is focused. 
-        # self.after(10, self._post_init)  
-
         logger.debug(f"Textbox finish init: {self.file_name}")
+
+    def __repr__(self) -> str:
+        ''' Override how the class looks when printed.'''
+        return f"IDE: {self.file_name} TK: {self.tab_tk_name}"
 
     @property
     def language(self) -> str:
@@ -55,7 +53,7 @@ class Ide(NTabFrame):
         ''' Updating the language will also update the syntax highlighting 
             if it is enabled. '''
         self._language = language
-        # self.ide.footer.lang_lbl.config(text=language)
+        self.footer.lang_lbl.config(text=language)
         logger.debug(f"Language set to: {language}")
         
     @property
@@ -77,7 +75,17 @@ class Ide(NTabFrame):
     ###
     def _binds(self) -> None:
         ''' Some keys need specific bindings to behave how you expect in a text editor '''
+
+        # I am not certain about bind vs bind_all and where we need each. This should get documented somewhere. 
         self.text.bind("<KP_Enter>", lambda event: self.editor.add_newline())
+        self.text.bind_all("<<Cut>>", lambda event: self.clipboard.cut_text())
+        self.text.bind_all("<<Copy>>", lambda event: self.clipboard.copy_text())
+        self.text.bind_all("<<Paste>>", lambda event: self.clipboard.paste_text())
+        self.text.bind_all("<<Undo>>", lambda event: self.history.undo())
+        self.text.bind_all("<<Redo>>", lambda event: self.history.redo())
+        self.bind_all("<<FindNext>>", lambda event:self.editor.find_next(direction=1))
+        self.bind_all("<<FindPrev>>", lambda event: self.editor.find_next(direction=-1))
+
 
         # This is currently the primary way to check if the line numbers
         # need to be redrawn. This may need to be changed when the language server 

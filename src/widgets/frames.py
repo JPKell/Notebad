@@ -88,7 +88,7 @@ class NTabFrame(Frame):
         return self._path_obj
     
     @full_path.setter
-    def full_path(self, path_obj:os.PathLike | str) -> None:
+    def full_path(self, path_obj:pathlib.Path | str) -> None:
         ''' Updating the full path will also update the file name and path '''
         if isinstance(path_obj, str):
             path_obj = pathlib.Path(path_obj)
@@ -99,7 +99,7 @@ class NTabFrame(Frame):
 
     @property
     def file_path(self) -> os.PathLike:
-        return self._path_obj.parent
+        return os.path.dirname(str(self._path_obj))
     
     ###
     # Private methods

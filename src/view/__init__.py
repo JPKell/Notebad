@@ -1,11 +1,12 @@
 from modules.logging import Log
 from settings import Configuration
 
-from view.key_commands  import KeyCommandList
-from view.settings_menu import SettingsDialog
-from view.tabs          import Tabs
-from view.ui            import UI
 from widgets import NFrame
+from .key_commands  import KeyCommandList
+from .menu          import Menubar
+from .settings_menu import SettingsDialog
+from .tabs          import Tabs
+from .ui            import UI
 
 
 cfg = Configuration()
@@ -29,18 +30,14 @@ class NoteView(NFrame):
         model. The controller should be the glue between the two and orchestrate
         the flow of data and the logic of the application.
     '''
-    def __init__(self, controller) -> None:
+    def __init__(self, parent) -> None:
         logger.debug("View begin init")
 
         # Set up the root frame
-        super().__init__(controller.app) 
+        super().__init__(parent) 
 
-        # App objects
-        self.controller = controller    
-        self.app        = controller.app     
-        
         # Build the app frame
-        self._build_ojects()
+        self._build_objects(parent)
         self._setup_and_grid()
 
         logger.debug("View finish init")
@@ -61,11 +58,11 @@ class NoteView(NFrame):
     # Private methods
     ###
 
-    def _build_ojects(self) -> None:
+    def _build_objects(self, root) -> None:
         ''' The meat of the view, this is where we create the widgets '''
-        self.ui      = UI(self)
-        self.tabs    = Tabs(self)
-
+        self.ui       = UI(self)
+        self.tabs     = Tabs(self)
+        self.menu     = Menubar(root, view=self, tabs=self.tabs, ui=self.ui)
         self.l_gutter = NFrame(self)
         self.r_gutter = NFrame(self)
 
@@ -80,8 +77,7 @@ class NoteView(NFrame):
 
         # Grid everything
         self.grid(row=0, column=0, sticky='nsew')
-
         self.l_gutter.grid(row=0, column=0, sticky='nsew')
         self.r_gutter.grid(row=0, column=2, sticky='nsew')
 
-        self.tabs.grid(row=0, column=1, sticky='nsew')
+        self.tabs.grid(row=0, column=1, padx=2, pady=(0,2), sticky='nsew')

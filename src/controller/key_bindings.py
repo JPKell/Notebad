@@ -164,19 +164,19 @@ class KeyBindings:
             {'name': 'Find next', 'key': '<Return>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.editor.find_text(
-                                                self.controller.view.toolbar.find_entry.get())},
+                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
+                                                self.controller.get_current_tab().toolbar.find_entry.get())},
 
             {'name': 'Find previous', 'key': '<Shift-Return>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.editor.find_text(
-                                                self.controller.view.toolbar.find_entry.get(), direction=-1)},
+                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
+                                                self.controller.get_current_tab().toolbar.find_entry.get(), direction=-1)},
 
             {'name': 'Find return focus', 'key': '<Escape>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.focus()},       
+                'callback': lambda event: self.controller.get_current_tab.text.focus()},       
         ]
 
         for binding in no_override_bindings:
@@ -206,7 +206,7 @@ class KeyBindings:
             {'name': 'Select all', 'key': '<Control-a>', 'category': 'Text editor',
                 'active': True, 'can_override': False,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.tabs.textbox.cursor.select_all() 
+                'callback': lambda event: self.controller.view.tabs.textbox.select_all() 
              },
 
             {'name': 'Indent', 'key': '<Tab>', 'category': 'Text editor',
@@ -306,29 +306,29 @@ class KeyBindings:
                 },
 
             {'name': 'Toggle theme', 'key': '<Alt-d>', 'category': 'Ui',
-                'widget_class': 'Text', 'active': True, 'can_override': True,
-                'bind_func': self.app.bind_class, 
+                'widget_class': None, 'active': True, 'can_override': True,
+                'bind_func': self.app.bind, 
                 'callback': lambda event: self.controller.view.ui.toggle_theme(), 
                 },
 
             {'name': 'Find', 'key': '<Control-f>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.toolbar.find_entry.focus(), 
+                'callback': lambda event: self.controller.get_current_tab().toolbar.find_entry.focus(), 
                 },
 
             {'name': 'Find next no focus', 'key': '<Control-g>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.textbox.editor.find_text(
-                    self.controller.view.toolbar.find_entry.get(), direction=1), 
+                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
+                    self.controller.get_current_tab().toolbar.find_entry.get(), direction=1), 
                 },
         
             {'name': 'Find prev no focus', 'key': '<Control-Shift-G>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.textbox.editor.find_text(
-                    self.controller.view.toolbar.find_entry.get(), direction=-1), 
+                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
+                    self.controller.get_current_tab().toolbar.find_entry.get(), direction=-1), 
                 },
 
             {'name': 'Python eval', 'key': '<Alt-e>', 'category': 'Python',

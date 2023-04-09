@@ -7,7 +7,11 @@ Hopefully the bugs decrease and the missing important does too
 
 # Bugs
 - expanding includes is not catching every one, and fails on some encoding issues. 
+- Find next from the menu is kinda broken. if find is going will highight other matchs
+- recent files broken
 - Live syntax highlighting is broken 
+- Language detection not working
+- Initial tab wont toggle dark mode on text area but new tabs will. Seems intermittent?? 
 
 # Missing important
 - FIND AND REPLACE
@@ -25,8 +29,9 @@ Hopefully the bugs decrease and the missing important does too
 - Textbox needs to be able to freeze state when switching tab. 
   - The issue is the functions with callbacks keep running in the background. even when tab is closed. That's terrible for longer sessions. That could get out of hand with many tabs open. 
   - Currently this is only the scrollbar because they are on a couple hundred millisecond callback loop
-
+- find should be moved over to the text widget
 - Move profiler file open into file management. 
+
 
 # Language
 - Continue to validate the effects of the language changes

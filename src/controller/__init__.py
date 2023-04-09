@@ -4,7 +4,7 @@ import tkinter as tk
 from controller.file_management import FileManagement
 from controller.key_bindings    import KeyBindings
 from controller.translate       import LanguageTools
-from controller.menu            import Menubar
+from view.menu            import Menubar
 from controller.utilities       import Utilities    
 
 from modules.parsers  import progress_profiler
@@ -31,22 +31,33 @@ class NoteController:
         # Instantiate controller objects
         # Root window
         self.app       = tk.Tk()
+        self.app.tk.call('source', os.path.join(cfg.theme_dir, f'forest-dark.tcl'))
+        self.app.tk.call('source', os.path.join(cfg.theme_dir, f'forest-light.tcl'))
         self.app.columnconfigure(0, weight=1)
         self.app.rowconfigure(0, weight=1)
-        
-        self.events_master()
+        self.app.title(cfg.app_title)  
+        self.app.geometry(cfg.geometry) 
+        self.app.minsize(*cfg.min_size)
+
+        if cfg.os == 'nt': 
+            self.app.iconbitmap(self.relative_to_abs_path('assets/icon.ico'))
+        else:
+            logo = tk.PhotoImage(file=self.relative_to_abs_path('assets/icon.gif'))
+            self.app.call('wm', 'iconphoto', self.app._w, logo)
+
         self.file_system = FileManagement(self)     
-        self.menu      = Menubar(self.app, controller=self)   
+
         # Instantiate the view
-        self.view      = NoteView(self) # View is instantiated here, passing the controller into the view
+        self.view      = NoteView(self.app) # View is instantiated here, passing the controller into the view
         # Order is important 
         self.language  = LanguageTools(self, self.view) # Language tools are instantiated here, passing the controller into the language tools
         self.utilities = Utilities(self, self.view) # Utilities are instantiated here, passing the controller into the utilities
         # Feed the view to the modules who need it
-        self.menu.set_view(self.view)
-        NoteController.view = self.view # This is a hack to get the view into the textbox class
-        
+
+        # NoteController.view = self.view # This is a hack to get the view into the textbox class
         self.key_bindings = KeyBindings(self) 
+        
+        self.events_master()
         self._app_protocols()
         
 
@@ -63,11 +74,26 @@ class NoteController:
     def events_master(self) -> None:
         ''' Events are things that happen in the application. '''
         self.events = {
+        # Profiler events
         '<<ProfilerFileChanged>>': self.parse_progress_profiler,
         '<<ProfilerSourceView>>':  self.build_text_for_parser,
+        # Window events
+        '<<OpenKeyCommandList>>':  self.populate_key_commands,
+        '<<OpenCalculator>>':      self.utilities.open_calculator,
+        '<<ExitApp>>':             self.exit_app,
+        # File management events
+        '<<NewFile>>':             self.file_system.new_file,
+        '<<OpenFile>>':            self.file_system.open_file,
+        '<<OpenRecentFile>>':      self.file_system.open_recent_file,
+        '<<SaveFile>>':            self.file_system.save_file,
+        '<<SaveFileAs>>':          self.file_system.save_file_as,
+        # Language events
+
+        # Nifty
+        '<<PyEvalLine>>':         self.utilities.eval_selection,  
         }
         for k,v in self.events.items():
-            self.app.bind(k, v)
+            self.app.bind_all(k, v)
 
 
     def _app_protocols(self) -> None:
@@ -110,6 +136,11 @@ class NoteController:
     def load_language(self, language:str) -> None:
         ''' Update the language of the current textbox. '''
         self.language.load_language(language)
+
+    def populate_key_commands(self, event) -> None:
+        ''' Populate the key commands list. '''
+        data = self.key_bindings.binder
+        event.widget.list_key_commands(data)
 
     def parse_progress_profiler(self, event) -> None:
         ''' Parse the progress profiler output file. '''

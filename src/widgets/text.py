@@ -113,11 +113,8 @@ class NText(Text):
 
     def _init_line_numbers(self) -> None:
         ''' Make the necessary bindings and set up the proxy listener '''
-        # These will call the _on_change method whenever the window is resized (<Configure>)
-        # or the proxy fires a <<Change>> event 
-        self.bind("<<Change>>", self._on_change)
-        self.bind("<Configure>", self._on_change)
-
+        self.bind("<Configure>", self._redraw_linenumbers)
+        self.bind_all("<<Change>>", self._redraw_linenumbers)
         # create a proxy for the text widget to listen for changes the 
         # line numbers need to react to.
         self._orig = self._w + "_orig"
@@ -127,7 +124,6 @@ class NText(Text):
     def _redraw_linenumbers(self, *args) -> None:
         ''' Redraw the line numbers on the canvas '''
         self.linenumbers.delete("all")
-
 
         i = self.index("@0,0")
         # Enter the endless loop
@@ -159,7 +155,6 @@ class NText(Text):
     def _proxy(self, *args):
         # let the actual widget perform the requested action
         cmd = (self._orig,) + args
-        
         # Would be nice to get rid of this extra try catch. Would that speed things up? 
         try:
             result = self.tk.call(cmd)
@@ -184,20 +179,13 @@ class NText(Text):
             args[0:2] == ("yview", "scroll")
         ):
             self.event_generate("<<Change>>", when="tail")
-
+            self._redraw_linenumbers()
         # return what the actual widget returned
         return result   
-
-    def _on_change(self, event) -> None:
-        ''' Triggered on <<Change>>. It will update the line numbers and cursor position in status bar (footer).
-            - event: dummy argument to match the event handler signature.
-        '''
-        self._redraw_linenumbers()
 
     ###
     # Looks
     ###
-
     def _set_theme(self) -> None:
         if cfg.theme == 'forest-dark':
             colors = Themes.dark
@@ -220,10 +208,23 @@ class NText(Text):
             insertofftime=cfg.cursor_off_time,
             padx=5, 
             pady=5)
-            
+         
         self.linenumbers.config(
             bg=colors.background, 
             highlightbackground=colors.background
             )
         
-        # self.tag_configure("find", background=cfg.find_background)
+        self.tag_configure("find", background=cfg.find_background)
+
+        self.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
+        self.tag_configure("red",      foreground = colors.syn_red)
+        self.tag_configure("orange",   foreground = colors.syn_orange)
+        self.tag_configure("yellow",   foreground = colors.syn_yellow)
+        self.tag_configure("green",    foreground = colors.syn_green)
+        self.tag_configure("cyan",     foreground = colors.syn_cyan)
+        self.tag_configure("blue",     foreground = colors.syn_blue)
+        self.tag_configure("alt_blue", foreground = colors.syn_alt_blue)
+        self.tag_configure("violet",   foreground = colors.syn_violet)
+        self.tag_configure("magenta",  foreground = colors.syn_magenta)
+        self.tag_configure("grey",     foreground = colors.syn_grey)
+        self.tag_configure("error",    foreground = colors.syn_error)

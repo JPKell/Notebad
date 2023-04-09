@@ -9,6 +9,6 @@ from .scrollers     import NHorizScrollbar, NVertScrollbar
 # Need to be imported below the widgets they are made up of
 from .tree          import NTreeview
 from .text          import NText
-from .footer        import IdeFooter
+from .footer        import TextFooter
 # Prompts and message boxes 
 from .dialogs       import prompt_yes_no, open_file_dialog, save_file_dialog

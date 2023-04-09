@@ -16,16 +16,17 @@ class Utilities:
         logger.debug('Utilities init')
 
 
-    def eval_selection(self) -> None:
+    def eval_selection(self, event=None) -> None:
         ''' Evaluate a line or selection of code. The result is displayed in 
             the footer.
         
             Since Python is interpreted, we can evaluate code right in the text 
             box. This is handy to doing math or other simple things.'''
-        selection = self.view.textbox.editor.get_selection()
+        ide = event.widget
+        selection = ide.editor.get_selection()
         # If there is nothing selected, evaluate the current line
         if selection == '':  
-            selection = self.view.textbox.editor.get_current_line_text()
+            selection = ide.editor.get_current_line_text()
         # If there is nothing still selected, do nothing
         if selection == '': 
             result = "Nothing to evaluate"
@@ -36,7 +37,7 @@ class Utilities:
             except:
                 result = "Invalid Python syntax" 
         logger.debug(f'Python eval: {selection} Result: {result}')
-        self.view.textbox.footer.set_status(result) # Return result to user
+        ide.footer.set_status(result) # Return result to user
         
 
     def open_calculator(self):

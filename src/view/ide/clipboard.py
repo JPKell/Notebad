@@ -1,5 +1,9 @@
+# Local imports
 from modules.logging import Log
 from widgets import NText
+# Relative imports
+from .editor import Editor
+
 
 logger = Log(__name__)
 
@@ -10,27 +14,29 @@ class Clipboard:
         which should be able to paste from the OS clipboard as well as our own. 
         This all might be excessive management and I should just use the OS clipboard
     '''
-    def __init__(self, textbox: NText) -> None:
-        self.textbox = textbox
+    def __init__(self, editor: Editor, text: NText) -> None:
+        # Gather IDE objects
+        self.editor = editor
+        self.text   = text
         self.clipboard = ""
         logger.debug("Clipboard init")
 
     def cut_text(self) -> None:
         ''' Don't run with scissors '''
         self.copy_text()
-        self.textbox.editor.delete_selection()  
-        logger.debug(f"Cut text {self.textbox.meta.tk_name}")
+        self.editor.delete_selection()  
+        logger.debug(f"Cut text")
 
     def copy_text(self) -> None:
-        ''' Plagurism is bad ''' 
-        self.clipboard = self.textbox.editor.get_selection()
-        self.textbox.clipboard_append(self.clipboard)
-        logger.debug(f"Copied text {self.textbox.meta.tk_name}")
+        ''' Plagiarism is bad ''' 
+        self.clipboard = self.editor.get_selection()
+        self.text.clipboard_append(self.clipboard)
+        logger.debug(f"Copied text")
 
     def paste_text(self) -> None:
         ''' Hand me that paper bag '''
         # If there is text selected, delete it
-        if self.textbox.cursor.has_selection():
-            self.textbox.editor.delete_selection()
-        self.textbox.insert('insert', self.clipboard)
-        logger.debug(f"Pasted text {self.textbox.meta.tk_name}")
+        if self.text.has_selection():
+            self.editor.delete_selection()
+        self.text.insert('insert', self.clipboard)
+        logger.debug(f"Pasted text")

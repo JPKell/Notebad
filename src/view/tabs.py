@@ -126,12 +126,3 @@ class Tabs(NNotebook):
         #     textbox = frm.winfo_children()[0]
         #     textbox.is_focus = False
         # logger.verbose("All textboxes unfocused")
-
-    def set_properties(self, tab_name:str, **kwargs) -> None:
-        ''' Set properties of a tab '''
-        self.tab(tab_name, **kwargs)
-        logger.debug(f"Tab properties set: {tab_name}")
-    
-    def cur_tab_tk_name(self) -> str:
-        ''' Returns the name of the current tab '''
-        return self.select()

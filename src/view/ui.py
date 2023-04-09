@@ -16,13 +16,12 @@ class UI:
         '''
     def __init__(self, view: NFrame) -> None:
         self.view = view
-        self.app  = view.controller.app
+
         self.style = Style()
         self.font = font.nametofont('TkFixedFont')
         self._font_size = cfg.font_size
 
         self._init_style()
-        self._root_window_setup()
         logger.debug("UI initialized")
 
     @property
@@ -33,7 +32,8 @@ class UI:
     def font_size(self, size: int) -> None:
         self._font_size = size
         self.font.configure(size=size)
-        self.view.textbox.config(font=(cfg.program_font, str(self.font_size)))
+        self.view.cur_tab.text.config(font=(cfg.program_font, str(self.font_size)))
+        self.view.event_generate('<<Change>>')   # This gets the line numbers to update
         logger.debug(f"Font size set to {size}")
     
     def font_size_bump(self, increase=True) -> None:
@@ -70,7 +70,7 @@ class UI:
             colors = Themes.dark
             self.style.theme_use('forest-dark')
 
-        self.app.event_generate('<<ThemeToggle>>')
+        self.view.event_generate('<<ThemeToggle>>')
 
         logger.debug(f"Theme set to {cfg.theme}")
      
@@ -87,53 +87,14 @@ class UI:
                 'activebackground': colors.bg_highlight, 
                 'activeforeground':colors.foreground 
                 }
-            self.view.controller.menu.configure(**menu_colors)   
+            
+            # TODO This is not working. Maybe bringing menu into view makes sense now
+
+            # self.view.controller.menu.configure(**menu_colors)   
+            
             # Loop through the menu items and set the colors 
-            for menu in self.view.controller.menu.menu_list:
-                menu.config(**menu_colors)     
-    
-        
-        ## This all needs to get done in the widgets themselves
-
-        # Tab styles. We need to cycle through all the tabs and set the styles.
-        # otherwise the active tab will be the only one to change. 
-        # for tab in self.view.tabs.tabs():
-        #     # The tab is a frame so we need to get the textbox from the frame.
-        #     # Other widgets are in the tab as well but they are in the ttk 
-        #     # style so they will get updated with the theme.
-        #     tab = self.view.tabs.nametowidget(tab)
-        #     textbox = tab.winfo_children()[0]
-        #     textbox.config(
-        #         background=colors.text_background, 
-        #         foreground=colors.text_foreground, 
-        #         insertbackground=colors.cursor, 
-
-        #         highlightbackground=colors.text_background, 
-        #         highlightcolor=colors.text_background,
-        #         )
-        #     # Style the line numbers on the side
-        #     textbox.linenumbers.config(bg=colors.background, highlightbackground=colors.background)
-            
-        #     # textbox.linenumbers.itemconfigure("lineno", fill=colors.text_foreground)
-            
-        #     # Style the syntax highlighting
-        #     textbox.tag_configure("red", foreground = colors.syn_red)
-        #     textbox.tag_configure("orange", foreground = colors.syn_orange)
-        #     textbox.tag_configure("yellow", foreground = colors.syn_yellow)
-        #     textbox.tag_configure("green", foreground = colors.syn_green)
-        #     textbox.tag_configure("cyan", foreground = colors.syn_cyan)
-        #     textbox.tag_configure("blue", foreground = colors.syn_blue)
-        #     textbox.tag_configure("alt_blue", foreground = colors.syn_alt_blue)
-        #     textbox.tag_configure("violet", foreground = colors.syn_violet)
-        #     textbox.tag_configure("magenta", foreground = colors.syn_magenta)
-        #     textbox.tag_configure("grey", foreground = colors.syn_grey)
-        #     textbox.tag_configure("error", foreground = colors.syn_error)
-
-        #     # Style the status bar
-        #     textbox.footer.status.config(bg=colors.background, fg=colors.foreground)
-        #     textbox.footer.pos_lbl.config(bg=colors.background, fg=colors.syn_orange)
-        #     textbox.footer.lang_lbl.config(bg=colors.background, fg=colors.syn_yellow)
-        #     textbox.footer.sel_lbl.config(bg=colors.background, fg=colors.syn_orange)
+            # for menu in self.view.controller.menu.menu_list:
+            #     menu.config(**menu_colors)     
 
     @staticmethod
     def parse_windows_mousewheel(event, callback=None):
@@ -145,122 +106,14 @@ class UI:
             mouse_wheel_up = False
         callback(mouse_wheel_up)
 
-
-    # This is not currently in use. It was for the x's on the tabs to close them.
-    def _init_img_pool(self) -> None:
-        ''' Images used in the tabs. These look okay at best. Would be nice to replace these'''
-        self.images = (
-            PhotoImage("img_close", data='''
-                R0lGODlhCAAIAMIBAAAAADs7O4+Pj9nZ2Ts7Ozs7Ozs7Ozs7OyH+EUNyZWF0ZWQg
-                d2l0aCBHSU1QACH5BAEKAAQALAAAAAAIAAgAAAMVGDBEA0qNJyGw7AmxmuaZhWEU
-                5kEJADs=
-                '''),
-            PhotoImage("img_closeactive", data='''
-                R0lGODlhCAAIAMIEAAAAAP/SAP/bNNnZ2cbGxsbGxsbGxsbGxiH5BAEKAAQALAAA
-                AAAIAAgAAAMVGDBEA0qNJyGw7AmxmuaZhWEU5kEJADs=
-                '''),
-            PhotoImage("img_closepressed", data='''
-                R0lGODlhCAAIAMIEAAAAAOUqKv9mZtnZ2Ts7Ozs7Ozs7Ozs7OyH+EUNyZWF0ZWQg
-                d2l0aCBHSU1QACH5BAEKAAQALAAAAAAIAAgAAAMVGDBEA0qNJyGw7AmxmuaZhWEU
-                5kEJADs=
-            ''')
-        )
-
+    ###
+    # Private methods
+    ###
     def _init_style(self) -> None:
         ''' This will get everything set up for the theme.'''
-        # Load a prefab theme
-
-        self.app.tk.call('source', os.path.join(cfg.theme_dir, f'forest-dark.tcl'))
-        self.app.tk.call('source', os.path.join(cfg.theme_dir, f'forest-light.tcl'))
-
-        # This custom element is used to make a close element for us to map over the image. 
-
-        # This section created the custom themes previously, It has the code for the close buttons.
-        # they didn't work on windows, so there's something to figure out. Its here as a starting 
-        # point for when it gets tackled.
-
-        # self.style.element_create("close", "image", "img_close",
-        #     ("active", "pressed", "!disabled", "img_closepressed"),
-        #     ("active", "!disabled", "img_closeactive"), border=8, sticky='e')
-        # This section creates the theme and sets the colors for the theme
-        # for title, colors in [('forest-dark', Themes.dark), ('forest-light', Themes.light)]: 
-        #     self.style.theme_create( title, parent="alt", settings={
-        #         "TNotebook": {
-        #             "configure": {
-        #                 "tabmargins": [cfg.line_number_width + 2, 5, 10, 0], 
-        #                 "foreground": colors.background,
-        #                 "background": colors.background,
-        #                 "borderwidth": 0,
-        #                 "highlightthickness": 0,
-        #                 } 
-        #             },
-        #         "TNotebook.Tab": {
-        #             "configure": {
-        #                 "padding": [10, 2, 10, 0], 
-        #                 "background": colors.tab_unselect,
-        #                 "foreground": colors.foreground,
-        #                 "compound": "right",
-        #                 "borderwidth": 0,
-        #                 },
-                    
-        #             "map": {
-        #                 "background": [("selected", colors.tab_select)],
-        #                 "expand": [("selected", [0, 1, 1, 0])] 
-        #                 },
-        #             } ,
-        #         } 
-        #     ) 
-        #     self._register_tab_close_button_with_style()
-        #     logger.verbose(f"Created theme: {title}")
 
         # Initialize to the correct theme
         if cfg.theme == 'forest-dark':
             self.style.theme_use('forest-dark')
         else:
             self.style.theme_use('forest-light')
-
-    def _register_tab_close_button_with_style(self) -> None:
-        ''' The tab close is a custom element so we need to register it with the style.
-            The main reason for this is so we can get that the close button is the element under 
-            the cursor when clicking on the close icon. 
-        '''
-        # This section layout the tab close button and provides the element name "close" to the style
-        self.style.layout("TNotebook", [("TNotebook.client", {"sticky": "nswe"})])
-        self.style.layout("TNotebook.Tab", [
-            ("TNotebook.tab", {
-                "sticky": "nswe",
-                "children": [
-                    ("TNotebook.padding", {
-                        "side": "top",
-                        "sticky": "nswe",
-                        "children": [(
-                            "TNotebook.focus", {
-                                "side": "top",
-                                "sticky": "nswe",
-                                "children": [
-                                    ("TNotebook.label", {"side": "left", "sticky": ''}),
-                                    ("TNotebook.close", {"side": "right", "sticky": ''})
-                                    ]
-                                }
-                            )]
-                        }
-                    )]
-                }
-            )]
-        )
-            
-
-    def _root_window_setup(self) -> None:
-        ''' Basic geometry and title settings for the root window.'''
-        app = self.view.app
-        # Window settings 
-        app.title(cfg.app_title)  
-        app.geometry(cfg.geometry) 
-        app.minsize(*cfg.min_size)
-
-        path_func = self.view.controller.relative_to_abs_path
-        if cfg.os == 'nt': 
-            app.iconbitmap(path_func('assets/icon.ico'))
-        else:
-            logo = PhotoImage(file=path_func('assets/icon.gif'))
-            app.call('wm', 'iconphoto', app._w, logo)

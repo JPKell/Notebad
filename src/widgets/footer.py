@@ -1,32 +1,35 @@
 from tkinter import StringVar
 
-from settings import Configuration
+from settings        import Configuration
 from modules.logging import Log
-from widgets import NFrame, NLabel
+from view.colors     import Themes
+from widgets         import NFrame, NLabel, NText
 
 cfg = Configuration()
 logger = Log(__name__)
 
 # TODO Make it listen for <<Change>> events and update the status bar
 
-class IdeFooter(NFrame):
+class TextFooter(NFrame):
     ''' Runs the status bar at the bottom of the screen. I would like to see this
         displaying useful information, but I'm not sure what that would be yet.
         Process run times, remote connections, etc. '''
-    def __init__(self, ide):
-        super().__init__(ide, height=30)        
-        self.ide = ide
-        self.status_txt = StringVar(self, value=cfg.status_bar_default_text)
-        self._binds()
-        self._make_label()
-        self._make_selection_labels()
-        self._make_position_labels()
-        self._make_language_label()
+    def __init__(self,parent, text: NText):
         logger.debug("Footer init")
+        super().__init__(parent)       
+        # Gather IDE objects
+        self.text = text
 
-    def set_status(self, text, revert=True) -> None:
+        self.status_txt = StringVar(self, value=cfg.status_bar_default_text) 
+
+        self._binds()
+        self._make_labels()
+        self._set_theme()
+        self._grid()
+        
+
+    def set_status(self, text:str, revert=True) -> None:
         ''' Set the status bar text and optionally revert it after the duration '''
-        text = str(text)
         old_txt = self.status_txt.get()
         self.status_txt.set(text)
         # If a blank string is passed, reset the status bar default text immediately
@@ -38,16 +41,17 @@ class IdeFooter(NFrame):
 
     def update_cursor_pos(self, event) -> None:
         ''' Update the status bar position on custom <<Change>> event '''
-        textbox = self.ide.text
-        ## Cursor stats
-        index = textbox.index('insert') 
+        index = self.text.index('insert') 
         index = index.split('.')
         self.pos_lbl.config(text=f"ln {index[0]} col {index[1]} ")
 
-    # TODO: Make this respond to events rather than being called directly
     def update_selection_stats(self, event):
         ''' Update selection stats when <<Selection>> event is triggered '''
-        selection_text = event.widget.selection_get()
+        # If there is no selection tk throws an error on selection get so bail early
+        try:
+            selection_text = self.text.selection_get()
+        except:
+            return
         lines = selection_text.count('\n')
         chars = len(selection_text)
         if lines + chars == 0:
@@ -59,27 +63,30 @@ class IdeFooter(NFrame):
     ###
     def _binds(self) -> None:
         ''' Bind events to methods '''
-        self.bind_all('<<Change>>', self.update_cursor_pos)
-        self.bind_all('<<Selection>>', self.update_selection_stats)
+        self.text.bind('<<Change>>', self.update_cursor_pos)
+        self.text.bind('<<Selection>>', self.update_selection_stats)
 
-    def _make_label(self) -> None:
+    def _make_labels(self) -> None:
         ''' Main constructor for the status bar '''
-        self.status = NLabel(self, textvariable=self.status_txt, relief='flat', anchor='w')
-        self.status.pack(fill='x')
+        self.status   = NLabel(self, textvariable=self.status_txt, relief='flat', anchor='w')
+        self.lang_lbl = NLabel(self, text="python", relief='flat', anchor='e')
+        self.pos_lbl  = NLabel(self, text="ln 1 col 0 ", relief='flat', anchor='e')
+        self.sel_lbl  = NLabel(self, text="()", relief='flat', anchor='e')
 
-    def _make_selection_labels(self):
-        self.sel_lbl = NLabel(self.status, text="()", relief='flat', anchor='e')
-        self.sel_lbl.pack(side='right')
+    def _grid(self) -> None:
+        ''' Grid the status bar '''
+        self.columnconfigure(0, weight=1)
+        self.status.grid(  row=0, column=0, padx=3, sticky='w')
+        self.lang_lbl.grid(row=0, column=1, padx=3, sticky='e')
+        self.pos_lbl.grid( row=0, column=2, padx=3, sticky='e')
+        self.sel_lbl.grid( row=0, column=3, padx=3, sticky='e')
 
-    def _make_position_labels(self):
-        self.pos_lbl = NLabel(self.status, text="ln 1 col 0 ", relief='flat', anchor='e')
-        self.pos_lbl.pack(side='right')
-
-    def _make_language_label(self):
-        self.lang_lbl = NLabel(self.status, text="python", relief='flat', anchor='e')
-        self.lang_lbl.pack(side='right')
-
-    def _reset_label(self, force=False) -> None:
-        ''' Return status bar to default text. Force will override the freeze setting.'''
-        if not cfg.status_bar_freeze or force:
-            self.status.config(text=cfg.status_bar_default_text)
+    def _set_theme(self) -> None:
+        if cfg.theme == 'forest-dark':
+            colors = Themes.dark
+        else:
+            colors = Themes.light
+        self.status.config(  background=colors.background, foreground=colors.foreground)
+        self.pos_lbl.config( background=colors.background, foreground=colors.syn_orange)
+        self.lang_lbl.config(background=colors.background, foreground=colors.syn_yellow)
+        self.sel_lbl.config( background=colors.background, foreground=colors.syn_orange)

@@ -3,23 +3,22 @@ from widgets import NFrame, NText, NToplevel
 class KeyCommandList(NToplevel):
     def __init__(self, master):
         super().__init__(master)
-        self.keybindings = master.controller.key_bindings
         self.root = NFrame(self)
-        self.geometry("450x900")
-        self.root.pack()
-        self.list_canvas()
+        self.geometry("550x900")
+        self._build_objects()
+        self.event_generate('<<OpenKeyCommandList>>')
 
-    def list_canvas(self):
-        self.txt = NText(self.root, width=400, height=200, font=('courier', 10))
-        
-        kb = self.keybindings.binder
+    def _build_objects(self):
+        self.txt = NText(self.root, font=('courier', 10))
 
-        categories = set([d['category'] for d in kb])
+
+    def list_key_commands(self, data:dict) -> None:
+        categories = set([d['category'] for d in data])
 
         self.txt.insert(1.0, "Key Commands\n")
         y = 2
         for category in categories:
-            key_list = [ k for k in kb if k['category'] == category ]
+            key_list = [ k for k in data if k['category'] == category ]
 
             self.txt.insert(f'{y}.0', f'\n{category}\n\n')
             y += 2
@@ -29,4 +28,10 @@ class KeyCommandList(NToplevel):
                 y += 1
 
         self.txt.config(state='disabled')
-        self.txt.pack()
+        self.root.grid(row=0, column=0, sticky='nsew')
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+
+        self.txt.grid()
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)

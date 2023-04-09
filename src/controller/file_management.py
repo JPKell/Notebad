@@ -18,18 +18,25 @@ class FileManagement:
         self._recent_files = os.path.join(cfg.data_dir, 'recent_files.txt') # TODO make a function in settings that returns the path to a file in the data dir So cfg.data_file('recent_files.txt')
         logger.debug('Initialized FileManagement')
 
-    def new_file(self) -> None:
+    def new_file(self, event=None) -> None:
         ''' Creates a new tab and a crisp fresh textbox. '''
         logger.debug('Creating new file')
         self.controller.view.tabs.new_tab('ide')
         self.controller.view.tabs.move_to_tab()    # Move focus to the new tab
         logger.info('New file created')
 
-    def open_file(self, full_path=None) -> None:
+    def open_recent_file(self, event):
+        ''' Opens a recent file by getting the filename from the event.'''
+        
+        self.open_file(full_path=event.widget._recent_file)
+
+    def open_file(self, event=None, full_path:str=None) -> None:
         ''' Opens a file. There should be an encoding option here. But there 
-            isn't, that should get added and this note removed. '''
-        if full_path is None:
-            full_path = open_file_dialog()   # Tkinter filedialog returns '/' filepath, even for Windows! Woohoo!
+            isn't, that should get added and this note removed. 
+            
+            The menubar sends the event and it handles the recent list. 
+            '''
+        full_path = open_file_dialog() if not full_path else full_path
 
         if full_path:
             tab = self.controller.get_current_tab()         # Get the current tab
@@ -56,30 +63,33 @@ class FileManagement:
         logger.info(f'Opened file: {full_path}')
         return 'break'
 
-    def save_file(self) -> None:
+    def save_file(self, event=None, ide:Ide=None) -> None:
         ''' Saves current textbox to disk. If not written to disk before,
             save_as_file is called to let the user name it. Also thinking 
             about just sequentially naming all the files to make like hard. jk'''
-        textbox = self.controller.view.textbox
-
-        # If the current file still has the default file name, prompt for a new name
-        if textbox.meta.file_name == cfg.new_file_name:
-            self.save_as_file(textbox)
-        else:
-            self.write_textbox_to_file(textbox.meta.full_path, textbox)
-        logger.info(f'Saved file: {textbox.meta.full_path}')
+        if hasattr(event.widget, 'text'):
+            ide = event.widget
+        if not ide:
+            return
         
-    def save_as_file(self, textbox:Ide=None) -> None:
+        # If the current file still has the default file name, prompt for a new name
+        if ide.file_name == cfg.new_file_name:
+            self.save_file_as(ide)
+        else:
+            self.write_textbox_to_file(ide.full_path, ide)
+        logger.info(f'Saved file: {ide.full_path}')
+        
+    def save_file_as(self, event=None, ide:Ide=None) -> None:
         ''' Saves textbox to disk. If no textbox is given, the current tab is used.'''
 
         # I am giving the option here to pass a textbox object in to be saved. 
         # the time this would be useful would be in a save all function. But is that
         # something to worry about now? No. 
-        if textbox is None:             
-            textbox = self.controller.view.textbox
-        full_path = save_file_dialog(file_name=textbox.file_name, path=textbox.file_path)
+        if ide is None:             
+            ide = event.widget
+        full_path = save_file_dialog(file_name=ide.file_name, path=ide.file_path)
         if full_path:
-            self.write_textbox_to_file(full_path, textbox)
+            self.write_textbox_to_file(full_path, ide)
         logger.info(f'Saved file as: {full_path}')
 
     def parts_from_file_path(self, full_path:str) -> dict:
@@ -159,4 +169,4 @@ class FileManagement:
                 f.write(file.strip() + '\n')
 
         # Send an event to update the recent files menu
-        self.controller.menu.make_recent_file_list()
+        self.controller.view.event_generate('<<UpdateRecentFiles>>')
