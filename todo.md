@@ -26,6 +26,8 @@ Hopefully the bugs decrease and the missing important does too
   - The issue is the functions with callbacks keep running in the background. even when tab is closed. That's terrible for longer sessions. That could get out of hand with many tabs open. 
   - Currently this is only the scrollbar because they are on a couple hundred millisecond callback loop
 
+- Move profiler file open into file management. 
+
 # Language
 - Continue to validate the effects of the language changes
 - Check that indentation rules are being followed 

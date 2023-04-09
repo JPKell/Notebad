@@ -6,7 +6,6 @@ from settings               import Configuration
 
 from view.ide.clipboard     import Clipboard
 from view.ide.edit          import Editor
-from view.ide.meta          import Meta
 from view.ide.history    import History
 from view.ide.toolbar       import Toolbar
 from widgets import NText, NTabFrame, IdeFooter
@@ -26,14 +25,11 @@ class Ide(NTabFrame):
         logger.debug("Textbox begin init")
 
         # Class variables
-        self._file_name = cfg.new_file_name 
-        self._path_obj  = os.PathLike           # Path object of the file   
-        self._has_focus = False                 # Reduce the number of events and pause loops
         self._language  = None                  # Programming language of source
         self.disable_line_no_update = False     # Line number proxy drags on mass edits
+        self.file_name = cfg.new_file_name 
 
         # Build the objects
-        self.meta      = Meta(self)
         self.toolbar   = Toolbar(self)
         self.text      = NText(self)
         self.history   = History(self)
@@ -49,46 +45,6 @@ class Ide(NTabFrame):
         # self.after(10, self._post_init)  
 
         logger.debug(f"Textbox finish init: {self.file_name}")
-
-    ###              ###
-    # Class properties #
-    ###              ###
-    @property
-    def file_name(self) -> str:
-        return self._file_name
-    
-    @file_name.setter
-    def file_name(self, file_name:str) -> None:
-        ''' Updating the filename will also update the tab name '''
-        self._file_name = file_name
-        self.tab_title = file_name + ' *' if self.tab_save_on_close else ''
-
-    @property
-    def full_path(self) -> os.PathLike:
-        return self._path_obj
-    
-    @full_path.setter
-    def full_path(self, path_obj:os.PathLike | str) -> None:
-        ''' Updating the full path will also update the file name and path '''
-        if isinstance(path_obj, str):
-            path_obj = os.path(path_obj)
-        self._path_obj = path_obj
-        self.file_name = path_obj.name
-
-    @property
-    def file_path(self) -> os.PathLike:
-        return self._path_obj.parent
-    
-    @property
-    def has_focus(self) -> bool:
-        return self._has_focus
-    
-    @has_focus.setter
-    def has_focus(self, has_focus:bool) -> None:
-        # Turn on any of the items in the event loop
-        self._has_focus = has_focus
-        if has_focus:
-            self.footer.update_cursor_pos()
 
     @property
     def language(self) -> str:

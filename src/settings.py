@@ -102,10 +102,11 @@ class Configuration:
         """ Set the root directory of the app. This is the directory that the
             app source is from. """
         self.current_dir = pathlib.Path(__file__).parent.resolve()
-        self.log_dir  = os.path.join(self.current_dir, 'logs')
-        self.log_file = os.path.join(self.log_dir, 'notebad.log')
+        self.log_dir     = os.path.join(self.current_dir, 'logs')
+        self.log_file    = os.path.join(self.log_dir, 'notebad.log')
         self.log_performance_file = os.path.join(self.log_dir, 'performance.log')
-        self.theme_dir = os.path.join(self.current_dir, 'theme')
+        self.theme_dir   = os.path.join(self.current_dir, 'theme')
+        self.data_dir    = os.path.join(self.current_dir, 'app_data')
         
         # Now that we know where we are we can look for personal settings
         self.init_personal_settings()

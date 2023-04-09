@@ -86,6 +86,10 @@ class NoteController:
             self.app.state("zoomed")
         self.app.mainloop()
 
+    def get_current_tab(self) -> None:
+        ''' Get the current tab. '''
+        return self.view.cur_tab
+
     def exit_app(self) -> None:
         ''' Exit the application. Optional hardcore mode will disable the prompt.
             This is useful for testing. To quote the devs at Bethseda, 

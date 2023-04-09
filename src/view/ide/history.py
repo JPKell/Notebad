@@ -23,7 +23,7 @@ class History:
         ''' This is the undo history a deque is used to limit the size of the
             stack and make it more efficient. '''
         self.undo_stack.append(self.ide.text.get("1.0", "end - 1c"))
-        logger.debug(f"Stackified text {self.ide.meta.tk_name}")
+        logger.debug(f"Stackified text {self.ide.tab_tk_name}")
  
     def undo(self) -> None:
         ''' This is the undo function. It pops the last item off the undo stack 
@@ -34,7 +34,7 @@ class History:
             txt = self.undo_stack.pop()
             self.ide.editor.clear_all()
             self.ide.text.insert("0.0", txt)
-            logger.debug(f"Undo {self.ide.meta.tk_name}")
+            logger.debug(f"Undo {self.ide.tab_tk_name}")
         except IndexError:
             logger.debug("Nothing to undo")
 
@@ -45,7 +45,7 @@ class History:
             txt = self.redo_stack.pop()
             self.undo_stack.append(txt)
             self.ide.editor.clear_all()
-            self.ide.test.insert("0.0", txt)
-            logger.debug(f"Redo {self.ide.meta.tk_name}")
+            self.ide.text.insert("0.0", txt)
+            logger.debug(f"Redo {self.ide.tab_tk_name}")
         except IndexError:
             logger.debug("Nothing to redo")
