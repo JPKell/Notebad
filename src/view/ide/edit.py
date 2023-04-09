@@ -148,7 +148,7 @@ class Editor:
                 self.current_find_positions.append("%s + %sc" % (find_position, count_matches.get()))
 
             # Update status bar with find information
-            self.tb.footer.set_status(f"Find Result {self.find_position_index + 1} of {len(self.current_find_positions)}", revert=False)
+            # self.tb.footer.set_status(f"Find Result {self.find_position_index + 1} of {len(self.current_find_positions)}", revert=False)
 
             self.find_next(direction=0)
 
@@ -162,7 +162,7 @@ class Editor:
         ''' Move to the first/next/prev result in the find_positions list.
             Direction can equal 1, -1 or 0. 0 sets the find index to 0 for a new find to start from the top '''
         if self.current_find_positions == []:
-            self.tb.footer.set_status("No results found...", revert=True)
+            # self.tb.footer.set_status("No results found...", revert=True)
             self.tb.bell()   # Play system bell
             return
 
@@ -177,8 +177,8 @@ class Editor:
         if self.find_position_index < 0:
             self.find_position_index = len(self.current_find_positions) - 1
 
-        self.tb.footer.set_status(f"Find Result {self.find_position_index + 1} of {len(self.current_find_positions)}",
-                                  revert=False)
+        # self.tb.footer.set_status(f"Find Result {self.find_position_index + 1} of {len(self.current_find_positions)}",
+                                #   revert=False)
 
         find_position_and_chars = self.current_find_positions[self.find_position_index]
         position = find_position_and_chars.split("+")

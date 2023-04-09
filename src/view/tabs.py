@@ -1,6 +1,6 @@
 from modules.logging import Log
 from settings   import Configuration
-from widgets    import NNotebook, NTabFrame
+from widgets    import NNotebook, NTabFrame, prompt_yes_no
 # Views 
 from .ide       import Ide
 from .profiler  import ProgressProfiler
@@ -47,12 +47,13 @@ class Tabs(NNotebook):
 
         # Instantiate the new tab
         new_tab = self.tab_widgets[tab_style](self, *args, **kwargs)
-
         # Add the tab to the notebook and set the tab name
         self.add(new_tab, text=new_tab.tab_title)
-        new_tab.tab_tk_name = self.select()
         self.move_to_tab()
-        
+        # The tab can not set it's own name until it is added to the notebook and is 
+        # being managed by the notebook.
+        new_tab.tab_tk_name = self.select()
+
         logger.debug(f"New { tab_style } tab created")
         
     def on_close_press(self, event) -> None:
@@ -94,7 +95,7 @@ class Tabs(NNotebook):
             tab_name = self.select()
         
         if self.cur_tab.tab_save_on_close and not cfg.hardcore_mode:
-            self.view.prompt_yes_no("Whoa, there...", "There are changes not yet saved. Save before you giddy on off??", self.view.controller.save_file)
+            prompt_yes_no("Whoa, there...", "There are changes not yet saved. Save before you giddy on off??", self._event())
 
         # Remove tab from the notebook
         self.forget(tab_name)

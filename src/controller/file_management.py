@@ -1,6 +1,9 @@
-from view.ide import Ide
+import os
+
 from modules.logging import Log
 from settings import Configuration
+from view.ide import Ide
+
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -32,12 +35,8 @@ class FileManagement:
                 self.controller.view.tabs.move_to_tab()
                 textbox = self.controller.view.textbox     # Grab the newly minted textbox object 
 
-            textbox.meta.set_meta(
-                tk_name=self.controller.view.tabs.select(),
-                full_path=full_path.strip(),
-                file_path=path_parts['path'], 
-                file_name=path_parts['file'], 
-                )
+            textbox.full_path=full_path.strip()
+            
             self.write_file_to_textbox(textbox, full_path)
             textbox.cursor.set_position('1.0')      # Set cursor at beginning of file
         logger.info(f'Opened file: {full_path}')
@@ -93,7 +92,7 @@ class FileManagement:
             else: # Else just load the file
                 textbox.insert('end', file.read())  # Insert the file contents into the textbox
 
-            textbox.meta.changed_since_saved = False # Reset the changed flag since we just opened the file
+            textbox.tab_save_on_close = False # Reset the changed flag since we just opened the file
             textbox.history.stackify()          # Add the file contents to the undo stack
         logger.debug(f'Wrote file to textbox: {full_path}')
 
@@ -107,13 +106,46 @@ class FileManagement:
 
         # Update the textbox properties
         path_parts = self.parts_from_file_path(full_path)
-        textbox.meta.set_meta(tk_name=self.controller.view.tabs.cur_tab_tk_name(),
-                    full_path=full_path,
-                    file_path=path_parts['path'], 
-                    file_name=path_parts['file'], )
-        textbox.meta.changed_since_saved = False
+        textbox.full_path = full_path
+        textbox.tab_save_on_close = False
         self.controller.view.tabs.set_properties(textbox.meta.tk_name, text=textbox.meta.file_name)
 
         # Update the window title
         self.controller.app.title(f"{cfg.app_title} - {textbox.meta.file_name}")
         logger.debug(f'Wrote file to textbox: {full_path}')
+
+
+
+class Meta:
+    def __init__(self, ide):
+        self.ide = ide
+
+        self._recent_files = os.path.join(cfg.current_dir, 'app_data/recent_files.txt')
+
+    # Do this from controller reacting to event from view
+    def add_recent_file(self):
+        ''' When meta is updated, add the full filepath to the recent files '''
+        recent_files = []
+        if self.full_path is not None:
+            # Check "recent files" file exists and extract contents to manipulate the paths inside
+            if os.path.exists(self._recent_files):
+                with open(self._recent_files, 'r') as f:
+                    recent_files = f.readlines()
+
+                # Loop through and remove any filepaths that no longer exist
+                for file in recent_files:
+                    if not os.path.exists(file.strip()):
+                        recent_files.remove(file)
+
+                # Check if current file exists in the list and remove it
+                if recent_files.count(self.full_path + '\n') != 0:
+                    recent_files.remove(self.full_path + '\n')
+                # Or trim the list if it's more than 10 items long
+                elif len(recent_files) >= 10:
+                    recent_files.pop(0)
+
+            # Write "recent filepaths" to file
+            recent_files.append(self.full_path)
+            with open(self._recent_files, 'w') as f:
+                for file in recent_files:
+                    f.write(file.strip() + '\n')

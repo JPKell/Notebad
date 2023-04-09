@@ -13,10 +13,11 @@ class IdeFooter(NFrame):
     ''' Runs the status bar at the bottom of the screen. I would like to see this
         displaying useful information, but I'm not sure what that would be yet.
         Process run times, remote connections, etc. '''
-    def __init__(self, view):
-        super().__init__(view, height=30)        
-        self.view = view
+    def __init__(self, ide):
+        super().__init__(ide, height=30)        
+        self.ide = ide
         self.status_txt = StringVar(self, value=cfg.status_bar_default_text)
+        self._binds()
         self._make_label()
         self._make_selection_labels()
         self._make_position_labels()
@@ -35,24 +36,32 @@ class IdeFooter(NFrame):
             self.after(cfg.status_bar_duration, self.status_txt.set, old_txt)
         logger.debug(f"Status bar set to: {text}")
 
-    def update_cursor_pos(self) -> None:
+    def update_cursor_pos(self, event) -> None:
         ''' Update the status bar position on custom <<Change>> event '''
-        textbox = self.view.textbox
+        textbox = self.ide.text
         ## Cursor stats
         index = textbox.index('insert') 
         index = index.split('.')
         self.pos_lbl.config(text=f"ln {index[0]} col {index[1]} ")
 
-    def update_selection_stats(self, selection_text):
+    # TODO: Make this respond to events rather than being called directly
+    def update_selection_stats(self, event):
         ''' Update selection stats when <<Selection>> event is triggered '''
+        selection_text = event.widget.selection_get()
         lines = selection_text.count('\n')
         chars = len(selection_text)
         if lines + chars == 0:
             self.sel_lbl.config(text=' ')
         else:
             self.sel_lbl.config(text=f'(sel ln {lines} ch {chars})')
-
+    ###
     # Private methods
+    ###
+    def _binds(self) -> None:
+        ''' Bind events to methods '''
+        self.bind_all('<<Change>>', self.update_cursor_pos)
+        self.bind_all('<<Selection>>', self.update_selection_stats)
+
     def _make_label(self) -> None:
         ''' Main constructor for the status bar '''
         self.status = NLabel(self, textvariable=self.status_txt, relief='flat', anchor='w')

@@ -56,10 +56,8 @@ class NoteController:
             textbox = self.view.cur_tab         
             self.file_system.write_file_to_textbox(textbox, cfg.preload_file)
             path_parts = self.file_system.parts_from_file_path(cfg.preload_file)
-            textbox.meta.set_meta(tk_name=self.view.tabs.cur_tab_tk_name(),
-                        full_path=cfg.preload_file,
-                        file_path=path_parts['path'], 
-                        file_name=path_parts['file'], )
+            textbox.full_path=cfg.preload_file
+
         logger.debug('Controller finish init')
 
     def events_master(self) -> None:
