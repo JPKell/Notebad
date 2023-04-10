@@ -3,3 +3,4 @@
 /home/jpk/test.txt3
 /home/jpk/new.txt
 /home/jpk/test.txt
+/home/jpk/gits/Notebad/test.p

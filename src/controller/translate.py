@@ -1,6 +1,10 @@
-from settings import Configuration
+from tkinter import Tk
+
+from language        import LanguageModel
 from modules.logging import Log
-from language import LanguageModel
+from settings        import Configuration
+from view            import NotebadView
+from view.ide        import Ide
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -8,8 +12,8 @@ logger = Log(__name__)
 class LanguageTools:
     ''' The language tools are the tools that are used to manipulate the text
         in the textbox from the model. This includes syntax highlighting '''
-    def __init__(self, controller, view):
-        self.controller = controller
+    def __init__(self, app: Tk, view: NotebadView):
+        self.app = app
         self.view = view
         self.current_language = None
         self.model = LanguageModel()
@@ -45,19 +49,19 @@ class LanguageTools:
         logger.debug('static_syntax_formatting begin')
 
         # Get the current textbox and cursor position
-        textbox = self.view.textbox
-        cur_index = textbox.index('insert')
+        ide = self.view.cur_tab if self.view.cur_tab is not None else Ide()
+        cur_index = ide.text.index('insert')
 
         if file_txt is None:
-            file_txt = textbox.get('1.0', 'end')
+            file_txt = ide.text.get('1.0', 'end')
 
         results = self.model.format_syntax(file_txt, expand=expand, upper=upper)
 
         # We want to disable the line number update otherwise we will 
         # end up blocking the app with thousands of inserts which trigger
         # events which will block in the Tk main loop. 
-        textbox.disable_line_no_update = True
-        textbox.editor.clear_all()
+        ide.disable_line_no_update = True
+        ide.editor.clear_all()
 
         nl = True
         indent_level = 0
@@ -80,7 +84,7 @@ class LanguageTools:
                     # Add the indent only after a newline. We build the indent 
                     # this line, and then add it to the next line
                     indent = ' ' * (cfg.indent_size * indent_level)
-                    textbox.insert('insert', tok.value)
+                    ide.text.insert('insert', tok.value)
                     nl=True
                     continue
 
@@ -99,7 +103,7 @@ class LanguageTools:
                     tok.indent = -1
                     indent = indent[:-cfg.indent_size]
                 
-                textbox.insert('insert',indent+spc+tok.value, tok.tag)
+                ide.text.insert('insert',indent+spc+tok.value, tok.tag)
 
                 # Increase and decrease points are set in the model
                 indent_level += tok.indent
@@ -108,14 +112,14 @@ class LanguageTools:
 
         else: # Dont track whitespace
             for tok in results:
-                textbox.insert('insert',tok.value, tok.tag)
+                ide.text.insert('insert',tok.value, tok.tag)
 
-        textbox.disable_line_no_update = False
+        ide.disable_line_no_update = False
         # Return the cursor to the same position by deleting the place it
         # ended up and then setting it back to the original position 
-        textbox.mark_unset('insert')
-        textbox.mark_set('insert', cur_index)
-        textbox.see('insert')
+        ide.text.mark_unset('insert')
+        ide.text.mark_set('insert', cur_index)
+        ide.text.see('insert')
         logger.debug('syntax_on_file_load finish')
 
 
@@ -147,10 +151,11 @@ class LanguageTools:
             return
         
         # Now we know we want to proceed lets get the textbox
-        textbox = self.view.textbox
+        # the if statement is just to give us the code completion while working
+        ide = self.view.cur_tab if self.view.cur_tab is not None else Ide()
 
         # The existing tags should give us the context of the word we are working on
-        existing_tags = textbox.tag_names('insert -1c')
+        existing_tags = ide.text.tag_names('insert -1c')
 
         # if 'comment' in existing_tags bail. we don't want to format comments
         if 'green' in existing_tags:
@@ -177,8 +182,8 @@ class LanguageTools:
         if event.keycode in trigger_keys: 
             
             # Get the current line
-            textbox.mark_set('insert', f'insert -1l')           
-            txt = textbox.editor.get_current_line_text()
+            ide.text.mark_set('insert', f'insert -1l')           
+            txt = ide.editor.get_current_line_text()
 
             # I like the idea of expanding as you type, but it causes some issues
             # Mainly inserting the cursor in the right place after expanding words
@@ -190,8 +195,8 @@ class LanguageTools:
             indent = ' ' * (cfg.indent_size * indent_level)
 
             # We want to disable the line number update otherwise we will block
-            textbox.disable_line_no_update = True
-            textbox.editor.delete_cur_line()
+            ide.disable_line_no_update = True
+            ide.editor.delete_cur_line()
             if not self.model.track_whitepace or cfg.syntax_indent:
                 ignore_whitespace = True if cfg.syntax_indent and self.model.track_whitepace else False
                 for tok in tokens:
@@ -207,7 +212,7 @@ class LanguageTools:
                         spc = ''
                         nl = True
                     
-                    textbox.insert('insert',indent+spc+tok.value, tok.tag)
+                    ide.text.insert('insert',indent+spc+tok.value, tok.tag)
 
                     # represents a negative indent immediately on ends of blocks
                     if tok.indent == -99:
@@ -221,36 +226,36 @@ class LanguageTools:
 
             else: # Dont track whitespace
                 for tok in tokens:
-                    textbox.insert('insert',tok.value, tok.tag)
+                    ide.text.insert('insert',tok.value, tok.tag)
             
             # Return the cursor to the new line
-            textbox.mark_set('insert', 'insert +1l linestart')
+            ide.text.mark_set('insert', 'insert +1l linestart')
 
             if cfg.syntax_indent:
                 indent = ' ' * (cfg.indent_size * indent_level)
-                textbox.insert('insert', indent)
+                ide.text.insert('insert', indent)
 
-            textbox.disable_line_no_update = False
+            ide.disable_line_no_update = False
 
         # Otherwise we just want to get and format one word
         else:
-            txt = textbox.editor.get_current_line_text()
-            index = textbox.index('insert')
+            txt = ide.editor.get_current_line_text()
+            index = ide.text.index('insert')
 
             # I like the idea of expanding as you type, but it causes some issues
             # Mainly inserting the cursor in the right place after expanding words
             tokens = self.model.format_syntax(txt, no_nl=True, expand=False, upper=False) 
 
             # We want to disable the line number update otherwise we will block
-            textbox.disable_line_no_update = True
-            textbox.editor.delete_cur_line()
+            ide.disable_line_no_update = True
+            ide.editor.delete_cur_line()
 
             # else: # Dont track whitespace
             for tok in tokens:
-                textbox.insert('insert',tok.value, tok.tag)
+                ide.text.insert('insert',tok.value, tok.tag)
             
             # Return the cursor to the new line
-            textbox.mark_set('insert', index)
-            textbox.disable_line_no_update = False
+            ide.text.mark_set('insert', index)
+            ide.disable_line_no_update = False
 
         logger.verbose('syntax_while_typing finish')
