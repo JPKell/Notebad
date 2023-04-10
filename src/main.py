@@ -1,6 +1,6 @@
 ''' This is the main entry point to Notebad. This is an MVC architecture and 
     the view and model (language) is loaded from within the controller.'''
-from controller import NotebadApp
+from app import NotebadApp
 from settings import Configuration
 
 if __name__ == '__main__':

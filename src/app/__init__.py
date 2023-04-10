@@ -2,10 +2,10 @@ import pathlib, os
 import tkinter as tk
 from tkinter import Tk
 
-from controller.file_management import FileManagement
-from controller.key_bindings    import KeyBindings
-from controller.translate       import LanguageTools
-from controller.utilities       import Utilities    
+from app.file_management import FileManagement
+from app.key_bindings    import KeyBindings
+from app.translate       import LanguageTools
+from app.utilities       import Utilities    
 
 from modules.parsers  import progress_profiler
 from modules.parsers  import includes_expander
