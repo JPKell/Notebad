@@ -12,6 +12,7 @@ Hopefully the bugs decrease and the missing important does too
 - Live syntax highlighting is broken 
 - Language detection not working
 - Initial tab wont toggle dark mode on text area but new tabs will. Seems intermittent?? 
+- Menu does not re theme on linux
 
 # Missing important
 - FIND AND REPLACE

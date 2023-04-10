@@ -1,5 +1,5 @@
 import os
-from   tkinter     import PhotoImage, font
+from   tkinter     import font, PhotoImage, Tk
 from   tkinter.ttk import Style
 
 from   settings        import Configuration
@@ -14,13 +14,14 @@ class UI:
     ''' Manages the appearance of the app. Custom colors are set in the colors.py file. ''
         Primarily used to toggle between light and dark themes.
         '''
-    def __init__(self, view: NFrame) -> None:
+    def __init__(self, view: NFrame, root: Tk) -> None:
         self.view = view
 
         self.style = Style()
         self.font = font.nametofont('TkFixedFont')
         self._font_size = cfg.font_size
 
+        self._init_root_tk_window(root)
         self._init_style()
         logger.debug("UI initialized")
 
@@ -109,6 +110,24 @@ class UI:
     ###
     # Private methods
     ###
+    def _init_root_tk_window(self, root: Tk) -> None:
+        ''' Initialize the root tkinter window. '''
+        # Add the themes to TK
+        root.tk.call('source', os.path.join(cfg.theme_dir, 'forest-dark.tcl'))
+        root.tk.call('source', os.path.join(cfg.theme_dir, 'forest-light.tcl'))
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+        root.title(cfg.app_title)  
+        root.geometry(cfg.geometry) 
+        root.minsize(*cfg.min_size)
+
+        # Todo this needs to be moved to the view
+        if cfg.os == 'nt': 
+            root.iconbitmap(os.path.join(cfg.current_dir, 'assets', 'icon.ico'))
+        else:
+            logo = PhotoImage(os.path.join(cfg.current_dir, 'assets', 'icon.gif'))
+            root.call('wm', 'iconphoto', root._w, logo)
+
     def _init_style(self) -> None:
         ''' This will get everything set up for the theme.'''
 

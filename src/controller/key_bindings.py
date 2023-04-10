@@ -1,5 +1,8 @@
+from tkinter import Tk
 from settings import Configuration
 from modules.logging import Log
+
+from view import NotebadView
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -22,10 +25,9 @@ logger = Log(__name__)
 class KeyBindings:
     ''' This class is responsible for binding all the key bindings to the self.app. 
         It is called from the app class. '''
-    def __init__(self, controller):
-        self.controller = controller
-        self.app = self.controller.app
-        
+    def __init__(self, app: Tk, view: NotebadView):
+        self.app  = app
+        self.view = view
         # Holds all the key bindings
         self.binder = []
         self.user_binder = []
@@ -103,26 +105,26 @@ class KeyBindings:
             {'name': 'Syntax: on keypress', 'key': '<Key>', 'category': 'Syntax',
                 'widget_class': None, 'active': True, 'can_override': False,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.language.dynamic_syntax_formatting(event), 
+                'callback': lambda event: self.app.language.dynamic_syntax_formatting(event), 
                 },
 
             # I think this is needed, but might be redundant. Need to check
             {'name': 'Syntax: on space', 'key': '<space>', 'category': 'Syntax',
                 'widget_class': None, 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_all, 
-                'callback': lambda event: self.controller.language.dynamic_syntax_formatting(event), 
+                'callback': lambda event: self.app.language.dynamic_syntax_formatting(event), 
                 },
         
             {'name': 'Syntax: keypad enter', 'key': '<KP_Enter>', 'category': 'Syntax',
                 'widget_class': None, 'active': True, 'can_override': False,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.language.dynamic_syntax_formatting(event),
+                'callback': lambda event: self.app.language.dynamic_syntax_formatting(event),
                 },
 
             {'name': 'Syntax: statis formatting', 'key': '<Alt-p>', 'category': 'Syntax',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.language.static_syntax_formatting(), 
+                'callback': lambda event: self.app.language.static_syntax_formatting(), 
                 },
         ]
 
@@ -135,23 +137,23 @@ class KeyBindings:
             # File management
             {'name': 'New file', 'key': '<Control-n>', 'category': 'File management',
                 'bind_func': self.app.bind,
-                'callback': lambda event: self.controller.file_system.new_file()},
+                'callback': self.view._event('<<NewFile>>')},
 
             {'name': 'Open file', 'key': '<Control-o>', 'category': 'File management', 
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.file_system.open_file()},
+                'callback': self.view._event('<<NewFile>>', self.view.cur_tab)},
 
             {'name': 'Save file', 'key': '<Control-s>', 'category': 'File management', 
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.file_system.save_file()},
+                'callback': self.view._event('<<SaveFile>>', self.view.cur_tab)},
 
             {'name': 'Save as file', 'key': '<Control-S>', 'category': 'File management', 
              'bind_func': self.app.bind, 
-             'callback': lambda event: self.controller.file_system.save_as_file()},
+             'callback': self.view._event('<<SaveFileAs>>', self.view.cur_tab)},
 
             {'name': 'Close tab', 'key': '<Control-w>', 'category': 'File management',
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.tabs.close_tab(), 
+                'callback': lambda event: self.view.tabs.close_tab(), 
                 },
 
             # Find entry overrides
@@ -159,24 +161,24 @@ class KeyBindings:
             {'name': 'Open file', 'key': '<Control-o>', 'category': 'File management',
                 'widget_class': 'Text',
                 'bind_func': self.app.bind_class,
-                'callback': lambda event: self.controller.file_system.open_file()},
+                'callback': self.view._event('<<OpenFile>>', self.view.cur_tab)},
 
             {'name': 'Find next', 'key': '<Return>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
-                                                self.controller.get_current_tab().toolbar.find_entry.get())},
+                'callback': lambda event: self.app.get_current_tab().editor.find_text(
+                                                self.app.get_current_tab().toolbar.find_entry.get())},
 
             {'name': 'Find previous', 'key': '<Shift-Return>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
-                                                self.controller.get_current_tab().toolbar.find_entry.get(), direction=-1)},
+                'callback': lambda event: self.app.get_current_tab().editor.find_text(
+                                                self.app.get_current_tab().toolbar.find_entry.get(), direction=-1)},
 
             {'name': 'Find return focus', 'key': '<Escape>', 'category': 'Text editor',
                 'widget_class': 'Entry', 
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.get_current_tab.text.focus()},       
+                'callback': lambda event: self.app.get_current_tab.text.focus()},       
         ]
 
         for binding in no_override_bindings:
@@ -190,80 +192,82 @@ class KeyBindings:
             {'name': 'Undo', 'key': '<Control-z>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.history.undo()},
+                'callback': self.view._event('<<Undo>>', self.view.cur_tab)
+            },
 
             {'name': 'Redo', 'key': '<Control-y>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.history.redo()},
+                'callback': self.view._event('<<Redo>>', self.view.cur_tab)
+            },
 
             {'name': 'Paste', 'key': '<Control-v>', 'category': 'Text editor',
                 'active': True, 'can_override': False,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.textbox.clipboard.paste_text()
-             },
+                'callback': self.view._event('<<Paste>>', self.view.cur_tab)
+            },
 
             {'name': 'Select all', 'key': '<Control-a>', 'category': 'Text editor',
                 'active': True, 'can_override': False,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.tabs.textbox.select_all() 
-             },
+                'callback': lambda event: self.view.cur_tab.text.select_all() 
+            },
 
             {'name': 'Indent', 'key': '<Tab>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_class, 
                 'add':False, ## Additional parameter to the bind function
-                'callback': lambda event: self.controller.view.tabs.textbox.editor.add_indent(), 
-             },
+                'callback': lambda event: self.view.cur_tab.editor.add_indent(), 
+            },
 
             {'name': 'Cancel find highlight ', 'key': '<Escape>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': False,
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.tabs.textbox.delete_tags_by_name("find")
-             },
+                'callback': lambda event: self.view.cur_tab.text.delete_tags_by_name("find")
+            },
 
             # Linux uses Button-4 and Button-5 for the mouse wheel
             {'name': 'Increase Font', 'key': '<Control-Button-4>', 'category': 'Text editor',
              'widget_class': 'Text', 'active': True, 'can_override': False,
              'bind_func': self.app.bind_class,
-             'callback': lambda event: self.controller.view.ui.font_size_bump(increase=True)
+             'callback': lambda event: self.view.ui.font_size_bump(increase=True)
              },
 
             {'name': 'Decrease Font', 'key': '<Control-Button-5>', 'category': 'Text editor',
              'widget_class': 'Text', 'active': True, 'can_override': False,
              'bind_func': self.app.bind_class,
-             'callback': lambda event: self.controller.view.ui.font_size_bump(increase=False)
+             'callback': lambda event: self.view.ui.font_size_bump(increase=False)
              },
 
             # Windows uses <Mousewheel> and then the events have to be parsed
             {'name': 'Increase/Decrease Font', 'key': '<Control-MouseWheel>', 'category': 'Text editor',
              'widget_class': 'Text', 'active': True, 'can_override': False,
              'bind_func': self.app.bind_class,
-             'callback': lambda event: self.controller.view.ui.parse_windows_mousewheel(event, callback=self.controller.view.ui.font_size_bump)
+             'callback': lambda event: self.view.ui.parse_windows_mousewheel(event, callback=self.app.view.ui.font_size_bump)
              },
 
             {'name': 'Delete line', 'key': '<Control-d>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': True,
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.editor.delete_line(), 
+                'callback': lambda event: self.view.cur_tab.editor.delete_line(), 
                 },
 
             {'name': 'Duplicate line', 'key': '<Control-l>', 'category': 'Text editor',
                 'widget_class': 'Text', 'active': True, 'can_override': True,
                 'bind_func': self.app.bind_class, 
-                'callback': lambda event: self.controller.view.textbox.editor.duplicate_line(), 
+                'callback': lambda event: self.view.cur_tab.editor.duplicate_line(), 
                 },
 
             {'name': 'Move line up', 'key': '<Alt-Shift-Up>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.textbox.editor.move_line(direction=1), 
+                'callback': lambda event: self.view.editor.move_line(direction=1), 
                 },
 
             {'name': 'Move line down', 'key': '<Alt-Shift-Down>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: lambda event: self.controller.view.textbox.editor.move_line(direction=-1), 
+                'callback': lambda event: lambda event: self.view.cur_tab.editor.move_line(direction=-1), 
                 },
         ]
         for binding in textbox_bindings:
@@ -284,57 +288,57 @@ class KeyBindings:
             {'name': 'Open settings', 'key': '<Control-Key-comma>', 'category': 'Application settings',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': self.controller.view.open_settings_window, 
+                'callback': self.view.open_settings_window, 
                 },
 
             {'name': 'Increase font', 'key': '<Control-equal>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.ui.font_size_bump(increase=True), 
+                'callback': lambda event: self.view.ui.font_size_bump(increase=True), 
                 },
 
             {'name': 'Decrease font', 'key': '<Control-minus>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.ui.font_size_bump(increase=False), 
+                'callback': lambda event: self.view.ui.font_size_bump(increase=False), 
                 },
 
             {'name': 'Calculator', 'key': '<Alt-c>', 'category': 'Utilities',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.utilities.open_calculator(), 
+                'callback': lambda event: self.app.utilities.open_calculator(), 
                 },
 
             {'name': 'Toggle theme', 'key': '<Alt-d>', 'category': 'Ui',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.view.ui.toggle_theme(), 
+                'callback': lambda event: self.view.ui.toggle_theme(), 
                 },
 
             {'name': 'Find', 'key': '<Control-f>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.get_current_tab().toolbar.find_entry.focus(), 
+                'callback': lambda event: self.view.cur_tab.toolbar.find_entry.focus(), 
                 },
 
             {'name': 'Find next no focus', 'key': '<Control-g>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
-                    self.controller.get_current_tab().toolbar.find_entry.get(), direction=1), 
+                'callback': lambda event: self.view.cur_tab.editor.find_text(
+                    self.view.cur_tab.toolbar.find_entry.get(), direction=1), 
                 },
         
             {'name': 'Find prev no focus', 'key': '<Control-Shift-G>', 'category': 'Text editor',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.get_current_tab().editor.find_text(
-                    self.controller.get_current_tab().toolbar.find_entry.get(), direction=-1), 
+                'callback': lambda event: self.view.cur_tab.editor.find_text(
+                    self.view.cur_tab.toolbar.find_entry.get(), direction=-1), 
                 },
 
             {'name': 'Python eval', 'key': '<Alt-e>', 'category': 'Python',
                 'widget_class': None, 'active': True, 'can_override': True,
                 'bind_func': self.app.bind, 
-                'callback': lambda event: self.controller.utilities.eval_selection(), 
+                'callback': lambda event: self.app.utilities.eval_selection(), 
                 },
         ]
 

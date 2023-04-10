@@ -12,9 +12,10 @@ class NFrame(Frame):
     def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
         
-    def _event(self, event:str='<<DefaultEvent>>') -> object:
-        def callback(): # This is the function that is returned to the caller
-            self.event_generate(event)
+    def _event(self, event:str, widget:callable=None) -> object:
+        def callback(*_): # This is the function that is returned to the caller
+            generator = widget if widget else self
+            generator.event_generate(event)
         return callback 
 
 class NLabelframe(Labelframe):
@@ -126,6 +127,6 @@ class NToplevel(Toplevel):
         super().__init__(parent, **kwargs)
         
     def _event(self, event:str) -> object:
-        def callback(): # This is the function that is returned to the caller
+        def callback(*_): # This is the function that is returned to the caller
             self.event_generate(event)
         return callback 

@@ -1,7 +1,13 @@
+from tkinter import Tk
+
 from calc.controller import Calculator
 from modules.logging import Log
+from settings        import Configuration
+from view            import NotebadView
 
+cfg = Configuration()
 logger = Log(__name__)
+
 
 class Utilities:
     ''' This class contains all the functions that are not directly related to
@@ -10,8 +16,8 @@ class Utilities:
 
         application itself. '''
     
-    def __init__(self, controller, view):
-        self.controller = controller
+    def __init__(self, app: Tk, view: NotebadView):
+        self.app  = app
         self.view = view
         logger.debug('Utilities init')
 
@@ -22,17 +28,16 @@ class Utilities:
         
             Since Python is interpreted, we can evaluate code right in the text 
             box. This is handy to doing math or other simple things.'''
-        ide = event.widget
-        selection = ide.editor.get_selection()
-        # If there is nothing selected, evaluate the current line
+        ide = event.widget 
         if selection == '':  
             selection = ide.editor.get_current_line_text()
-        # If there is nothing still selected, do nothing
+
         if selection == '': 
             result = "Nothing to evaluate"
         else:
             # It's bad enough we are evaluating any user input, so lets at least 
-            try: # to catch any errors that might occur.
+            # try to catch any errors that might occur.
+            try: 
                 result = eval(selection)
             except:
                 result = "Invalid Python syntax" 

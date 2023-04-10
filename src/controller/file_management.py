@@ -1,7 +1,9 @@
 import os
+from tkinter import Tk
 
 from modules.logging import Log
 from settings import Configuration
+from view import NotebadView
 from view.ide import Ide
 from view.profiler import ProgressProfiler
 
@@ -13,16 +15,17 @@ logger = Log(__name__)
 
 class FileManagement:
     ''' Handles all file management. '''
-    def __init__(self, controller):
-        self.controller = controller
+    def __init__(self, app: Tk, view: NotebadView):
+        self.app = app
+        self.view = view
         self._recent_files = os.path.join(cfg.data_dir, 'recent_files.txt') # TODO make a function in settings that returns the path to a file in the data dir So cfg.data_file('recent_files.txt')
         logger.debug('Initialized FileManagement')
 
     def new_file(self, event=None) -> None:
         ''' Creates a new tab and a crisp fresh textbox. '''
         logger.debug('Creating new file')
-        self.controller.view.tabs.new_tab('ide')
-        self.controller.view.tabs.move_to_tab()    # Move focus to the new tab
+        self.view.tabs.new_tab('ide')
+        self.view.tabs.move_to_tab()    # Move focus to the new tab
         logger.info('New file created')
 
     def open_recent_file(self, event):
@@ -39,25 +42,25 @@ class FileManagement:
         full_path = open_file_dialog() if not full_path else full_path
 
         if full_path:
-            tab = self.controller.get_current_tab()         # Get the current tab
+            tab = self.view.cur_tab         # Get the current tab
 
             if 'prof' in full_path[-8:]:
-                self.controller.view.tabs.new_tab('profiler')
-                self.controller.view.tabs.move_to_tab()
+                self.view.tabs.new_tab('profiler')
+                self.view.tabs.move_to_tab()
 
                 tab.full_path = full_path.strip()
-                self.write_file_to_textbox(tab, full_path)
+                self.write_file_to_textbox(ide=tab, full_path=full_path)
                 tab.text.set_position('1.0')
             else:             
                 
                 if isinstance(tab, Ide) and not tab.is_blank: # Don't open a new tab if the current one is blank
                     # TODO replace this with a cleaner way to open a new tab
-                    self.controller.view.tabs.new_tab('ide')
-                    self.controller.view.tabs.move_to_tab()
-                    tab = self.controller.get_current_tab()     # Grab the newly minted textbox object 
+                    self.view.tabs.new_tab('ide')
+                    self.view.tabs.move_to_tab()
+                    tab = self.view.cur_tab     # Grab the newly minted textbox object 
 
                 tab.full_path = full_path.strip()
-                self.write_file_to_textbox(tab, full_path)
+                self.write_file_to_textbox(ide=tab, full_path=full_path)
                 tab.text.set_position('1.0')      # Set cursor at beginning of file
             
         logger.info(f'Opened file: {full_path}')
@@ -74,7 +77,7 @@ class FileManagement:
         
         # If the current file still has the default file name, prompt for a new name
         if ide.file_name == cfg.new_file_name:
-            self.save_file_as(ide)
+            self.save_file_as(ide=ide)
         else:
             self.write_textbox_to_file(ide.full_path, ide)
         logger.info(f'Saved file: {ide.full_path}')
@@ -99,7 +102,7 @@ class FileManagement:
         parts = full_path.split('/')
         return {'path': '/'.join(parts[:-1]), 'file': parts[-1]}
 
-    def write_file_to_textbox(self, ide:Ide, full_path:str) -> None:
+    def write_file_to_textbox(self, full_path:str, ide:Ide) -> None:
         ''' Writes the contents of a file to the textbox '''
 
         ext = full_path.split('.')[-1]
@@ -109,8 +112,8 @@ class FileManagement:
                 ide.text.insert('end', file.read())
             
             elif ext in ['p', 'w', 'i', 'cls']: # Else see if we can handle the syntax
-                self.controller.language.load_language('abl')
-                self.controller.language.static_syntax_formatting(file_txt=file.read())
+                self.app.language.load_language('abl')
+                self.app.language.static_syntax_formatting(file_txt=file.read())
             
             else: # Else just load the file
                 ide.text.insert('end', file.read())  # Insert the file contents into the textbox
@@ -169,4 +172,4 @@ class FileManagement:
                 f.write(file.strip() + '\n')
 
         # Send an event to update the recent files menu
-        self.controller.view.event_generate('<<UpdateRecentFiles>>')
+        self.app.event_generate('<<UpdateRecentFiles>>')

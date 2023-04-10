@@ -12,7 +12,7 @@ from .ui            import UI
 cfg = Configuration()
 logger = Log(__name__)
 
-class NoteView(NFrame):
+class NotebadView(NFrame):
     ''' The noteview class is a launching point for the UI. It initializes
         the UI and the tabs. The tabs are the main container for the content
         of the application. 
@@ -60,7 +60,7 @@ class NoteView(NFrame):
 
     def _build_objects(self, root) -> None:
         ''' The meat of the view, this is where we create the widgets '''
-        self.ui       = UI(self)
+        self.ui       = UI(self, root)
         self.tabs     = Tabs(self)
         self.menu     = Menubar(root, view=self, tabs=self.tabs, ui=self.ui)
         self.l_gutter = NFrame(self)
