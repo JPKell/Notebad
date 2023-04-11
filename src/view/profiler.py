@@ -181,7 +181,7 @@ class ProgressProfiler(NTabFrame):
         self.text = NText(self.main_frame)
         self.text.grid(row=0, column=2, sticky='nsew')
 
-    def _set_theme(self, theme: str) -> None:
+    def _set_theme(self) -> None:
         ''' Set the theme for the profiler '''
         if hasattr(self, 'text'):
             self.text._set_theme()
