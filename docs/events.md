@@ -32,7 +32,7 @@ There is a generator and if it matters it will be described, otherwise it can co
 - `<<ProfilerFileChanged>>` 
     - Handler: self.parse_progress_profiler
 - `<<ProfilerSourceView>>`  
-    - Handler: self.build_text_for_parser
+    - Handler: self.build_profiler_source
 
 ## Window events
 - `<<OpenKeyCommandList>>`  

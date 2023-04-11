@@ -30,14 +30,18 @@ class NotebadView(NFrame):
         model. The controller should be the glue between the two and orchestrate
         the flow of data and the logic of the application.
     '''
-    def __init__(self, parent) -> None:
+    def __init__(self, root) -> None:
         logger.debug("View begin init")
 
         # Set up the root frame
-        super().__init__(parent) 
+        super().__init__(root) 
 
-        # Build the app frame
-        self._build_objects(parent)
+        self.ui       = UI(self, root)
+        self.tabs     = Tabs(self)
+        self.menu     = Menubar(root, view=self, tabs=self.tabs, ui=self.ui)
+        self.l_gutter = NFrame(self)
+        self.r_gutter = NFrame(self)
+
         self._setup_and_grid()
 
         logger.debug("View finish init")
@@ -48,7 +52,7 @@ class NotebadView(NFrame):
     def cur_tab(self):           # So common it needs to be a property in view
         return self.tabs.cur_tab
 
-    def key_command_list(self):
+    def key_command_window(self):
         KeyCommandList(self)
 
     def open_settings_window(self, *args):
@@ -57,14 +61,6 @@ class NotebadView(NFrame):
     ###
     # Private methods
     ###
-
-    def _build_objects(self, root) -> None:
-        ''' The meat of the view, this is where we create the widgets '''
-        self.ui       = UI(self, root)
-        self.tabs     = Tabs(self)
-        self.menu     = Menubar(root, view=self, tabs=self.tabs, ui=self.ui)
-        self.l_gutter = NFrame(self)
-        self.r_gutter = NFrame(self)
 
     def _setup_and_grid(self) -> None:
         ''' This is where we set up the widgets and grid them '''

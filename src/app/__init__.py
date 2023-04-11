@@ -29,6 +29,7 @@ class NotebadApp(Tk):
 
         # Set up the root frame
         super().__init__()
+        self.protocol("WM_DELETE_WINDOW", self.exit_app)
 
         # Instantiate the view
         self.view        = NotebadView(self) # View is instantiated here, passing the controller into the view
@@ -43,7 +44,6 @@ class NotebadApp(Tk):
         self.key_bindings = KeyBindings(self, self.view) 
         
         self.events_master()
-        self._app_protocols()
         
         # This might be better done as a function on its own. 
         # At that point, maybe we stash the open tabs at close and reopen them 
@@ -54,14 +54,15 @@ class NotebadApp(Tk):
 
         logger.debug('Controller finish init')
 
-
-
+    ###
+    # Application management
+    ###
     def events_master(self) -> None:
         ''' Events are things that happen in the application. '''
         self.events = {
         # Profiler events
         '<<ProfilerFileChanged>>': self.parse_progress_profiler,
-        '<<ProfilerSourceView>>':  self.build_text_for_parser,
+        '<<ProfilerSourceView>>':  self.build_profiler_source,
         # Window events
         '<<OpenKeyCommandList>>':  self.populate_key_commands,
         '<<OpenCalculator>>':      self.utilities.open_calculator,
@@ -80,29 +81,6 @@ class NotebadApp(Tk):
         for k,v in self.events.items():
             self.bind_all(k, v)
 
-
-    def _app_protocols(self) -> None:
-        ''' Application protocols deal with system commands such as closing the window. '''
-        self.protocol("WM_DELETE_WINDOW", self.exit_app)
-
-    def relative_to_abs_path(self, rel_path:str) -> str:
-        ''' Returns the absolute path of a relative path. '''
-        return os.path.join(cfg.current_dir, rel_path) 
-
-    def run(self) -> None:
-        ''' Start 'er up! Run is called from outside the controller allowing for 
-            everything to be set up first. '''
-        logger.debug('Starting the main loop')
-
-        # Todo update this to work in linux too. See tkinter python epub for code.
-        if cfg.start_fullscreen:
-            self.state("zoomed")
-        self.mainloop()
-
-    def get_current_tab(self) -> None:
-        ''' Get the current tab. '''
-        return self.view.cur_tab
-
     def exit_app(self) -> None:
         ''' Exit the application. Optional hardcore mode will disable the prompt.
             This is useful for testing. To quote the devs at Bethseda, 
@@ -120,14 +98,28 @@ class NotebadApp(Tk):
         self.view.master.destroy()
         logger.debug('Application closed')
 
-    def load_language(self, language:str) -> None:
-        ''' Update the language of the current textbox. '''
-        self.language.load_language(language)
+    def run(self) -> None:
+        ''' Start 'er up! Run is called from outside the controller allowing for 
+            everything to be set up first. '''
+        logger.debug('Starting the main loop')
 
-    def populate_key_commands(self, event) -> None:
-        ''' Populate the key commands list. '''
-        data = self.key_bindings.binder
-        event.widget.list_key_commands(data)
+        # Todo update this to work in linux too. See tkinter python epub for code.
+        if cfg.start_fullscreen:
+            self.state("zoomed")
+        self.mainloop()
+
+    ###
+    # Function routing
+    ### 
+
+    ### Profiler ###
+    def build_profiler_source(self, event) -> str:
+        ''' Build the text to be parsed. '''
+        profiler = event.widget
+        if cfg.project_src:
+            results = includes_expander.expand_includes(profiler.tree.current_line())
+            profiler.text.delete('1.0', tk.END)
+            profiler.text.insert(tk.END, ''.join(results))
 
     def parse_progress_profiler(self, event) -> None:
         ''' Parse the progress profiler output file. '''
@@ -136,10 +128,17 @@ class NotebadApp(Tk):
         parser_data = progress_profiler.parse_profiler_data(filename)
         profiler.load_profiler_data(parser_data)
 
-    def build_text_for_parser(self, event) -> str:
-        ''' Build the text to be parsed. '''
-        profiler = event.widget
-        if cfg.project_src:
-            results = includes_expander.expand_includes(profiler.tree.current_line())
-            profiler.text.delete('1.0', tk.END)
-            profiler.text.insert(tk.END, ''.join(results))
+    ### Language ###
+    def load_language(self, language:str) -> None:
+        ''' Update the language of the current textbox. '''
+        self.language.load_language(language)
+
+    ### Key command window
+    def populate_key_commands(self, event) -> None:
+        ''' Populate the key commands list. '''
+        data = self.key_bindings.binder
+        event.widget.list_key_commands(data)
+
+
+
+

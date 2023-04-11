@@ -11,6 +11,8 @@ from  .ide             import Ide
 cfg = Configuration()
 logger = Log(__name__)
 
+
+### This should probably change to superclass from Style
 class UI:
     ''' Manages the appearance of the app. Custom colors are set in the colors.py file. ''
         Primarily used to toggle between light and dark themes.

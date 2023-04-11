@@ -83,7 +83,6 @@ class TextFooter(NFrame):
         self.sel_lbl.grid( row=0, column=3, padx=3, sticky='e')
 
     def _set_theme(self) -> None:
-        print("MARCO")
         if cfg.theme == 'forest-dark':
             colors = Themes.dark
         else:
