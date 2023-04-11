@@ -17,6 +17,8 @@ class NFrame(Frame):
             generator = widget if widget else self
             generator.event_generate(event)
         return callback 
+    
+    def _set_theme(self): ... # To be overridden
 
 class NLabelframe(Labelframe):
     ''' A labelframe with a name. '''
@@ -120,6 +122,8 @@ class NTabFrame(Frame):
         root = self.winfo_toplevel()
         root.title(f'{self.tab_title} - {cfg.app_title}')
 
+    def _set_theme(self): ... # To be overridden
+
 
 class NToplevel(Toplevel):
     ''' A toplevel with a name. '''
@@ -130,3 +134,5 @@ class NToplevel(Toplevel):
         def callback(*_): # This is the function that is returned to the caller
             self.event_generate(event)
         return callback 
+    
+    def _set_theme(self): ... # To be overridden

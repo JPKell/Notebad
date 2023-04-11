@@ -4,7 +4,7 @@ from tkinter import Tk
 
 from app.file_management import FileManagement
 from app.key_bindings    import KeyBindings
-from app.translate       import LanguageTools
+from app.language_tools  import LanguageTools
 from app.utilities       import Utilities    
 
 from modules.parsers  import progress_profiler
@@ -35,8 +35,8 @@ class NotebadApp(Tk):
 
         # Order is important 
         self.file_system = FileManagement(self, self.view)     
-        self.language  = LanguageTools(self, self.view) # Language tools are instantiated here, passing the controller into the language tools
-        self.utilities = Utilities(self, self.view) # Utilities are instantiated here, passing the controller into the utilities
+        self.language    = LanguageTools(self, self.view) # Language tools are instantiated here, passing the controller into the language tools
+        self.utilities   = Utilities(self, self.view) # Utilities are instantiated here, passing the controller into the utilities
         # Feed the view to the modules who need it
 
         # NoteController.view = self.view # This is a hack to get the view into the textbox class

@@ -62,7 +62,7 @@ class FileManagement:
                 tab.full_path = full_path.strip()
                 self.write_file_to_textbox(ide=tab, full_path=full_path)
                 tab.text.set_position('1.0')      # Set cursor at beginning of file
-            
+
         logger.info(f'Opened file: {full_path}')
         return 'break'
 
@@ -106,17 +106,16 @@ class FileManagement:
         ''' Writes the contents of a file to the textbox '''
 
         ext = full_path.split('.')[-1]
-        with open(full_path, "r") as file:
-            
-            if not cfg.syntax_on_load: # Just load the file
-                ide.text.insert('end', file.read())
-            
-            elif ext in ['p', 'w', 'i', 'cls']: # Else see if we can handle the syntax
+        with open(full_path, "r") as file:        
+            # TODO make this smarter using a dict to handle multiple languages. 
+            if ext.strip() in ['p', 'w', 'i', 'cls']: # Else see if we can handle the syntax
+                ide.language = 'abl'
                 self.app.language.load_language('abl')
-                self.app.language.static_syntax_formatting(file_txt=file.read())
+                if cfg.syntax_on_load: # Just load the file
+                    self.app.language.static_syntax_formatting(file_txt=file.read())
             
-            else: # Else just load the file
-                ide.text.insert('end', file.read())  # Insert the file contents into the textbox
+
+            ide.text.insert('end', file.read())  # Insert the file contents into the textbox
 
             ide.tab_save_on_close = False # Reset the changed flag since we just opened the file
             ide.history.stackify()          # Add the file contents to the undo stack
@@ -133,6 +132,13 @@ class FileManagement:
             file.write(txt)
 
         # Update the textbox properties
+        ext = full_path.split('.')[-1]
+        if ext.strip() in ['p', 'w', 'i', 'cls']:
+            ide.language = 'abl'
+            self.app.language.load_language('abl')
+            if cfg.syntax_on_load:
+                self.app.language.static_syntax_formatting(file_txt=txt)
+
         ide.full_path = full_path
         ide.tab_save_on_close = False
 

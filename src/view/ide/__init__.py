@@ -133,3 +133,6 @@ class Ide(NTabFrame):
         self.text.focus_set()
 
         self.tab_title = self.file_name
+
+    def _set_theme(self):
+        self.text._set_theme()

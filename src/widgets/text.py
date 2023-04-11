@@ -21,10 +21,10 @@ class NText(Text):
         # Setup variables
         self.disable_line_no_update = False
 
-        self.frame.bind_all('<<ThemeChanged>>', lambda event: self._set_theme())
-
         self._build_ui_elements()
         self._init_line_numbers()
+        
+        self.bind_all('<<ThemeToggle>>', lambda event: self._set_theme())
 
     ###
     # Cursor methods
@@ -191,6 +191,7 @@ class NText(Text):
             colors = Themes.dark
         else:
             colors = Themes.light
+
 
         self.font = font.Font(family=cfg.program_font)
         self.font.configure(size=cfg.font_size)

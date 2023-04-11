@@ -7,12 +7,8 @@ Hopefully the bugs decrease and the missing important does too
 
 # Bugs
 - expanding includes is not catching every one, and fails on some encoding issues. 
-- Find next from the menu is kinda broken. if find is going will highight other matchs
-- recent files broken
-- Live syntax highlighting is broken 
-- Language detection not working
-- Initial tab wont toggle dark mode on text area but new tabs will. Seems intermittent?? 
 - Menu does not re theme on linux
+- Static syntax take forever now.
 
 # Missing important
 - FIND AND REPLACE
@@ -32,7 +28,6 @@ Hopefully the bugs decrease and the missing important does too
   - Currently this is only the scrollbar because they are on a couple hundred millisecond callback loop
 - find should be moved over to the text widget
 - Move profiler file open into file management. 
-
 
 # Language
 - Continue to validate the effects of the language changes

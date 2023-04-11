@@ -125,6 +125,7 @@ class Editor:
     def find_text(self, find_txt, direction=1):
         ''' Clear all current "find" tags and loop through the textbox
             to find any current matching text '''
+        
         self.text.delete_tags_by_name("find")
 
         if find_txt != self.current_find:
@@ -164,6 +165,8 @@ class Editor:
     def find_next(self, direction=1):
         ''' Move to the first/next/prev result in the find_positions list.
             Direction can equal 1, -1 or 0. 0 sets the find index to 0 for a new find to start from the top '''
+
+        self.text.delete_tags_by_name("find")
 
         if self.current_find_positions == []:
             # self.tb.footer.set_status("No results found...", revert=True)

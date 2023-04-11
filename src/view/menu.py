@@ -38,7 +38,9 @@ class Menubar(Menu):
     
     def _open_recent_event(self, file):
         ''' Event handler for the recent files menu. '''
+
         def return_function(*_):
+            print(file)
             self._recent_file = file
             self.event_generate('<<OpenRecentFile>>')
         return return_function
@@ -131,4 +133,4 @@ class Menubar(Menu):
                     # Check the filepath still exists on the system
                     if os.path.exists(file):
                         ### TODO Make this work
-                        self.recent_files_menu.add_command(label=os.path.basename(file), command=lambda file=file: self._open_recent_event(file))
+                        self.recent_files_menu.add_command(label=os.path.basename(file), command=self._open_recent_event(file))

@@ -65,11 +65,12 @@ class TextFooter(NFrame):
         ''' Bind events to methods '''
         self.text.bind('<<Change>>', self.update_cursor_pos)
         self.text.bind('<<Selection>>', self.update_selection_stats)
+        self.bind_all('<<ThemeToggle>>',lambda event: self._set_theme())
 
     def _make_labels(self) -> None:
         ''' Main constructor for the status bar '''
         self.status   = NLabel(self, textvariable=self.status_txt, relief='flat', anchor='w')
-        self.lang_lbl = NLabel(self, text="python", relief='flat', anchor='e')
+        self.lang_lbl = NLabel(self, text="txt", relief='flat', anchor='e')
         self.pos_lbl  = NLabel(self, text="ln 1 col 0 ", relief='flat', anchor='e')
         self.sel_lbl  = NLabel(self, text="()", relief='flat', anchor='e')
 
@@ -82,6 +83,7 @@ class TextFooter(NFrame):
         self.sel_lbl.grid( row=0, column=3, padx=3, sticky='e')
 
     def _set_theme(self) -> None:
+        print("MARCO")
         if cfg.theme == 'forest-dark':
             colors = Themes.dark
         else:
@@ -90,3 +92,5 @@ class TextFooter(NFrame):
         self.pos_lbl.config( background=colors.background, foreground=colors.syn_orange)
         self.lang_lbl.config(background=colors.background, foreground=colors.syn_yellow)
         self.sel_lbl.config( background=colors.background, foreground=colors.syn_orange)
+
+        return

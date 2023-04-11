@@ -1,6 +1,8 @@
 /home/jpk/Jordan_Kell_Assignment_2.txt
 /home/jpk/profile.profile
 /home/jpk/test.txt3
-/home/jpk/new.txt
 /home/jpk/test.txt
+/home/jpk/new.txt
 /home/jpk/gits/Notebad/test.p
+/home/jpk/gits/Notebad/test3.p
+/home/jpk/new.p

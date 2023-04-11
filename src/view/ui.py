@@ -6,6 +6,7 @@ from   settings        import Configuration
 from   modules.logging import Log
 from   widgets         import NFrame
 from   .colors         import Themes
+from  .ide             import Ide
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -86,16 +87,20 @@ class UI:
                 'bg': colors.background, 
                 'fg': colors.foreground, 
                 'activebackground': colors.bg_highlight, 
-                'activeforeground':colors.foreground 
+                'activeforeground':colors.foreground,
+                'relief': 'flat',
                 }
-            
-            # TODO This is not working. Maybe bringing menu into view makes sense now
-
-            # self.view.controller.menu.configure(**menu_colors)   
+            self.view.menu.configure(**menu_colors)   
             
             # Loop through the menu items and set the colors 
-            # for menu in self.view.controller.menu.menu_list:
-            #     menu.config(**menu_colors)     
+            for menu in self.view.menu.menu_list:
+                menu.config(**menu_colors)     
+
+        # Loop through the tabs and set the colors
+        for tab in self.view.tabs.tabs():
+            frame = self.view.nametowidget(tab)
+            frame._set_theme()
+        # logger.verbose("All textboxes unfocused")
 
     @staticmethod
     def parse_windows_mousewheel(event, callback=None):

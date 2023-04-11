@@ -180,3 +180,8 @@ class ProgressProfiler(NTabFrame):
         # Todo This needs to be themed and have a scrollbar
         self.text = NText(self.main_frame)
         self.text.grid(row=0, column=2, sticky='nsew')
+
+    def _set_theme(self, theme: str) -> None:
+        ''' Set the theme for the profiler '''
+        if hasattr(self, 'text'):
+            self.text._set_theme()
