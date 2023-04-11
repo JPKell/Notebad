@@ -3,8 +3,7 @@ test.p
 __pycache__*
 venv*
 _local_*
-cribbage.py
-
+src/app_data/*
 src/logs/notebad.log
 src/logs/performance.log
 *.p
