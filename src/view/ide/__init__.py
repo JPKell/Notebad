@@ -23,7 +23,6 @@ class Ide(NTabFrame):
 
         # Class variables
         self._language  = None                  # Programming language of source
-        self.disable_line_no_update = False     # Line number proxy drags on mass edits
         self.file_name = cfg.new_file_name 
 
         # Build the objects

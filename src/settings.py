@@ -37,6 +37,7 @@ class Configuration:
     status_bar_freeze       = False # Prevent resetting of status bar       
 
     # File settings
+    file_encoding = 'iso-8859-1'
     new_file_name = 'new.txt'
     hardcore_mode = False
     max_undo = 50

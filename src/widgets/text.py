@@ -58,9 +58,14 @@ class NText(Text):
             if tag == name:
                 self.tag_remove(tag, "1.0", "end")
 
+        # Todo this doesn't work. We should get a good way of sending messages to the footer
         # self.footer.set_status("", revert=True)
 
         return 'break'
+
+    def highlight_line(self, line_number, tag_name:str='highlight') -> None:
+        ''' Highlight a line in the textbox '''
+        self.tag_add(tag_name, f"{line_number}.0", f"{line_number}.end")
 
 
     ###
@@ -229,3 +234,4 @@ class NText(Text):
         self.tag_configure("magenta",  foreground = colors.syn_magenta)
         self.tag_configure("grey",     foreground = colors.syn_grey)
         self.tag_configure("error",    foreground = colors.syn_error)
+        self.tag_configure("highlight", foreground = colors.syn_highlight, background = colors.syn_highlight_bg)

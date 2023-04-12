@@ -25,6 +25,8 @@ Themes = SimpleNamespace(
         syn_alt_blue = '#167bc2',
         syn_violet   = '#6c71c4',
         syn_magenta  = '#d33682',
+        syn_highlight = '#dc322f',
+        syn_highlight_bg = '#FCFCFC',
     ),
     dark = SimpleNamespace(
         # Text
@@ -50,5 +52,7 @@ Themes = SimpleNamespace(
         syn_alt_blue = '#C0FDFB',
         syn_violet   = '#7c81d4',
         syn_magenta  = '#e34692',
+        syn_highlight = '#ec423f',
+        syn_highlight_bg = '#626262',
     ),
 )

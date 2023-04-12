@@ -1,5 +1,4 @@
-import pathlib, os
-import tkinter as tk
+
 from tkinter import Tk
 
 from app.file_management import FileManagement
@@ -7,13 +6,11 @@ from app.key_bindings    import KeyBindings
 from app.language_tools  import LanguageTools
 from app.utilities       import Utilities    
 
-from modules.parsers  import progress_profiler
-from modules.parsers  import includes_expander
-from view  import NotebadView
-from widgets import prompt_yes_no
-
-from settings  import Configuration
 from modules.logging import Log
+from modules.parsers import progress_profiler
+from settings import Configuration
+from view     import NotebadView
+from widgets  import prompt_yes_no
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -105,6 +102,7 @@ class NotebadApp(Tk):
 
         # Todo update this to work in linux too. See tkinter python epub for code.
         if cfg.start_fullscreen:
+            logger.debug('Starting in fullscreen mode')
             self.state("zoomed")
         self.mainloop()
 
@@ -116,10 +114,14 @@ class NotebadApp(Tk):
     def build_profiler_source(self, event) -> str:
         ''' Build the text to be parsed. '''
         profiler = event.widget
-        if cfg.project_src:
-            results = includes_expander.expand_includes(profiler.tree.current_line())
-            profiler.text.delete('1.0', tk.END)
-            profiler.text.insert(tk.END, ''.join(results))
+        
+        if not cfg.project_src:
+            logger.warn('No project source directory set')
+            return
+        
+        self.language.expand_includes(profiler)
+
+        
 
     def parse_progress_profiler(self, event) -> None:
         ''' Parse the progress profiler output file. '''

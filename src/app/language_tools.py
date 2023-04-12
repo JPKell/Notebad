@@ -1,3 +1,4 @@
+import pathlib, os
 from tkinter import Tk
 
 from language        import LanguageModel
@@ -5,6 +6,7 @@ from modules.logging import Log
 from settings        import Configuration
 from view            import NotebadView
 from view.ide        import Ide
+from view.profiler   import ProgressProfiler
 
 cfg = Configuration()
 logger = Log(__name__)
@@ -60,7 +62,7 @@ class LanguageTools:
         # We want to disable the line number update otherwise we will 
         # end up blocking the app with thousands of inserts which trigger
         # events which will block in the Tk main loop. 
-        ide.disable_line_no_update = True
+        ide.text.disable_line_no_update = True
         ide.editor.clear_all()
 
         nl = True
@@ -114,7 +116,7 @@ class LanguageTools:
             for tok in results:
                 ide.text.insert('insert',tok.value, tok.tag)
 
-        ide.disable_line_no_update = False
+        ide.text.disable_line_no_update = False
         # Return the cursor to the same position by deleting the place it
         # ended up and then setting it back to the original position 
         ide.text.mark_unset('insert')
@@ -195,7 +197,7 @@ class LanguageTools:
             indent = ' ' * (cfg.indent_size * indent_level)
 
             # We want to disable the line number update otherwise we will block
-            ide.disable_line_no_update = True
+            ide.text.disable_line_no_update = True
             ide.editor.delete_cur_line()
             if not self.model.track_whitepace or cfg.syntax_indent:
                 ignore_whitespace = True if cfg.syntax_indent and self.model.track_whitepace else False
@@ -235,7 +237,7 @@ class LanguageTools:
                 indent = ' ' * (cfg.indent_size * indent_level)
                 ide.text.insert('insert', indent)
 
-            ide.disable_line_no_update = False
+            ide.text.disable_line_no_update = False
 
         # Otherwise we just want to get and format one word
         else:
@@ -247,7 +249,7 @@ class LanguageTools:
             tokens = self.model.format_syntax(txt, no_nl=True, expand=False, upper=False) 
 
             # We want to disable the line number update otherwise we will block
-            ide.disable_line_no_update = True
+            ide.text.disable_line_no_update = True
             ide.editor.delete_cur_line()
 
             # else: # Dont track whitespace
@@ -256,6 +258,68 @@ class LanguageTools:
             
             # Return the cursor to the new line
             ide.text.mark_set('insert', index)
-            ide.disable_line_no_update = False
+            ide.text.disable_line_no_update = False
 
         logger.verbose('syntax_while_typing finish')
+
+    @logger.performance
+    def expand_includes(self, profiler:ProgressProfiler) -> None:
+        ''' Expands the include statements in the current file. 
+            This is a recursive function that will expand all the files
+            that are included in the current file.
+            
+            It uses the full abl profile and thats excessive we just need to remove the ones 
+            inside comments. Once the language is more solid it can get it's own simple profile.'''
+        logger.debug('expand_includes start')
+        filename = profiler.tree.current_line()
+
+        # This should have a check first if the language is ABL if this is the solution
+        self.load_language('abl')
+
+        def expand_includes_recursive(fname):
+            ''' Builds a list of all the files that are included in the current file. '''
+            path = os.path.join(cfg.project_src, fname)
+            if not os.path.exists(path):
+                raise FileNotFoundError(f'File not found: {fname}')
+            
+            with open(path, 'r', encoding=cfg.file_encoding) as f:
+                txt = f.read()
+
+            tokens = self.model.format_syntax(txt, no_nl=False, expand=False, upper=False) 
+
+            output = []
+            for tok in tokens:
+                if tok.type == 'CURLY_BRACE':
+                    fn = tok.value[1:-1].split(' ')[0]
+                    if fn.find('.') != -1:
+                        profiler.text.insert('insert',f'Expanding: {fn}\n', 'orange')
+                        
+                        # By using update it slows down the process but it allows the user to see what is happening 
+                        profiler.update() 
+                        output += expand_includes_recursive(fn)
+                    else:
+                        output += [tok.value]
+                else:
+                    output += [tok.value]
+                # ide.text.insert('insert',tok.value, tok.tag)
+            return output
+        
+        # Clear output for the loading text        
+        profiler.text.delete('1.0', 'end')
+
+        # Start the recursive function
+        output = expand_includes_recursive(filename)
+
+        # Clear the loading text
+        profiler.text.delete('1.0', 'end')
+
+        profiler.text.disable_line_no_update = True
+        for token in output:
+            # Todo when this is more performant we can add the tags back in. They will need to be added back at the recursive level
+            profiler.text.insert('insert',token)
+
+        for ln in profiler.profiler_data[filename]['lines'].keys():
+            profiler.text.highlight_line(ln)
+        logger.debug('expand_includes finish')
+
+        profiler.text.disable_line_no_update = False

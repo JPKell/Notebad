@@ -106,7 +106,7 @@ class FileManagement:
         ''' Writes the contents of a file to the textbox '''
 
         ext = full_path.split('.')[-1]
-        with open(full_path, "r") as file:        
+        with open(full_path, "r", encoding=cfg.file_encoding) as file:        
             # TODO make this smarter using a dict to handle multiple languages. 
             if ext.strip() in ['p', 'w', 'i', 'cls']: # Else see if we can handle the syntax
                 ide.language = 'abl'
@@ -125,7 +125,7 @@ class FileManagement:
 
     def write_textbox_to_file(self, full_path:str, ide:Ide) -> None:
         ''' Private method to write file to disk. Needs encoding option. '''
-        with open(full_path, "w") as file:
+        with open(full_path, "w", encoding=cfg.file_encoding) as file:
             txt = ide.text.get(1.0, 'end')
             if len(txt) > 1:   
                 txt = txt[:-1] # Trailing newline character that needs to be removed

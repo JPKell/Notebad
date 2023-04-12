@@ -27,7 +27,7 @@ class ProgressProfiler(NTabFrame):
         self.tab_title = 'Profiler'
 
         # Tab variables
-        self.filename  = StringVar()
+        self.filename  = StringVar(value="/home/jpk/profile.profile")
         self.timestamp = StringVar()
         self.mode      = StringVar(value="Source")
         self.profiler_data = {}
@@ -35,6 +35,9 @@ class ProgressProfiler(NTabFrame):
         # Build everything
         self._build_toolbar()
         self._build_summary_view()
+
+        # This for debugging only to load the data right away
+        self.after(250,lambda:self.event_generate('<<ProfilerFileChanged>>'))
 
         
     def load_profiler_data(self, data:dict) -> None:
