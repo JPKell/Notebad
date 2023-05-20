@@ -10,3 +10,4 @@ src/logs/performance.log
 *.i
 *.w
 personal.cf
+src/logs/performance.log

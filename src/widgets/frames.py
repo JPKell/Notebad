@@ -44,7 +44,7 @@ class NTabFrame(Frame):
     @property
     def tab_title(self) -> str:
         return self._tab_title
-    
+
     @tab_title.setter
     def tab_title(self, tab_title:str) -> None:
         ''' Updating the tab title will also update the tab name in the parent widget '''

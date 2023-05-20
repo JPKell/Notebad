@@ -57,23 +57,23 @@ class NotebadApp(Tk):
     def events_master(self) -> None:
         ''' Events are things that happen in the application. '''
         self.events = {
-        # Profiler events
-        '<<ProfilerFileChanged>>': self.parse_progress_profiler,
-        '<<ProfilerSourceView>>':  self.build_profiler_source,
-        # Window events
-        '<<OpenKeyCommandList>>':  self.populate_key_commands,
-        '<<OpenCalculator>>':      self.utilities.open_calculator,
-        '<<ExitApp>>':             self.exit_app,
-        # File management events
-        '<<NewFile>>':             self.file_system.new_file,
-        '<<OpenFile>>':            self.file_system.open_file,
-        '<<OpenRecentFile>>':      self.file_system.open_recent_file,
-        '<<SaveFile>>':            self.file_system.save_file,
-        '<<SaveFileAs>>':          self.file_system.save_file_as,
-        # Language events
+            # Profiler events
+            '<<ProfilerFileChanged>>': self.parse_progress_profiler,
+            '<<ProfilerSourceView>>':  self.build_profiler_source,
+            # Window events
+            '<<OpenKeyCommandList>>':  self.populate_key_commands,
+            '<<OpenCalculator>>':      self.utilities.open_calculator,
+            '<<ExitApp>>':             self.exit_app,
+            # File management events
+            '<<NewFile>>':             self.file_system.new_file,
+            '<<OpenFile>>':            self.file_system.open_file,
+            '<<OpenRecentFile>>':      self.file_system.open_recent_file,
+            '<<SaveFile>>':            self.file_system.save_file,
+            '<<SaveFileAs>>':          self.file_system.save_file_as,
+            # Language events
 
-        # Nifty
-        '<<PyEvalLine>>':         self.utilities.eval_selection,  
+            # Nifty
+            '<<PyEvalLine>>':         self.utilities.eval_selection,  
         }
         for k,v in self.events.items():
             self.bind_all(k, v)
@@ -120,8 +120,6 @@ class NotebadApp(Tk):
             return
         
         self.language.expand_includes(profiler)
-
-        
 
     def parse_progress_profiler(self, event) -> None:
         ''' Parse the progress profiler output file. '''

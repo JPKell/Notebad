@@ -130,8 +130,6 @@ class ProgressProfiler(NTabFrame):
 
             self.timestamp.set(self.profiler_data['meta']['timestamp'])
 
-
-
     def _build_src_view(self, *_) -> None:
         ''' Build the source code view. This has a treeview on the left and a text 
             widget on the right that shows the source code. The profiler results 
